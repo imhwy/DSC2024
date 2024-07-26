@@ -1,0 +1,7 @@
+llama-index==0.10.58
+llama-parse==0.4.9
+markdownify==0.13.1
+pandas==2.2.2
+python-dotenv==1.0.1
+tiktoken==0.7.0
+tqdm==4.66.4
