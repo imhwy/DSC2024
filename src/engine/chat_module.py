@@ -32,7 +32,7 @@ class ChatEngine:
         self._prompt_template = prompt_template
         self._language_model = language_model
 
-    def generate_response(
+    async def generate_response(
         self,
         user_query: str,
         relevant_information: List[str]

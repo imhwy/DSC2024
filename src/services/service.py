@@ -9,8 +9,9 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.core import Settings
 
 from src.repositories.weaviatedb import WeaviateDB
-from src.services.retriever_module import HybridRetriever
-from src.services.chat_module import ChatEngine
+from src.engine.retriever_module import HybridRetriever
+from src.engine.chat_module import ChatEngine
+from src.services.retrieve_chat import RetrieveChat
 
 load_dotenv()
 
@@ -53,6 +54,10 @@ class Service:
         self._chat_engine = ChatEngine(
             language_model=self._llm
         )
+        self._retrieve_chat_engine = RetrieveChat(
+            retriever=self._retriever,
+            chat=self._chat_engine
+        )
 
     @property
     def vector_database(self) -> WeaviateDB:
@@ -93,3 +98,23 @@ class Service:
             HybridRetriever: The initialized HybridRetriever object.
         """
         return self._retriever
+
+    @property
+    def chat_engine(self) -> ChatEngine:
+        """
+        Retrieves the ChatEngine instance.
+
+        Returns:
+            ChatEngine: The initialized ChatEngine object.
+        """
+        return self._chat_engine
+
+    @property
+    def retrieve_chat_engine(self) -> RetrieveChat:
+        """
+        Retrieves the RetrieveChat instance.
+
+        Returns:
+            RetrieveChat: The initialized RetrieveChat object.
+        """
+        return self._retrieve_chat_engine

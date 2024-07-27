@@ -41,7 +41,7 @@ class HybridRetriever:
         self._index = index
         self._encoding = tiktoken.get_encoding("cl100k_base")
 
-    def get_retriever(self) -> BaseRetriever:
+    async def get_retriever(self) -> BaseRetriever:
         """
         Constructs a BaseRetriever object from the stored vector index.
 
@@ -63,7 +63,7 @@ class HybridRetriever:
         )
         return retriever
 
-    def combine_retrieved_nodes(
+    async def combine_retrieved_nodes(
         self,
         retrieved_nodes: List[TextNode],
         max_tokens: int = MAX_TOKENS
@@ -94,7 +94,7 @@ class HybridRetriever:
             combined_strings.append(current_string.strip())
         return combined_strings
 
-    def retrieve_nodes(
+    async def retrieve_nodes(
         self,
         query: str
     ) -> List[TextNode]:
@@ -107,9 +107,9 @@ class HybridRetriever:
         Returns:
             List[TextNode]: A list of TextNode objects retrieved from the vector store.
         """
-        retriever = self.get_retriever()
-        retrieved_nodes = retriever.retrieve(query)
-        combined_retrieved_nodes = self.combine_retrieved_nodes(
+        retriever = await self.get_retriever()
+        retrieved_nodes = await retriever.aretrieve(query)
+        combined_retrieved_nodes = await self.combine_retrieved_nodes(
             retrieved_nodes=retrieved_nodes,
         )
         return combined_retrieved_nodes
