@@ -1,6 +1,7 @@
 """
 This module defines FastAPI endpoints for chat.
 """
+
 from fastapi import (status,
                      Depends,
                      APIRouter,
@@ -43,7 +44,17 @@ async def chat_domain(
     reponse, is_outdomain = await service.retrieve_chat_engine.retrieve_chat(
         query=request_chat.query
     )
-    return ResponseChat(
-        response=reponse,
-        is_outdomain=is_outdomain
-    )
+    try:
+        await service.chat_repository.add_chat_domains(
+            query=request_chat.query,
+            answer=reponse,
+            is_out_of_domain=is_outdomain
+        )
+        return ResponseChat(
+            response=reponse,
+            is_outdomain=is_outdomain
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)) from e

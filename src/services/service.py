@@ -8,11 +8,12 @@ from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.core import Settings
 
-from src.repositories.weaviatedb import WeaviateDB
+from src.storage.weaviatedb import WeaviateDB
 from src.engines.retriever_engine import HybridRetriever
 from src.engines.chat_engine import ChatEngine
 from src.services.retrieve_chat import RetrieveChat
 from src.utils.utility import convert_value
+from src.repositories.chat_repository import ChatRepository
 
 load_dotenv()
 
@@ -59,6 +60,7 @@ class Service:
             retriever=self._retriever,
             chat=self._chat_engine
         )
+        self._chat_repository = ChatRepository()
 
     @property
     def vector_database(self) -> WeaviateDB:
@@ -119,3 +121,13 @@ class Service:
             RetrieveChat: The initialized RetrieveChat object.
         """
         return self._retrieve_chat_engine
+
+    @property
+    def chat_repository(self) -> ChatRepository:
+        """
+        Retrieves the ChatRepository instance.
+
+        Returns:
+            ChatRepository: The initialized ChatRepository object.
+        """
+        return self._chat_repository
