@@ -3,8 +3,8 @@ this service provides retrieve and chat module for chatbot
 """
 
 from typing import Tuple
-from src.engine.chat_module import ChatEngine
-from src.engine.retriever_module import HybridRetriever
+from src.engines.chat_engine import ChatEngine
+from src.engines.retriever_engine import HybridRetriever
 
 
 class RetrieveChat:

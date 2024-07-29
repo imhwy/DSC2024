@@ -11,11 +11,13 @@ from llama_index.core import VectorStoreIndex, StorageContext
 from llama_index.vector_stores.weaviate import WeaviateVectorStore
 from llama_index.core.schema import Document, Node
 
+from src.utils.utility import convert_value
+
 load_dotenv()
 
-WEAVIATE_HOST = os.getenv('WEAVIATE_HOST')
-WEAVIATE_PORT = os.getenv('WEAVIATE_PORT')
-WEAVIATE_NAME = os.getenv('WEAVIATE_NAME')
+WEAVIATE_HOST = convert_value(os.getenv('WEAVIATE_HOST'))
+WEAVIATE_PORT = convert_value(os.getenv('WEAVIATE_PORT'))
+WEAVIATE_NAME = convert_value(os.getenv('WEAVIATE_NAME'))
 
 
 class WeaviateDB:

@@ -11,12 +11,14 @@ from llama_index.core import VectorStoreIndex
 from llama_index.core.retrievers import BaseRetriever
 from llama_index.core.schema import TextNode
 
+from src.utils.utility import convert_value
+
 load_dotenv()
 
-VECTOR_STORE_QUERY_MODE = os.getenv('VECTOR_STORE_QUERY_MODE')
-SIMILARITY_TOP_K = os.getenv('SIMILARITY_TOP_K')
-ALPHA = os.getenv('ALPHA')
-MAX_TOKENS = os.getenv('MAX_TOKENS')
+VECTOR_STORE_QUERY_MODE = convert_value(os.getenv('VECTOR_STORE_QUERY_MODE'))
+SIMILARITY_TOP_K = convert_value(os.getenv('SIMILARITY_TOP_K'))
+ALPHA = convert_value(os.getenv('ALPHA'))
+MAX_TOKENS = convert_value(os.getenv('MAX_TOKENS'))
 
 
 class HybridRetriever:
@@ -58,8 +60,8 @@ class HybridRetriever:
 
         retriever = self._index.as_retriever(
             vector_store_query_mode=self._query_mode,
-            similarity_top_k=int(self._top_k),
-            alpha=float(self._alpha)
+            similarity_top_k=self._top_k,
+            alpha=self._alpha
         )
         return retriever
 
@@ -84,7 +86,7 @@ class HybridRetriever:
         current_string = ""
         for retrieved_node in retrieved_nodes:
             tokens = self._encoding.encode(retrieved_node.text)
-            if len(current_tokens) + len(tokens) > int(max_tokens):
+            if len(current_tokens) + len(tokens) > max_tokens:
                 combined_strings.append(current_string.strip())
                 current_tokens = []
                 current_string = ""

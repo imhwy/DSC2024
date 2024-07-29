@@ -9,16 +9,17 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.core import Settings
 
 from src.repositories.weaviatedb import WeaviateDB
-from src.engine.retriever_module import HybridRetriever
-from src.engine.chat_module import ChatEngine
+from src.engines.retriever_engine import HybridRetriever
+from src.engines.chat_engine import ChatEngine
 from src.services.retrieve_chat import RetrieveChat
+from src.utils.utility import convert_value
 
 load_dotenv()
 
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-OPENAI_MODEL = os.getenv('OPENAI_MODEL')
-OPENAI_EMBED_MODEL = os.getenv('OPENAI_EMBED_MODEL')
-TEMPERATURE_MODEL = os.getenv('TEMPERATURE_MODEL')
+OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
+OPENAI_MODEL = convert_value(os.getenv('OPENAI_MODEL'))
+OPENAI_EMBED_MODEL = convert_value(os.getenv('OPENAI_EMBED_MODEL'))
+TEMPERATURE_MODEL = convert_value(os.getenv('TEMPERATURE_MODEL'))
 
 
 class Service:
