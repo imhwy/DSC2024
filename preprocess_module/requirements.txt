@@ -1,0 +1,6 @@
+numpy
+torch
+transformers
+langdetect
+streamlit
+google-generativeai
