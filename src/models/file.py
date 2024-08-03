@@ -15,6 +15,22 @@ class File(BaseModel):
         time (str): A timestamp indicating when the file was created, modified, or accessed.
     """
     Id: str
-    name: str
+    url: str
+    file_name: str
     file_type: str
+    file_path: str
     time: str
+
+
+class FileMetadata(BaseModel):
+    """
+    A Pydantic model for storing metadata about a file extracted from a URL.
+
+    Attributes:
+        file_name_with_extension (str): The complete file name including the extension.
+        file_name (str): The file name without the extension.
+        file_extension (str): The file extension, including the leading dot.
+    """
+    file_name_with_extension: str
+    file_name: str
+    file_extension: str

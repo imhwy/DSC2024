@@ -83,3 +83,13 @@ class CRUDDocuments():
             pymongo.cursor.Cursor: A cursor to iterate over all documents in the collection.
         """
         return self.collection.find({})
+
+    def delete_one_doc(self, obj):
+        """
+        """
+        return self.collection.delete_one(document=obj)
+
+    def find_one_doc(self, obj):
+        """
+        """
+        return self.collection.find_one(document=obj)

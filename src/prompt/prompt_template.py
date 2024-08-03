@@ -30,6 +30,7 @@ Context: Quy trình tuyển sinh của trường bao gồm nộp đơn trực tu
 Query: 'Quy trình tuyển sinh là gì?'
 Response: 'Quy trình tuyển sinh bao gồm nộp đơn trực tuyến, tham gia kỳ thi tuyển sinh, và phỏng vấn.'
 
+Context: Quy trình tuyển sinh của trường bao gồm nộp đơn trực tuyến, tham gia kỳ thi tuyển sinh, và phỏng vấn.
 Query: 'Các bộ phim mới nhất hiện nay là gì?'
 Response: 'Nội dung bạn đề cập không nằm trong phạm vi của nhà trường'
 

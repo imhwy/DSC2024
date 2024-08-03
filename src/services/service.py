@@ -14,6 +14,9 @@ from src.engines.chat_engine import ChatEngine
 from src.services.retrieve_chat import RetrieveChat
 from src.utils.utility import convert_value
 from src.repositories.chat_repository import ChatRepository
+from src.repositories.file_repository import FileRepository
+from src.data_loader.general_loader import GeneralLoader
+from src.services.file_management import FileManagement
 
 load_dotenv()
 
@@ -61,6 +64,13 @@ class Service:
             chat=self._chat_engine
         )
         self._chat_repository = ChatRepository()
+        self._file_repository = FileRepository()
+        self._general_loader = GeneralLoader()
+        self._file_management = FileManagement(
+            file_repository=self._file_repository,
+            general_loader=self._general_loader,
+            vector_database=self._vector_database
+        )
 
     @property
     def vector_database(self) -> WeaviateDB:
@@ -131,3 +141,25 @@ class Service:
             ChatRepository: The initialized ChatRepository object.
         """
         return self._chat_repository
+
+    @property
+    def file_repository(self) -> FileRepository:
+        """
+        Retrieves the FileRepository instance.
+
+        Returns:
+            FileRepository: The initialized FileRepository object.
+        """
+        return self._file_repository
+
+    @property
+    def general_loader(self) -> GeneralLoader:
+        """
+        """
+        return self._general_loader
+    
+    @property
+    def file_management(self) -> FileManagement:
+        """
+        """
+        return self._file_management

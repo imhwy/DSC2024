@@ -37,22 +37,42 @@ async def file_upload(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="URL is required"
         )
-
     try:
-        response = requests.get(
-            request_file.url,
-            stream=True,
-            timeout=TIME_OUT
+        urls = service.file_management.add_file(
+            urls=request_file.url
         )
-        response.raise_for_status()
-
-        # Check content type and handle accordingly
-        content_type = response.headers['Content-Type']
-        file_content = response.content
-        print(f"file_content: {content_type}")
         return ResponseFileUpload(
-            file_type=content_type,
-            message="succesfully"
+            file_type=urls,
+            message="File added successfully",
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)) from e
+
+
+@file_router.delete('/fileDelete', status_code=status.HTTP_200_OK, response_model=ResponseFileUpload)
+async def file_delete(
+    file_name: str = None,
+    service: Service = Depends(get_service)
+) -> ResponseFileUpload:
+    """
+    """
+    if not file_name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="URL is required"
+        )
+    if not service.file_repository.get_file(
+        file_name=file_name
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No file found in database"
+        )
+    try:
+        service.file_management.delete_file(
+            file_name=file_name
         )
     except Exception as e:
         raise HTTPException(

@@ -1,5 +1,5 @@
 """
-This repository class for managing result documents in the question answering system.
+This repository class for managing chat collec in the question answering system.
 """
 
 from src.storage.chat_crud import CRUDChatCollection
@@ -8,7 +8,7 @@ from src.utils.utility import (create_new_id,
                                get_datetime)
 
 
-class ChatRepository():
+class ChatRepository:
     """
     A repository class for managing result documents in the question answering system.
     """
@@ -40,7 +40,6 @@ class ChatRepository():
         Args:
             chat (ChatDomain): The chat document to be added.
         """
-        self.collection.insert_one_doc(chat.__dict__)
 
     async def add_chat_domains(
         self,
