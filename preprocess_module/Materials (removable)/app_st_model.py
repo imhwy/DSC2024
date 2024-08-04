@@ -11,7 +11,7 @@ model_path = "C:/Users/ADMIN/Desktop/DSC/Final/model"
 tokenizer_path = "C:/Users/ADMIN/Desktop/DSC/Final/tokenizer"
 
 # Streamlit application
-st.title("Vietnamese Text Correction and Classification")
+st.title("Vietnamese Text Correction and Classification using Local Model")
 
 text_input = st.text_area("Nhập câu hỏi cần xử lý:")
 
@@ -27,8 +27,8 @@ if st.button("Xử lý câu hỏi"):
                 st.write("Xin lỗi, chúng tôi không hỗ trợ prompt injection")
             else:
                 # Use the predict_label_from_text function for domain classification
-                # domain = predict_label_from_text(corrected_text, model_path, tokenizer_path)
-                domain = classify_domain(corrected_text)
+                domain = predict_label_from_text(corrected_text, model_path, tokenizer_path) # Use Local Model
+                # domain = classify_domain(corrected_text) # Use Gemini
                 if domain == 0:
                     st.write("Xin lỗi, chúng tôi không hỗ trợ câu hỏi này")
                 else:
