@@ -55,6 +55,10 @@ class ExcelLoader(BaseLoader):
         documents = []
         for file in sources:
             markdown_text = self.convert_to_markdown(file)
-            documents.append(Document(text=markdown_text,
-                             metadata={'file_path': file}))
+            documents.append(
+                Document(
+                    text=markdown_text,
+                    metadata={'file_path': file}
+                )
+            )
         return documents

@@ -77,7 +77,8 @@ class CRUDDocuments():
         """
         Retrieve all documents from the collection.
 
-        This method queries the database collection and returns all documents contained within it.
+        Args:
+            None
 
         Returns:
             pymongo.cursor.Cursor: A cursor to iterate over all documents in the collection.
@@ -86,10 +87,24 @@ class CRUDDocuments():
 
     def delete_one_doc(self, obj):
         """
+        Deletes a single document from the collection based on the specified filter.
+
+        Args:
+        obj (dict): A dictionary specifying the filter
+
+        Returns:
+            dict: A dictionary containing information about the delete operation
         """
-        return self.collection.delete_one(document=obj)
+        return self.collection.delete_one(filter=obj)
 
     def find_one_doc(self, obj):
         """
+        Finds a single document in the collection that matches the specified filter.
+
+        Args:
+            obj (dict): A dictionary specifying the filter
+
+        Returns:
+            Optional[dict]: A dictionary representing the found document
         """
-        return self.collection.find_one(document=obj)
+        return self.collection.find_one(filter=obj)

@@ -25,6 +25,9 @@ class ChatRepository:
         """
         Load all documents from the collection.
 
+        Args:
+            None
+
         Returns:
             list: A list of documents with '_id' field as a string.
         """
@@ -39,7 +42,11 @@ class ChatRepository:
 
         Args:
             chat (ChatDomain): The chat document to be added.
+
+        Returns:
+            None
         """
+        self.collection.insert_one_doc(chat.__dict__)
 
     async def add_chat_domains(
         self,
@@ -56,6 +63,9 @@ class ChatRepository:
             inference_time (float): The time it took to generate the answer.
             is_out_of_domain (bool, optional): Flag indicating if the query 
                                                is out of domain. Defaults to False.
+
+        Returns:
+            None
         """
         chat_domain_id = create_new_id(prefix="chatdomain")
         timestamp = get_datetime()

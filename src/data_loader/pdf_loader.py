@@ -34,7 +34,7 @@ class PDFLoader(BaseLoader):
         result_type: ResultType = ResultType.MD,
         language: Language = Language.VIETNAMESE,
         parsing_instruction: str = PARSING_INSTRUCTION
-    ) -> None:
+    ):
         """
         Initialize the PDFLoader with the specified parsing options.
 
@@ -56,9 +56,9 @@ class PDFLoader(BaseLoader):
             invalidate_cache=True
         )
         self.extensions = [
-            ".xls", ".xlsx", ".csv", ".tsv",  # excel
-            ".jpg", ".jpeg", ".png", ".svg", ".tiff", ".webp", ".bmp",  # image
-            ".pdf"  # pdf
+            ".xls", ".xlsx", ".csv", ".tsv",
+            ".jpg", ".jpeg", ".png", ".svg", ".tiff", ".webp", ".bmp",
+            ".pdf"
         ]
         self.file_extractor = {ext: self.parser for ext in self.extensions}
 
@@ -76,13 +76,15 @@ class PDFLoader(BaseLoader):
             List[Document]: A list of Document objects containing the loaded data.
         """
         try:
-            documents = SimpleDirectoryReader(input_files=sources,
-                                              file_extractor=self.file_extractor
-                                              ).load_data(num_workers=self.num_workers)
+            documents = SimpleDirectoryReader(
+                input_files=sources,
+                file_extractor=self.file_extractor
+            ).load_data(num_workers=self.num_workers)
         except ValueError as e:
             print('Use default PDF, return text instead of markdown:', str(e))
             del self.file_extractor['.pdf']
-            documents = SimpleDirectoryReader(input_files=sources,
-                                              file_extractor=self.file_extractor
-                                              ).load_data(num_workers=self.num_workers)
+            documents = SimpleDirectoryReader(
+                input_files=sources,
+                file_extractor=self.file_extractor
+            ).load_data(num_workers=self.num_workers)
         return documents

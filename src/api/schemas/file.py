@@ -1,19 +1,29 @@
 """
+This schemas is used for file
 """
 
 from typing import List
 from pydantic import BaseModel
 
 
-class RequestFileUpload(BaseModel):
+class FileUpload(BaseModel):
     """
+    Represents a file upload with its URL, type, and name.
     """
-    url: List[str]
-    file_type: List[str]
+    url: str
+    file_type: str
+    file_name: str
 
 
-class ResponseFileUpload(BaseModel):
+class FileUploadRequest(BaseModel):
     """
+    Represents a list of file uploads.
     """
-    file_type: List[str]
+    data: List[FileUpload]
+
+
+class FileUploadResponse(BaseModel):
+    """
+    Represents a response message for a file upload operation.
+    """
     message: str

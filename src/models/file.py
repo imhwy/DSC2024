@@ -22,6 +22,15 @@ class File(BaseModel):
     time: str
 
 
+class FileUpload(BaseModel):
+    """
+    Represents a file upload with its URL, type, and name.
+    """
+    url: str
+    file_type: str
+    file_name: str
+
+
 class FileMetadata(BaseModel):
     """
     A Pydantic model for storing metadata about a file extracted from a URL.

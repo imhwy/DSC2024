@@ -89,6 +89,9 @@ class WeaviateDB:
         Returns the VectorStoreIndex object that is used for
         querying and retrieving documents from the Weaviate database.
 
+        Args:
+            None
+
         Returns:
             VectorStoreIndex: The VectorStoreIndex object
         """
@@ -160,6 +163,9 @@ class WeaviateDB:
 
         Args:
             nodes (List[Node]): List of nodes to be added.
+
+        Returns:
+            None
         """
         if nodes:
             self._index.insert_nodes(nodes=nodes)
@@ -170,6 +176,9 @@ class WeaviateDB:
     ) -> None:
         """
         Deletes a document from the vector store using the reference document ID.
+
+        Returns:
+            None
 
         Args:
             ref_doc_id (str, optional): The reference document ID of the document to be deleted.
@@ -189,6 +198,9 @@ class WeaviateDB:
         Args:
         nodes (List[TextNode]): A list of TextNode objects to be inserted 
                                 into the document store.
+
+        Returns:
+            None
         """
         if nodes:
             self._storage_context.docstore.add_documents(
@@ -205,6 +217,9 @@ class WeaviateDB:
         Args:
         ref_doc_id (str, optional): The reference document ID of the document to be deleted. 
                                     If None, no action is taken.
+
+        Returns:
+            None
         """
         if ref_doc_id:
             self._storage_context.docstore.delete_ref_doc(
@@ -223,6 +238,9 @@ class WeaviateDB:
             file_name (str, optional): The name of the file associated with the documents.
             documents (List[Document], optional): A list of Document objects to be added. 
                                                   Defaults to an empty list if not provided.
+
+        Returns:
+            None
         """
         if documents:
             processed_documents = self.document_configuration(
@@ -232,7 +250,6 @@ class WeaviateDB:
             nodes = self.documents_to_nodes(
                 documents=processed_documents
             )
-            print(nodes)
             try:
                 self.insert_nodes(
                     nodes=nodes
@@ -254,14 +271,20 @@ class WeaviateDB:
             file_name (str, optional): The name of the file associated with the documents
                                        to be deleted. If None, no action is taken.
         """
+        ref_doc_ids = []
         for _, node in self._storage_context.docstore.docs.items():
-            if node.metadata.get("file_name") == file_name:
+            if node.metadata.get("file_name") == file_name and node.ref_doc_id not in ref_doc_ids:
                 self.delete_nodes(
                     ref_doc_id=node.ref_doc_id
                 )
+                print(
+                    f"delete node with ref_doc_id {node.ref_doc_id} successfully ")
                 self.delete_docstore(
                     ref_doc_id=node.ref_doc_id
                 )
+                print(
+                    f"delete doc from docstore with ref_doc_id {node.ref_doc_id} successfully ")
+                ref_doc_ids.append(node.ref_doc_id)
 
     def delete_collection(
         self,
@@ -273,6 +296,9 @@ class WeaviateDB:
         Args:
             collection_name (str, optional): The name of the collection to be deleted. 
                                              If None, no action is taken.
+
+        Returns:
+            None
         """
         self._client.collections.delete(
             name=collection_name

@@ -1,4 +1,5 @@
 """
+This service represents the file management functionality of the application.
 """
 
 from typing import List
@@ -6,10 +7,12 @@ from typing import List
 from src.data_loader.general_loader import GeneralLoader
 from src.repositories.file_repository import FileRepository
 from src.storage.weaviatedb import WeaviateDB
+from src.models.file import FileUpload
 
 
 class FileManagement:
     """
+    The FileManagement class provides functionalities to manage files
     """
 
     def __init__(
@@ -24,65 +27,53 @@ class FileManagement:
 
     def add_file(
         self,
-        urls: List[str]
-    ) -> List[str]:
+        data_list: List[FileUpload]
+    ) -> None:
         """
-        Adds a file to the knowledge base.
+        Adds files to the system by transferring them, loading their data,
+        and storing them in a vector database.
 
         Args:
-            urls (List[str]): A list of URLs to the files to be added.
-        """
-        for url in urls:
-            if 'https://res.cloudinary.com/' in url:
-                file_metadata = self._file_repository.file_info(url=url)
-                print("pass 1")
-                file_path = self._file_repository.file_transfer(
-                    url=url,
-                    file_info=file_metadata
-                )
-                print("pass 2")
+            data_list (List[FileUpload]): A list of FileUpload objects containing file metadata.
 
-                documents = self._general_loader.load_data(sources=[file_path])
-                print("pass 3")
-                print(documents)
+        Returns:
+            None
+        """
+        for data in data_list:
+            file_path = self._file_repository.file_transfer(
+                data=data
+            )
+            documents = self._general_loader.load_data(sources=[file_path])
+            try:
                 self._vector_database.add_knowledge(
-                    file_name=file_metadata.file_name_with_extension,
+                    file_name=data.file_name,
                     documents=documents,
                 )
-                print("pass 4")
-
                 self._file_repository.add_file(
-                    url=url,
-                    name=file_metadata.file_name_with_extension,
-                    file_type=file_metadata.file_extension,
+                    url=data.url,
+                    file_name=data.file_name,
+                    file_type=data.file_type,
                     file_path=file_path,
                 )
-            else:
-                documents = self._general_loader.load_data(sources=[url])
-                print("pass 3")
-                self._vector_database.add_knowledge(
-                    file_name=url,
-                    documents=documents,
-                )
-                print("pass 4")
-
-                self._file_repository.add_file(
-                    url=url,
-                    name=url,
-                    file_type="link",
-                    file_path="link",
-                )
-        return urls
+            except ValueError as e:
+                print(f"Failed to process file {data.file_name}: {str(e)}")
 
     def delete_file(
         self,
         file_name: str = None
     ) -> None:
         """
+        Deletes a file and its associated knowledge from the vector database.
+
+        Args:
+            file_name (str): The name of the file to be deleted.
+
+        Returns:
+            None
         """
-        self._vector_database.delete_knowlegde(
+        self._file_repository.delete_specific_file(
             file_name=file_name
         )
-        self._file_repository.delete_file(
+        self._vector_database.delete_knowlegde(
             file_name=file_name
         )

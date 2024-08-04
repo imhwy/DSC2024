@@ -9,6 +9,7 @@ from llama_index.readers.web import SimpleWebPageReader
 import markdownify
 
 from src.data_loader.base_loader import BaseLoader
+from src.utils.utility import get_last_part_of_url
 
 
 class URLLoader(BaseLoader):
@@ -73,11 +74,29 @@ class URLLoader(BaseLoader):
         """
         reader = SimpleWebPageReader()
         documents = reader.load_data(sources)
-
+        processed_documents = []
         for doc in documents:
+            file_name = get_last_part_of_url(doc.id_)
             articles = self.extract_articles(doc.text)
             articles = self.remove_duplicate_new_line(articles)
             markdown_text = markdownify.markdownify(articles)
-            doc.text = markdown_text
-
-        return documents
+            document = Document(
+                excluded_llm_metadata_keys=[
+                    "url",
+                    "file_name",
+                    "file_type"
+                ],
+                excluded_embed_metadata_keys=[
+                    "url",
+                    "file_name",
+                    "file_type"
+                ],
+                text=markdown_text,
+                metadata={
+                    "url": doc.id_,
+                    "file_name": file_name,
+                    "file_type": "web_page"
+                },
+            )
+            processed_documents.append(document)
+        return processed_documents

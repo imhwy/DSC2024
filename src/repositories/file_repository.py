@@ -3,14 +3,13 @@ This module provides a `FileRepository` class to manage file records in a data s
 """
 
 import os
-import requests
-from urllib.parse import urlparse
-from dotenv import load_dotenv
 from typing import List
+import requests
+from dotenv import load_dotenv
 
 from src.storage.file_crud import CRUDFileCollection
 from src.models.file import (File,
-                             FileMetadata)
+                             FileUpload)
 from src.utils.utility import (create_new_id,
                                get_datetime,
                                convert_value)
@@ -43,6 +42,9 @@ class FileRepository:
         """
         Load all documents from the collection.
 
+        Args:
+            None
+
         Returns:
             list: A list of documents with '_id' field as a string.
         """
@@ -60,13 +62,16 @@ class FileRepository:
 
         Args:
             file (File): A `File` instance containing the data to be inserted.
+
+        Returns:
+            None
         """
         self.collection.insert_one_doc(file.__dict__)
 
     def add_file(
         self,
         url: str = None,
-        name: str = None,
+        file_name: str = None,
         file_type: str = None,
         file_path: str = None
     ) -> None:
@@ -77,13 +82,16 @@ class FileRepository:
             url (str, optional): The URL associated with the file.
             name (str, optional): The name of the file.
             file_type (str, optional): The type or format of the file (e.g., 'pdf', 'txt').
+
+        Returns:
+            None
         """
         file_id = create_new_id(prefix="file")
         timestamp = get_datetime()
         file_instance = File(
             Id=file_id,
             url=url,
-            file_name=name,
+            file_name=file_name,
             file_type=file_type,
             file_path=file_path,
             time=timestamp
@@ -92,53 +100,59 @@ class FileRepository:
             file=file_instance
         )
 
-    def file_info(
-        self,
-        url: str = None
-    ) -> FileMetadata:
-        """
-        """
-        parsed_url = urlparse(url)
-        file_name_with_extension = os.path.basename(
-            parsed_url.path
-        )
-        file_name, file_extension = os.path.splitext(
-            file_name_with_extension
-        )
-        return FileMetadata(
-            file_name_with_extension=file_name_with_extension,
-            file_name=file_name,
-            file_extension=file_extension
-        )
-
     def file_transfer(
         self,
-        url: str = None,
-        file_info: FileMetadata = None
+        data: FileUpload
     ) -> str:
         """
+        Transfers a file from a given URL to a local directory.
+
+        Args:
+            data (FileUpload): An object containing the file's URL, type, and name.
+
+        Returns:
+            str: The local file path where the file is saved or the URL 
+                 itself if the file type is "link".
         """
-        os.makedirs(
-            self.directory,
-            exist_ok=True
-        )
-        file_path = os.path.join(
-            self.directory,
-            file_info.file_name_with_extension
-        )
-        response = requests.get(
-            url,
-            timeout=self.time_out
-        )
-        response.raise_for_status()
-        with open(file_path, "wb") as file:
-            file.write(response.content)
+        file_path = None
+        if not data.file_type == "link":
+            os.makedirs(
+                self.directory,
+                exist_ok=True
+            )
+            file_path = os.path.join(
+                self.directory,
+                data.file_name
+            )
+            response = requests.get(
+                data.url,
+                timeout=self.time_out
+            )
+            response.raise_for_status()
+            with open(file_path, "wb") as file:
+                file.write(response.content)
+            return file_path
+        file_path = data.url
         return file_path
 
-    def delete_file(
+    def delete_specific_file(
         self,
         file_name: str = None
-    ):
+    ) -> None:
+        """
+        Deletes a document with the specified file name from the collection.
+
+        Args:
+            file_name (str, optional): The name of the file to be deleted.
+                If None, no document will be deleted.
+
+        Raises:
+            Exception: If an error occurs during the deletion process.
+
+        Returns:
+            None: This method returns nothing, but prints a message indicating
+            the result of the deletion operation.
+        """
         try:
             result = self.collection.delete_one_doc({'file_name': file_name})
             if result.deleted_count > 0:
@@ -146,17 +160,28 @@ class FileRepository:
                     f"Document with file_name = {file_name} deleted successfully.")
             else:
                 print(f"No document with file_name = {file_name} found.")
-            return result
         except Exception as e:
             print(f"Error deleting document with file_name = {file_name}: {e}")
             raise
 
-    def get_file(
+    def get_specific_file(
         self,
         file_name: str = None
     ) -> List:
-        documents = list(self.collection.find_one_doc(
-            {'file_name': file_name}))
-        for document in documents:
-            document["id_"] = str(document["id_"])
-        return documents
+        """
+        Retrieves a document from the collection based on the specified file name.
+
+        Args:
+            file_name (str, optional): The name of the file to retrieve.
+
+        Returns:
+            Optional[dict]: A dictionary representing the document
+        """
+        document = self.collection.find_one_doc(
+            {
+                'file_name': file_name
+            }
+        )
+        if document:
+            document["_id"] = str(document["_id"])
+        return document

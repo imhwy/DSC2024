@@ -56,7 +56,8 @@ class HybridRetriever:
         """
         if self._index is None:
             raise ValueError(
-                "Index must be initialized before creating a retriever.")
+                "Index must be initialized before creating a retriever."
+            )
 
         retriever = self._index.as_retriever(
             vector_store_query_mode=self._query_mode,

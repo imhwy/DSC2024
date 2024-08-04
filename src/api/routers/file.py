@@ -1,23 +1,17 @@
 """
 This module defines FastAPI endpoints for file.
 """
-import os
-import requests
-from dotenv import load_dotenv
+
 from fastapi import (status,
                      Depends,
                      APIRouter,
-                     HTTPException)
+                     HTTPException,
+                     Response)
 
 from src.services.service import Service
 from src.api.dependencies.dependency import get_service
-from src.api.schemas.file import (RequestFileUpload,
-                                  ResponseFileUpload)
-from src.utils.utility import convert_value
+from src.api.schemas.file import (FileUploadRequest)
 
-load_dotenv()
-
-TIME_OUT = convert_value(os.getenv('TIME_OUT'))
 
 file_router = APIRouter(
     tags=["File"],
@@ -25,56 +19,80 @@ file_router = APIRouter(
 )
 
 
-@file_router.post('/fileUpload', status_code=status.HTTP_200_OK, response_model=ResponseFileUpload)
+@file_router.post('/fileUpload', status_code=status.HTTP_200_OK)
 async def file_upload(
-    request_file: RequestFileUpload,
+    request_file: FileUploadRequest,
     service: Service = Depends(get_service)
-) -> ResponseFileUpload:
+) -> Response:
     """
+    Endpoint to handle file uploads.
+
+    Args:
+        request_file (FileUploadRequest): The uploaded file data.
+        service (Service): The service used for file management.
+
+    Raises:
+        HTTPException: If request data is missing or an error occurs.
+
+    Returns:
+        dict: Success message if the file is uploaded successfully.
     """
-    if not request_file.url:
+    if not request_file.data:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="URL is required"
+            detail="Data is required"
         )
     try:
-        urls = service.file_management.add_file(
-            urls=request_file.url
+        service.file_management.add_file(
+            data_list=request_file.data
         )
-        return ResponseFileUpload(
-            file_type=urls,
-            message="File added successfully",
+        return Response(
+            status_code=status.HTTP_201_CREATED,
+            content="Adding file successfully"
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)) from e
+            detail=str(e)
+        ) from e
 
 
-@file_router.delete('/fileDelete', status_code=status.HTTP_200_OK, response_model=ResponseFileUpload)
+@file_router.delete('/fileDelete', status_code=status.HTTP_200_OK)
 async def file_delete(
-    file_name: str = None,
+    file_name: str,
     service: Service = Depends(get_service)
-) -> ResponseFileUpload:
+) -> Response:
     """
+    Endpoint to handle file deletion.
+
+    Args:
+        file_name (str): The name of the file to be deleted.
+        service (Service): The service used for file management and repository access.
+
+    Raises:
+        HTTPException: If the file is not found or an error occurs during deletion.
+
+    Returns:
+        Response: Success message if the file is deleted successfully.
     """
-    if not file_name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="URL is required"
-        )
-    if not service.file_repository.get_file(
+    record = service.file_repository.get_specific_file(
         file_name=file_name
-    ):
+    )
+    if not record:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No file found in database"
+            detail="File not found"
         )
     try:
         service.file_management.delete_file(
             file_name=file_name
         )
+        return Response(
+            status_code=status.HTTP_201_CREATED,
+            content="Deleted file successfully"
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)) from e
+            detail=str(e)
+        ) from e

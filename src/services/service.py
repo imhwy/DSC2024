@@ -155,11 +155,13 @@ class Service:
     @property
     def general_loader(self) -> GeneralLoader:
         """
+        Provides access to the GeneralLoader instance.
         """
         return self._general_loader
-    
+
     @property
     def file_management(self) -> FileManagement:
         """
+        Provides access to the FileManagement instance.
         """
         return self._file_management
