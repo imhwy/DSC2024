@@ -60,24 +60,53 @@ def correct_vietnamese_text(text):
     response = model.generate_content(prompt)
     return response.text.strip()
 
+# def preprocess_text(text_input):
+#     """
+#     Process the input text and return a text result.
+#     """
+#     if text_input:
+#         if not is_vietnamese_text(text_input):
+#             return "Xin lỗi, chúng tôi chỉ hỗ trợ tiếng Việt"
+        
+#         corrected_text = correct_vietnamese_text(text_input)
+#         if is_prompt_injection(corrected_text):
+#             return "Xin lỗi, chúng tôi không hỗ trợ prompt injection"
+        
+#         domain = classify_domain(corrected_text)
+#         if domain == 0:
+#             return "Xin lỗi, chúng tôi không hỗ trợ câu hỏi này"
+#         else:
+#             return f"Thuộc quy trình xử lý (In domain):\n{corrected_text}"
+#     else:
+#         return "Vui lòng nhập câu hỏi để xử lý."
+
 def preprocess_text(text_input):
     """
     Process the input text and return a text result.
     """
+    query = ""
+    language = True
+    flag = False
+
     if text_input:
         if not is_vietnamese_text(text_input):
-            return "Xin lỗi, chúng tôi chỉ hỗ trợ tiếng Việt"
-        
+            language = False
+
         corrected_text = correct_vietnamese_text(text_input)
         if is_prompt_injection(corrected_text):
-            return "Xin lỗi, chúng tôi không hỗ trợ prompt injection"
-        
+            flag = True
+
         domain = classify_domain(corrected_text)
         if domain == 0:
-            return "Xin lỗi, chúng tôi không hỗ trợ câu hỏi này"
+            flag = True
+
+        if language and not flag:
+            query = corrected_text
         else:
-            return f"Thuộc quy trình xử lý (In domain):\n{corrected_text}"
+            query = text_input
+
     else:
-        return "Vui lòng nhập câu hỏi để xử lý."
-
-
+        query = ""
+    #print(f"Query: {query}, Language: {language}, Flag: {flag}")
+    # Return the result and the flags
+    return query, language, flag
