@@ -17,6 +17,7 @@ from src.repositories.chat_repository import ChatRepository
 from src.repositories.file_repository import FileRepository
 from src.data_loader.general_loader import GeneralLoader
 from src.services.file_management import FileManagement
+from src.repositories.suggestion_repository import SuggestionRepository
 
 load_dotenv()
 
@@ -71,6 +72,7 @@ class Service:
             general_loader=self._general_loader,
             vector_database=self._vector_database
         )
+        self._suggestion_repository = SuggestionRepository()
 
     @property
     def vector_database(self) -> WeaviateDB:
@@ -165,3 +167,10 @@ class Service:
         Provides access to the FileManagement instance.
         """
         return self._file_management
+
+    @property
+    def suggestion_repository(self) -> SuggestionRepository:
+        """
+        Provides access to the SuggestionRepository instance.
+        """
+        return self._suggestion_repository
