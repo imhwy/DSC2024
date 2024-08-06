@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routers import chat_router
 from src.api.routers import file_router
+from src.api.routers import suggestion_router
 
 
 app = FastAPI()
@@ -15,6 +16,7 @@ app = FastAPI()
 # app.include_router(root_router)
 app.include_router(chat_router)
 app.include_router(file_router)
+app.include_router(suggestion_router)
 
 # CORS middleware
 app.add_middleware(
@@ -29,6 +31,6 @@ app.add_middleware(
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
-        host="127.0.0.1",
+        host="localhost",
         port=8000
     )

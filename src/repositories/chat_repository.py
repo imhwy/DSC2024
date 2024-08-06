@@ -2,6 +2,8 @@
 This repository class for managing chat collec in the question answering system.
 """
 
+from typing import List
+
 from src.storage.chat_crud import CRUDChatCollection
 from src.models.chat import ChatDomain
 from src.utils.utility import (create_new_id,
@@ -33,7 +35,7 @@ class ChatRepository:
         """
         self.data = list(self.collection.find_all_doc())
         for doc in self.data:
-            doc['_id'] = str(doc['_id'])
+            doc["_id"] = str(doc["_id"])
         return self.data
 
     async def add_one_record(self, chat: ChatDomain):
@@ -52,6 +54,7 @@ class ChatRepository:
         self,
         query: str,
         answer: str,
+        retrieved_nodes: List[str],
         is_out_of_domain: bool = False
     ):
         """
@@ -61,6 +64,7 @@ class ChatRepository:
             query (str): The user's query.
             answer (str): The chatbot's answer to the query.
             inference_time (float): The time it took to generate the answer.
+            retrieved_nodes (List): the list of retrieved nodes.
             is_out_of_domain (bool, optional): Flag indicating if the query 
                                                is out of domain. Defaults to False.
 
@@ -73,6 +77,7 @@ class ChatRepository:
             Id=chat_domain_id,
             query=query,
             answer=answer,
+            retrieved_nodes=retrieved_nodes,
             time=timestamp,
             is_outdomain=is_out_of_domain
         )

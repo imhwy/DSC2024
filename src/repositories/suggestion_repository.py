@@ -34,7 +34,7 @@ class SuggestionRepository:
         """
         self.data = list(self.collection.find_all_doc())
         for doc in self.data:
-            doc['_id'] = str(doc['_id'])
+            doc["_id"] = str(doc["_id"])
         return self.data
 
     def add_one_record(
@@ -79,15 +79,15 @@ class SuggestionRepository:
             suggestion=suggestion_instance
         )
 
-    def delete_suggestion_by_id(
+    def delete_suggestion(
         self,
-        suggestion_id: str = None
+        identifier: str = None
     ) -> None:
         """
         Delete a suggestion from the collection by its ID.
 
         Args:
-            suggestion_id (str, optional): The unique ID of the suggestion 
+            identifier (str, optional): The unique ID or question of the suggestion 
 
         Returns:
             None
@@ -96,15 +96,16 @@ class SuggestionRepository:
             Exception: If an error occurs during the deletion process
         """
         try:
-            result = self.collection.delete_one_doc({'Id': suggestion_id})
+            query = {"$or": [{"Id": identifier}, {"question": identifier}]}
+            result = self.collection.delete_one_doc(query)
             if result.deleted_count > 0:
                 print(
-                    f"Suggestion with id = {suggestion_id} deleted successfully.")
+                    f"Suggestion with identifier = {identifier} deleted successfully.")
             else:
-                print(f"No suggestion with id = {suggestion_id} found.")
+                print(f"No suggestion with identifier = {identifier} found.")
         except Exception as e:
             print(
-                f"Error deleting suggestion with id = {suggestion_id}: {e}")
+                f"Error deleting suggestion with identifier = {identifier}: {e}")
             raise
 
     def get_suggestion_by_question(
@@ -122,7 +123,7 @@ class SuggestionRepository:
         """
         document = self.collection.find_one_doc(
             {
-                'question': suggestion_question
+                "question": suggestion_question
             }
         )
         if document:

@@ -19,7 +19,11 @@ chat_router = APIRouter(
 )
 
 
-@chat_router.post('/chatDomain', status_code=status.HTTP_200_OK, response_model=ResponseChat)
+@chat_router.post(
+    '/chatDomain',
+    status_code=status.HTTP_200_OK,
+    response_model=ResponseChat
+)
 async def chat_domain(
     request_chat: RequestChat,
     service: Service = Depends(get_service)
@@ -41,13 +45,14 @@ async def chat_domain(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Query is required"
         )
-    reponse, is_outdomain = await service.retrieve_chat_engine.retrieve_chat(
-        query=request_chat.query
-    )
     try:
+        reponse, is_outdomain, retrieved_nodes = await service.retrieve_chat_engine.retrieve_chat(
+            query=request_chat.query
+        )
         await service.chat_repository.add_chat_domains(
             query=request_chat.query,
             answer=reponse,
+            retrieved_nodes=retrieved_nodes,
             is_out_of_domain=is_outdomain
         )
         return ResponseChat(

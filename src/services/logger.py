@@ -18,7 +18,7 @@ class DSCLogger(object):
         file_log="log",
         write_to_file=False,
         mode="info",
-        data_source='./log'
+        data_source="./log"
     ):
         """
         Initialize the QAsystem instance.
@@ -32,9 +32,9 @@ class DSCLogger(object):
 
         if write_to_file:
             hdlr = logging.FileHandler(os.path.join(
-                data_source, f'{file_log}.log'))
+                data_source, f"{file_log}.log"))
             formatter = logging.Formatter(
-                '%(asctime)s %(levelname)s %(name)s %(message)s')
+                "%(asctime)s %(levelname)s %(name)s %(message)s")
             hdlr.setFormatter(formatter)
             self.logger.addHandler(hdlr)
 

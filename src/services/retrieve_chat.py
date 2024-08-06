@@ -42,4 +42,4 @@ class RetrieveChat:
         )
         if response in "Nội dung bạn đề cập không nằm trong phạm vi của nhà trường.":
             is_outdomain = True
-        return response, is_outdomain
+        return response, is_outdomain, retrieved_nodes

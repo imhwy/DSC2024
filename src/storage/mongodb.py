@@ -11,13 +11,13 @@ from src.utils.utility import convert_value
 
 load_dotenv()
 
-MONGODB_URL = convert_value(os.environ.get('MONGODB_URL'))
-MONGODB_NAME = convert_value(os.environ.get('MONGODB_NAME'))
+MONGODB_URL = convert_value(os.environ.get("MONGODB_URL"))
+MONGODB_NAME = convert_value(os.environ.get("MONGODB_NAME"))
 if MONGODB_URL is None:
-    MONGODB_URL = convert_value(os.environ.get('MONGODB_URL'))
-LOG_LEVEL = convert_value(os.environ.get('LOG_LEVEL'))
-WRITE_LOG_TO_FILE = convert_value(os.environ.get('WRITE_LOG_TO_FILE'))
-FILE_NAME = convert_value(os.environ.get('FILE_NAME'))
+    MONGODB_URL = convert_value(os.environ.get("MONGODB_URL"))
+LOG_LEVEL = convert_value(os.environ.get("LOG_LEVEL"))
+WRITE_LOG_TO_FILE = convert_value(os.environ.get("WRITE_LOG_TO_FILE"))
+FILE_NAME = convert_value(os.environ.get("FILE_NAME"))
 
 log = DSCLogger(
     file_name=FILE_NAME,
@@ -41,7 +41,7 @@ class MongoDBConnection():
         print("DEBUG DEBUG")
         try:
             # check connection is available
-            self.client.admin.command('ismaster')
+            self.client.admin.command("ismaster")
             log.info(f"CONNECT TO DB {self.db} SUCCESSFULLY")
 
         except ValueError as e:
@@ -61,7 +61,7 @@ class CRUDDocuments():
         """
         Insert a single document.
         Example:
-            Input: x= {'x': 1}
+            Input: x= {"x": 1}
                 result = db.test.insert_one_doc(x)
             Output: result.inserted_id
                 ObjectId('54f112defba522406c9cc208')

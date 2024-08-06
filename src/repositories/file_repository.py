@@ -50,7 +50,7 @@ class FileRepository:
         """
         self.data = list(self.collection.find_all_doc())
         for doc in self.data:
-            doc['_id'] = str(doc['_id'])
+            doc["_id"] = str(doc["_id"])
         return self.data
 
     def add_one_record(
@@ -81,7 +81,7 @@ class FileRepository:
         Args:
             url (str, optional): The URL associated with the file.
             name (str, optional): The name of the file.
-            file_type (str, optional): The type or format of the file (e.g., 'pdf', 'txt').
+            file_type (str, optional): The type or format of the file (e.g., "pdf", "txt").
 
         Returns:
             None
@@ -108,7 +108,7 @@ class FileRepository:
         Transfers a file from a given URL to a local directory.
 
         Args:
-            data (FileUpload): An object containing the file's URL, type, and name.
+            data (FileUpload): An object containing the file"s URL, type, and name.
 
         Returns:
             str: The local file path where the file is saved or the URL 
@@ -154,7 +154,7 @@ class FileRepository:
             the result of the deletion operation.
         """
         try:
-            result = self.collection.delete_one_doc({'file_name': file_name})
+            result = self.collection.delete_one_doc({"file_name": file_name})
             if result.deleted_count > 0:
                 print(
                     f"Document with file_name = {file_name} deleted successfully.")
@@ -179,7 +179,7 @@ class FileRepository:
         """
         document = self.collection.find_one_doc(
             {
-                'file_name': file_name
+                "file_name": file_name
             }
         )
         if document:

@@ -21,7 +21,11 @@ file_router = APIRouter(
 )
 
 
-@file_router.get('/getAllFilesUpload', status_code=status.HTTP_200_OK, response_model=AllFiles)
+@file_router.get(
+    "/getAllFilesUpload",
+    status_code=status.HTTP_200_OK,
+    response_model=AllFiles
+)
 async def get_all_files_upload(
     service: Service = Depends(get_service)
 ) -> AllFiles:
@@ -36,7 +40,9 @@ async def get_all_files_upload(
     """
     try:
         file_records = service.file_repository.load_all_data()
-        return AllFiles(data=[File(**record) for record in file_records])
+        return AllFiles(
+            data=[File(**record) for record in file_records]
+        )
     except Exception as e:
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -44,7 +50,11 @@ async def get_all_files_upload(
         ) from e
 
 
-@file_router.get('/getFileUpload', status_code=status.HTTP_200_OK, response_model=File)
+@file_router.get(
+    "/getFileUpload",
+    status_code=status.HTTP_200_OK,
+    response_model=File
+)
 async def get_file_upload(
     file_name: str,
     service: Service = Depends(get_service)
@@ -77,7 +87,10 @@ async def get_file_upload(
         ) from e
 
 
-@file_router.post('/fileUpload', status_code=status.HTTP_200_OK)
+@file_router.post(
+    "/fileUpload",
+    status_code=status.HTTP_200_OK
+)
 async def file_upload(
     request_file: FileUploadRequest,
     service: Service = Depends(get_service)
@@ -115,7 +128,10 @@ async def file_upload(
         ) from e
 
 
-@file_router.delete('/fileDelete', status_code=status.HTTP_200_OK)
+@file_router.delete(
+    "/fileDelete",
+    status_code=status.HTTP_200_OK
+)
 async def file_delete(
     file_name: str,
     service: Service = Depends(get_service)

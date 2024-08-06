@@ -17,11 +17,11 @@ from src.utils.utility import convert_value
 
 load_dotenv()
 
-WEAVIATE_HOST = convert_value(os.getenv('WEAVIATE_HOST'))
-WEAVIATE_PORT = convert_value(os.getenv('WEAVIATE_PORT'))
-WEAVIATE_NAME = convert_value(os.getenv('WEAVIATE_NAME'))
-MONGODB_URL = convert_value(os.getenv('MONGODB_URL'))
-MONGODB_NAME = convert_value(os.getenv('MONGODB_NAME'))
+WEAVIATE_HOST = convert_value(os.getenv("WEAVIATE_HOST"))
+WEAVIATE_PORT = convert_value(os.getenv("WEAVIATE_PORT"))
+WEAVIATE_NAME = convert_value(os.getenv("WEAVIATE_NAME"))
+MONGODB_URL = convert_value(os.getenv("MONGODB_URL"))
+MONGODB_NAME = convert_value(os.getenv("MONGODB_NAME"))
 
 
 class WeaviateDB:
