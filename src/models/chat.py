@@ -2,6 +2,7 @@
 This module defines a data model for handling chat domain data using Pydantic.
 """
 
+from typing import List
 from pydantic import BaseModel
 
 
@@ -20,5 +21,6 @@ class ChatDomain(BaseModel):
     Id: str
     query: str
     answer: str
+    retrieved_nodes: List[str]
     time: str
     is_outdomain: bool
