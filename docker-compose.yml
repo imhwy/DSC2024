@@ -1,4 +1,5 @@
 version: '3.4'
+
 services:
   weaviate:
     command:
@@ -22,5 +23,11 @@ services:
       DEFAULT_VECTORIZER_MODULE: 'none'
       ENABLE_MODULES: 'text2vec-cohere,text2vec-huggingface,text2vec-palm,text2vec-openai,generative-openai,generative-cohere,generative-palm,ref2vec-centroid,reranker-cohere,qna-openai'
       CLUSTER_HOSTNAME: 'node1'
+
+  fastapi-service:
+    build: .
+    ports:
+      - "8000:8000"
+
 volumes:
   weaviate_data:
