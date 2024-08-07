@@ -133,7 +133,7 @@ async def file_upload(
     status_code=status.HTTP_200_OK
 )
 async def file_delete(
-    file_name: str,
+    public_id: str,
     service: Service = Depends(get_service)
 ) -> Response:
     """
@@ -151,7 +151,7 @@ async def file_delete(
     """
     try:
         record = service.file_repository.get_specific_file(
-            file_name=file_name
+            public_id=public_id
         )
         if not record:
             raise HTTPException(
@@ -159,7 +159,7 @@ async def file_delete(
                 detail="File not found"
             )
         service.file_management.delete_file(
-            file_name=file_name
+            public_id=public_id
         )
         return Response(
             status_code=status.HTTP_201_CREATED,
