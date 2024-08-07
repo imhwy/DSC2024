@@ -1,5 +1,14 @@
 version: '3.4'
 services:
+  backend:
+    image: xuanphi310302/dsc2024:v0.1
+    ports:
+      - 8000:8000
+    networks:
+      - weaviate_network
+    depends_on:
+      - weaviate
+
   weaviate:
     command:
       - --host
@@ -22,17 +31,6 @@ services:
       DEFAULT_VECTORIZER_MODULE: 'none'
       ENABLE_MODULES: 'text2vec-cohere,text2vec-huggingface,text2vec-palm,text2vec-openai,generative-openai,generative-cohere,generative-palm,ref2vec-centroid,reranker-cohere,qna-openai'
       CLUSTER_HOSTNAME: 'node1'
-    networks:
-      - weaviate_network
-
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 8000:8000
-    depends_on:
-      - weaviate
     networks:
       - weaviate_network
 
