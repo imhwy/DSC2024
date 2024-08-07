@@ -43,19 +43,19 @@ model = genai.GenerativeModel(
 
 svm_model = joblib.load('C:/Users/ADMIN/Desktop/DSC/github/DSC2024/preprocess_module/Materials (removable)/Models/svm_model.joblib')
 tfidf_vectorizer = joblib.load('C:/Users/ADMIN/Desktop/DSC/github/DSC2024/preprocess_module/Materials (removable)/Models/tfidf_vectorizer.joblib')
-
+def tokenize_text(text):
+    tokens = word_tokenize(text, format='text')
+    return tokens
 def classify_domain(text):
     # Preprocess the text
-    tokens = word_tokenize(text, format='text')
-    processed_text = ' '.join(tokens)
+    processed_text = tokenize_text(text)
 
     # Convert to TF-IDF features
     text_tfidf = tfidf_vectorizer.transform([processed_text])
 
     # Predict and measure time
     prediction = svm_model.predict(text_tfidf)
-    return prediction
-
+    return prediction[0]
 
 def is_vietnamese_text(text):
     prompt = f"Identify the language of the following text and return the language code: {text}. If it is Vietnamese, return 'vi', else return 'False'."

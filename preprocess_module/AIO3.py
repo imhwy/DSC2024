@@ -41,13 +41,14 @@ model = genai.GenerativeModel(
 #     return int(prediction)
 
 
-svm_model = joblib.load('C:/Users/ADMIN/Desktop/DSC/github/DSC2024/preprocess_module/Domain Clf Models/svm_model.joblib')
-tfidf_vectorizer = joblib.load('C:/Users/ADMIN/Desktop/DSC/github/DSC2024/preprocess_module/Domain Clf Models/tfidf_vectorizer.joblib')
-
+svm_model = joblib.load('C:/Users/ADMIN/Desktop/DSC/github/DSC2024/preprocess_module/Materials (removable)/Models/svm_model.joblib')
+tfidf_vectorizer = joblib.load('C:/Users/ADMIN/Desktop/DSC/github/DSC2024/preprocess_module/Materials (removable)/Models/tfidf_vectorizer.joblib')
+def tokenize_text(text):
+    tokens = word_tokenize(text, format='text')
+    return tokens
 def classify_domain(text):
     # Preprocess the text
-    tokens = word_tokenize(text, format='text')
-    processed_text = ' '.join(tokens)
+    processed_text = tokenize_text(text)
 
     # Convert to TF-IDF features
     text_tfidf = tfidf_vectorizer.transform([processed_text])
@@ -55,6 +56,8 @@ def classify_domain(text):
     # Predict and measure time
     prediction = svm_model.predict(text_tfidf)
     return prediction[0]
+
+
 def lang_detect(text):
 
     lang = "vi" # or "en" or "vi_en" "no_tonemark_vi" "no_tonemark_vi_en"
