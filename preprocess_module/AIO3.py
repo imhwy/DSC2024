@@ -97,7 +97,7 @@ def is_prompt_injection(text):
 #     return response.text.strip()
 
 def correct_vietnamese_text(text):
-    prompt = f"""Thêm dấu tiếng Việt và sửa lỗi chính tả cho văn bản tiếng Việt dưới đây: {text}."""
+    prompt = f"""Thêm dấu tiếng Việt và sửa lỗi chính tả, và xử lý các từ viết tắt (viết đầy đủ hơn) cho văn bản tiếng Việt dưới đây: {text}."""
     response = model.generate_content(prompt)
     return response.text.strip()
 
@@ -122,7 +122,7 @@ def translate_vi_en_text(text):
 
 def preprocess_text(text_input):
     """
-    Process the input text and return a text result.
+    Process the input text and return a tesxt result.
     """
     query = ""
     language = True
@@ -159,10 +159,10 @@ def preprocess_text(text_input):
         
         print(f"Text correction time: {e2 - s2}")
 
-        s2 = time.time()
-        corrected_text = correct_vietnamese_text(text_input)
-        e2 = time.time()
-        print(f"Text correction time: {e2 - s2}")
+        # s2 = time.time()
+        # corrected_text = correct_vietnamese_text(text_input)
+        # e2 = time.time()
+        # print(f"Text correction time: {e2 - s2}")
 
         s3 = time.time()
         if is_prompt_injection(corrected_text):
