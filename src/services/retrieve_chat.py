@@ -40,6 +40,6 @@ class RetrieveChat:
             user_query=query,
             relevant_information=retrieved_nodes
         )
-        if response in "Nội dung bạn đề cập không nằm trong phạm vi của nhà trường.":
+        if response in "Nội dung bạn đề cập không nằm trong phạm vi của nhà trường":
             is_outdomain = True
         return response, is_outdomain, retrieved_nodes

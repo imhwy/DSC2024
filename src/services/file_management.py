@@ -50,6 +50,7 @@ class FileManagement:
                     documents=documents,
                 )
                 self._file_repository.add_file(
+                    public_id=data.public_id,
                     url=data.url,
                     file_name=data.file_name,
                     file_type=data.file_type,

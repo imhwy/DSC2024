@@ -10,8 +10,7 @@ from dotenv import load_dotenv
 from src.storage.file_crud import CRUDFileCollection
 from src.models.file import (File,
                              FileUpload)
-from src.utils.utility import (create_new_id,
-                               get_datetime,
+from src.utils.utility import (get_datetime,
                                convert_value)
 
 load_dotenv()
@@ -70,6 +69,7 @@ class FileRepository:
 
     def add_file(
         self,
+        public_id: str = None,
         url: str = None,
         file_name: str = None,
         file_type: str = None,
@@ -86,10 +86,9 @@ class FileRepository:
         Returns:
             None
         """
-        file_id = create_new_id(prefix="file")
         timestamp = get_datetime()
         file_instance = File(
-            Id=file_id,
+            public_id=public_id,
             url=url,
             file_name=file_name,
             file_type=file_type,
