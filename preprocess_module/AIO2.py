@@ -1,5 +1,9 @@
 import google.generativeai as genai
 import re
+import time
+
+import joblib
+from underthesea import word_tokenize
 
 # Set up the API key for the Google Generative AI
 genai.configure(api_key="")
@@ -27,20 +31,38 @@ model = genai.GenerativeModel(
     safety_settings=safety_settings
 )
 
+# def classify_domain(text):
+#     """
+#     Classify the text as In Domain (1) or Out of Domain (0) based on whether it is about university admission programs.
+#     """
+#     prompt = f"Xác định xem đoạn văn dưới này có thuộc dạng câu hỏi về chương trình tuyển sinh của một trường đại học không, nếu có trả về 1, không trả về 0: {text}"
+#     response = model.generate_content(prompt)
+#     prediction = response.text.strip()
+#     return int(prediction)
+
+
+svm_model = joblib.load('C:/Users/ADMIN/Desktop/DSC/github/DSC2024/preprocess_module/Materials (removable)/Models/svm_model.joblib')
+tfidf_vectorizer = joblib.load('C:/Users/ADMIN/Desktop/DSC/github/DSC2024/preprocess_module/Materials (removable)/Models/tfidf_vectorizer.joblib')
+
 def classify_domain(text):
-    """
-    Classify the text as In Domain (1) or Out of Domain (0) based on whether it is about university admission programs.
-    """
-    prompt = f"Xác định xem đoạn văn dưới này có thuộc dạng câu hỏi về chương trình tuyển sinh của một trường đại học không, nếu có trả về 1, không trả về 0: {text}"
-    response = model.generate_content(prompt)
-    prediction = response.text.strip()
-    return int(prediction)
+    # Preprocess the text
+    tokens = word_tokenize(text, format='text')
+    processed_text = ' '.join(tokens)
+
+    # Convert to TF-IDF features
+    text_tfidf = tfidf_vectorizer.transform([processed_text])
+
+    # Predict and measure time
+    prediction = svm_model.predict(text_tfidf)
+    return prediction
+
 
 def is_vietnamese_text(text):
     prompt = f"Identify the language of the following text and return the language code: {text}. If it is Vietnamese, return 'vi', else return 'False'."
     response = model.generate_content(prompt)
     lang = response.text.strip()
     return lang == 'vi'
+
 
 def is_prompt_injection(text):
     prompt_injection_patterns = [
@@ -55,30 +77,22 @@ def is_prompt_injection(text):
             return True
     return False
 
+# def correct_vietnamese_text(text):
+#     prompt = f"""Bạn có các vai trò sau:
+
+#     Nếu đầu vào {text} là tiếng Việt, vui lòng kiểm tra và sửa lỗi chính tả, và thêm dấu Tiếng việt cho các từ bị thiếu để đảm bảo câu có ý nghĩa hoàn chỉnh.
+
+#     Nếu đầu vào {text} là tiếng Anh, vui lòng dịch sang tiếng Việt.
+
+#     Nếu đầu vào {text} là câu tiếng Việt chứa từ tiếng Anh, vui lòng dịch toàn bộ sang tiếng Việt.
+
+#     Cuối cùng, trả lại kết quả đã được xử lý."""
+#     response = model.generate_content(prompt)
+#     return response.text.strip()
 def correct_vietnamese_text(text):
     prompt = f"Thêm dấu tiếng Việt và sửa lỗi chính tả cho văn bản tiếng Việt dưới đây: {text}"
     response = model.generate_content(prompt)
     return response.text.strip()
-
-# def preprocess_text(text_input):
-#     """
-#     Process the input text and return a text result.
-#     """
-#     if text_input:
-#         if not is_vietnamese_text(text_input):
-#             return "Xin lỗi, chúng tôi chỉ hỗ trợ tiếng Việt"
-        
-#         corrected_text = correct_vietnamese_text(text_input)
-#         if is_prompt_injection(corrected_text):
-#             return "Xin lỗi, chúng tôi không hỗ trợ prompt injection"
-        
-#         domain = classify_domain(corrected_text)
-#         if domain == 0:
-#             return "Xin lỗi, chúng tôi không hỗ trợ câu hỏi này"
-#         else:
-#             return f"Thuộc quy trình xử lý (In domain):\n{corrected_text}"
-#     else:
-#         return "Vui lòng nhập câu hỏi để xử lý."
 
 def preprocess_text(text_input):
     """
@@ -89,17 +103,34 @@ def preprocess_text(text_input):
     flag = False
 
     if text_input:
+
+        #sử dụng lang_detect chỗ này 
+
+        s1 = time.time()
         if not is_vietnamese_text(text_input):
             language = False
+        e1 = time.time()
+        print(f"Language detection time: {e1 - s1}")
 
+        s2 = time.time()
         corrected_text = correct_vietnamese_text(text_input)
+        e2 = time.time()
+        print(f"Text correction time: {e2 - s2}")
+
+        s3 = time.time()
         if is_prompt_injection(corrected_text):
             flag = True
+        e3 = time.time()
+        print(f"Prompt injection time: {e3 - s3}")
 
+        s4 = time.time()
         domain = classify_domain(corrected_text)
-        if domain == 0:
+        e4 = time.time()
+        print(f"Domain classification time: {e4 - s4}")
+        print(f"Domain: {domain}")
+        if domain == [0]:
             flag = True
-
+            
         if language and not flag:
             query = corrected_text
         else:

@@ -26,9 +26,13 @@ if st.button("Xử lý câu hỏi"):
             if is_prompt_injection(corrected_text):
                 st.write("Xin lỗi, chúng tôi không hỗ trợ prompt injection")
             else:
+                s1 = time.time()
                 # Use the predict_label_from_text function for domain classification
                 domain = predict_label_from_text(corrected_text, model_path, tokenizer_path) # Use Local Model
                 # domain = classify_domain(corrected_text) # Use Gemini
+                e1 = time.time()
+                t1 = s1 - e1
+                st.write(f"Thời gian xử lý: {t1:.2f} giây")
                 if domain == 0:
                     st.write("Xin lỗi, chúng tôi không hỗ trợ câu hỏi này")
                 else:

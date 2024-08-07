@@ -1,4 +1,4 @@
-from AIO import preprocess_text 
+from AIO2 import preprocess_text 
 
 def main():
     text_input = input()
