@@ -37,6 +37,7 @@ async def get_all_suggestion(
                 status.HTTP_404_NOT_FOUND,
                 detail="No result not found"
             )
+        print(result)
         return Response(
             status_code=status.HTTP_201_CREATED,
             content="Success"
