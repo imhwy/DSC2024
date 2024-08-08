@@ -3,7 +3,9 @@ This module provides services for handling LLM and embedding models using OpenAI
 """
 
 import os
+import joblib
 from dotenv import load_dotenv
+import google.generativeai as genai
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.core import Settings
@@ -18,6 +20,7 @@ from src.repositories.file_repository import FileRepository
 from src.data_loader.general_loader import GeneralLoader
 from src.services.file_management import FileManagement
 from src.repositories.suggestion_repository import SuggestionRepository
+from src.prompt.prompt_template import safety_settings
 
 from src.engines.preprocess_engine import PreprocessQuestion
 
@@ -27,6 +30,14 @@ OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
 OPENAI_MODEL = convert_value(os.getenv('OPENAI_MODEL'))
 OPENAI_EMBED_MODEL = convert_value(os.getenv('OPENAI_EMBED_MODEL'))
 TEMPERATURE_MODEL = convert_value(os.getenv('TEMPERATURE_MODEL'))
+GEMINI_API_KEY = convert_value(os.getenv('GEMINI_API_KEY'))
+GEMINI_LLM_MODEL = convert_value(os.getenv('GEMINI_LLM_MODEL'))
+TEMPERATURE = convert_value(os.getenv('TEMPERATURE'))
+TOP_P = convert_value(os.getenv('TOP_P'))
+TOP_K = convert_value(os.getenv('TOP_K'))
+MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
+CLF_MODEL = convert_value(os.getenv('CLF_MODEL'))
+CLF_VECTORIZE = convert_value(os.getenv('CLF_VECTORIZE'))
 
 
 class Service:
@@ -34,24 +45,36 @@ class Service:
     A service class that sets up and manages LLM and embedding models using OpenAI
     """
 
-    def __init__(
-        self,
-        openai_api_key: str = OPENAI_API_KEY,
-        openai_api_model: str = OPENAI_MODEL,
-        openai_api_embed_model: str = OPENAI_EMBED_MODEL,
-        temperature_model: str = TEMPERATURE_MODEL
-    ):
+    def __init__(self):
         """
         Initializes the Service class with LLM and embedding models.
         """
-        self._llm = OpenAI(
-            api_key=openai_api_key,
-            model=openai_api_model,
-            temperature=temperature_model
+        genai.configure(
+            api_key=GEMINI_API_KEY
         )
+        self._llm = OpenAI(
+            api_key=OPENAI_API_KEY,
+            model=OPENAI_MODEL,
+            temperature=TEMPERATURE_MODEL
+        )
+
+        self._clf_model = joblib.load(CLF_MODEL)
+        self._clf_vectorizer = joblib.load(CLF_VECTORIZE)
+
         self._embed_model = OpenAIEmbedding(
-            api_key=openai_api_key,
-            model=openai_api_embed_model
+            api_key=OPENAI_API_KEY,
+            model=OPENAI_EMBED_MODEL
+        )
+        self._generation_config = {
+            "temperature": TEMPERATURE,
+            "top_p": TOP_P,
+            "top_k": TOP_K,
+            "max_output_tokens": MAX_OUTPUT_TOKENS,
+        }
+        self._gemini = genai.GenerativeModel(
+            model_name=GEMINI_LLM_MODEL,
+            generation_config=self._generation_config,
+            safety_settings=safety_settings
         )
         Settings.llm = self._llm
         Settings.embed_model = self._embed_model
@@ -75,6 +98,13 @@ class Service:
             vector_database=self._vector_database
         )
         self._suggestion_repository = SuggestionRepository()
+        self._preprocess_engine = PreprocessQuestion(
+            gemini=self._gemini,
+            domain_clf_model=self._clf_model,
+            domain_clf_vectorizer=self._clf_vectorizer,
+            lang_detect_model=None,
+            lang_detect_vectorizer=None
+        )
 
     @property
     def vector_database(self) -> WeaviateDB:
@@ -176,3 +206,10 @@ class Service:
         Provides access to the SuggestionRepository instance.
         """
         return self._suggestion_repository
+
+    @property
+    def get_preprocess_engine(self) -> PreprocessQuestion:
+        """
+        Provides access to the PreprocessQuestion instance.
+        """
+        return self._preprocess_engine

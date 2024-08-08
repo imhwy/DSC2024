@@ -1,31 +1,36 @@
 """
 
 """
-from src.prompt.prompt_template import prompt_injection_patterns, correct_vi_prompt, translate_en_prompt, translate_vi_en_prompt
-import google.generativeai as genai
+
 import re
 import time
-import joblib
 from underthesea import word_tokenize
+
+from src.prompt.prompt_template import (prompt_injection_patterns,
+                                        correct_vi_prompt,
+                                        translate_en_prompt,
+                                        translate_vi_en_prompt)
+
 
 class PreprocessQuestion:
     """
-    
     """
-    def __init__(self,gemini ,generation_config, safety_settings, domain_clf_model,domain_clf_vectorizer,lang_detect_model, lang_detect_vectorizer) -> None:
+
+    def __init__(
+        self,
+        gemini,
+        domain_clf_model,
+        domain_clf_vectorizer,
+        lang_detect_model,
+        lang_detect_vectorizer
+    ) -> None:
         """
-        
         """
         self.gemini = gemini
         self.domain_clf_model = domain_clf_model
         self.domain_clf_vectorizer = domain_clf_vectorizer
         self.lang_detect_model = lang_detect_model
         self.lang_detect_vectorizer = lang_detect_vectorizer
-        self.generation_config = generation_config
-        self.safety_settings = safety_settings
-
-
-    
 
     def tokenize_text(self, text):
         """
@@ -70,7 +75,7 @@ class PreprocessQuestion:
         Returns:
             str: The detected language code.
         """
-        lang = "vi" # or "en" or "vi_en" "no_tonemark_vi" "no_tonemark_vi_en"
+        lang = "vi"  # or "en" or "vi_en" "no_tonemark_vi" "no_tonemark_vi_en"
         return lang
 
     def is_prompt_injection(self, text):
@@ -83,7 +88,7 @@ class PreprocessQuestion:
         Returns:
             bool: True if prompt injection is detected, False otherwise.
         """
-        
+
         for pattern in prompt_injection_patterns:
             if re.search(pattern, text, re.IGNORECASE):
                 return True
@@ -99,7 +104,9 @@ class PreprocessQuestion:
         Returns:
             str: The corrected Vietnamese text.
         """
-        response = self.gemini.generate_content(correct_vi_prompt)
+        response = self.gemini.generate_content(
+            correct_vi_prompt.format(text=text)
+        )
         return response.text.strip()
 
     def translate_en_text(self, text):
@@ -112,8 +119,10 @@ class PreprocessQuestion:
         Returns:
             str: The translated Vietnamese text.
         """
-        
-        response = self.gemini.generate_content(translate_en_prompt)
+
+        response = self.gemini.generate_content(
+            translate_en_prompt.format(text=text)
+        )
         return response.text.strip()
 
     def translate_vi_en_text(self, text):
@@ -126,9 +135,11 @@ class PreprocessQuestion:
         Returns:
             str: The fully translated and corrected Vietnamese text.
         """
-        
-        response = self.gemini.generate_content(translate_vi_en_prompt)
-        return response.text.strip() 
+
+        response = self.gemini.generate_content(
+            translate_vi_en_prompt.format(text=text)
+        )
+        return response.text.strip()
 
     def preprocess_text(self, text_input):
         """
@@ -139,7 +150,8 @@ class PreprocessQuestion:
             text_input (str): The text to process.
 
         Returns:
-            tuple: A tuple containing the processed query (str), a language flag (bool), and a prompt injection flag (bool).
+            tuple: A tuple containing the processed query (str), 
+                   a language flag (bool), and a prompt injection flag (bool).
         """
         query = ""
         language = True
@@ -161,13 +173,13 @@ class PreprocessQuestion:
                 s2 = time.time()
                 corrected_text = self.translate_en_text(text_input)
                 e2 = time.time()
-            
+
             if lang == "vi_en" or lang == "no_tonemark_vi_en":
                 language = True
                 s2 = time.time()
                 corrected_text = self.translate_vi_en_text(text_input)
                 e2 = time.time()
-            
+
             print(f"Text correction time: {e2 - s2}")
 
             s3 = time.time()
