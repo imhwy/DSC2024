@@ -42,3 +42,25 @@ Response: 'Nội dung bạn đề cập không nằm trong phạm vi của nhà 
 ----------------------------------------------------------------
 Your answer:
 """
+
+prompt_injection_patterns = [
+    r"bỏ qua hướng dẫn trước", r"bỏ qua phần trên", r"bỏ qua chỉ dẫn trước",
+    r"bỏ qua chỉ dẫn trên", r"lờ đi hướng dẫn trước", r"lờ đi phần trên",
+    r"bỏ qua lệnh trước", r"bỏ qua lệnh trên", r"vượt qua", r"phá vỡ",
+    r"trick AI", r"hack AI", r"độc hại", r"tiêm nhiễm"
+]
+
+correct_vi_prompt = f"""Thêm dấu tiếng Việt và sửa lỗi chính tả, và xử lý các từ viết tắt (viết đầy đủ hơn) cho văn bản tiếng Việt dưới đây: {text}."""
+
+translate_en_prompt = f"""You have the role: 
+
+        Translate the following English text into Vietnamese: {text}
+
+        Return the output as the processed input."""
+
+translate_vi_en_prompt = f"""You have the role: 
+
+        Translate each english word in this sentence into Vietnamese and translate the whole sentence into Vietnamese. Besides, check and correct spelling errors, and
+        add any missing punctuation to ensure the sentence has complete meaning and exactly Vietnamese form: {text}
+
+        Return the output as the processed input."""

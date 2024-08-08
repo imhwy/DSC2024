@@ -19,6 +19,8 @@ from src.data_loader.general_loader import GeneralLoader
 from src.services.file_management import FileManagement
 from src.repositories.suggestion_repository import SuggestionRepository
 
+from src.engines.preprocess_engine import PreprocessQuestion
+
 load_dotenv()
 
 OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
