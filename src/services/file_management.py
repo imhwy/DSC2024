@@ -46,10 +46,12 @@ class FileManagement:
             documents = self._general_loader.load_data(sources=[file_path])
             try:
                 self._vector_database.add_knowledge(
+                    public_id=data.public_id,
                     file_name=data.file_name,
                     documents=documents,
                 )
                 self._file_repository.add_file(
+                    public_id=data.public_id,
                     url=data.url,
                     file_name=data.file_name,
                     file_type=data.file_type,
@@ -60,7 +62,7 @@ class FileManagement:
 
     def delete_file(
         self,
-        file_name: str = None
+        public_id: str = None
     ) -> None:
         """
         Deletes a file and its associated knowledge from the vector database.
@@ -72,8 +74,8 @@ class FileManagement:
             None
         """
         self._file_repository.delete_specific_file(
-            file_name=file_name
+            public_id=public_id
         )
         self._vector_database.delete_knowlegde(
-            file_name=file_name
+            public_id=public_id
         )

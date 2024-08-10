@@ -107,6 +107,7 @@ class WeaviateDB:
     def document_configuration(
         self,
         file_name: str = None,
+        public_id: str = None,
         documents: List[Document] = List[None]
     ) -> List[Document]:
         """
@@ -123,15 +124,18 @@ class WeaviateDB:
             List[Document]: The list of Document objects with updated metadata.
         """
         for document in documents:
-            if not document.metadata.get("file_name"):
+            if not document.metadata.get("public_id"):
                 document.metadata = {
-                    "file_name": file_name
+                    "file_name": file_name,
+                    "public_id": public_id
                 }
                 document.excluded_embed_metadata_keys = [
-                    "file_name"
+                    "file_name",
+                    "public_id"
                 ]
                 document.excluded_llm_metadata_keys = [
-                    "file_name"
+                    "file_name",
+                    "public_id"
                 ]
         return documents
 
@@ -228,6 +232,7 @@ class WeaviateDB:
 
     def add_knowledge(
         self,
+        public_id: str = None,
         file_name: str = None,
         documents: List[Document] = List[None]
     ) -> None:
@@ -245,6 +250,7 @@ class WeaviateDB:
         if documents:
             processed_documents = self.document_configuration(
                 file_name=file_name,
+                public_id=public_id,
                 documents=documents
             )
             nodes = self.documents_to_nodes(
@@ -262,7 +268,7 @@ class WeaviateDB:
 
     def delete_knowlegde(
         self,
-        file_name: str = None
+        public_id: str = None
     ) -> None:
         """
         Deletes documents from the knowledge base by file name.
@@ -273,7 +279,7 @@ class WeaviateDB:
         """
         ref_doc_ids = []
         for _, node in self._storage_context.docstore.docs.items():
-            if node.metadata.get("file_name") == file_name and node.ref_doc_id not in ref_doc_ids:
+            if node.metadata.get("public_id") == public_id and node.ref_doc_id not in ref_doc_ids:
                 self.delete_nodes(
                     ref_doc_id=node.ref_doc_id
                 )

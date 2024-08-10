@@ -10,6 +10,7 @@ class FileUpload(BaseModel):
     """
     Represents a file upload with its URL, type, and name.
     """
+    public_id: str
     url: str
     file_type: str
     file_name: str
@@ -28,6 +29,7 @@ class FileUploadResponse(BaseModel):
     """
     message: str
 
+
 class File(BaseModel):
     """
     A Pydantic model representing a file with key attributes.
@@ -38,12 +40,13 @@ class File(BaseModel):
         file_type (str): The type or extension of the file (e.g., 'pdf', 'txt').
         time (str): A timestamp indicating when the file was created, modified, or accessed.
     """
-    Id: str
+    public_id: str
     url: str
     file_name: str
     file_type: str
     file_path: str
     time: str
+
 
 class AllFiles(BaseModel):
     """

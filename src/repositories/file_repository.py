@@ -10,8 +10,7 @@ from dotenv import load_dotenv
 from src.storage.file_crud import CRUDFileCollection
 from src.models.file import (File,
                              FileUpload)
-from src.utils.utility import (create_new_id,
-                               get_datetime,
+from src.utils.utility import (get_datetime,
                                convert_value)
 
 load_dotenv()
@@ -70,6 +69,7 @@ class FileRepository:
 
     def add_file(
         self,
+        public_id: str = None,
         url: str = None,
         file_name: str = None,
         file_type: str = None,
@@ -86,10 +86,9 @@ class FileRepository:
         Returns:
             None
         """
-        file_id = create_new_id(prefix="file")
         timestamp = get_datetime()
         file_instance = File(
-            Id=file_id,
+            public_id=public_id,
             url=url,
             file_name=file_name,
             file_type=file_type,
@@ -137,7 +136,7 @@ class FileRepository:
 
     def delete_specific_file(
         self,
-        file_name: str = None
+        public_id: str = None
     ) -> None:
         """
         Deletes a document with the specified file name from the collection.
@@ -154,19 +153,19 @@ class FileRepository:
             the result of the deletion operation.
         """
         try:
-            result = self.collection.delete_one_doc({"file_name": file_name})
+            result = self.collection.delete_one_doc({"public_id": public_id})
             if result.deleted_count > 0:
                 print(
-                    f"Document with file_name = {file_name} deleted successfully.")
+                    f"Document with public_id = {public_id} deleted successfully.")
             else:
-                print(f"No document with file_name = {file_name} found.")
+                print(f"No document with public_id = {public_id} found.")
         except Exception as e:
-            print(f"Error deleting document with file_name = {file_name}: {e}")
+            print(f"Error deleting document with public_id = {public_id}: {e}")
             raise
 
     def get_specific_file(
         self,
-        file_name: str = None
+        public_id: str = None
     ) -> List:
         """
         Retrieves a document from the collection based on the specified file name.
@@ -179,7 +178,7 @@ class FileRepository:
         """
         document = self.collection.find_one_doc(
             {
-                "file_name": file_name
+                "public_id": public_id
             }
         )
         if document:

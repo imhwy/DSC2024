@@ -56,7 +56,7 @@ async def get_all_files_upload(
     response_model=File
 )
 async def get_file_upload(
-    file_name: str,
+    public_id: str,
     service: Service = Depends(get_service)
 ) -> File:
     """
@@ -73,7 +73,9 @@ async def get_file_upload(
         File: The details of the requested file if found.
     """
     try:
-        file_record = service.file_repository.get_specific_file(file_name)
+        file_record = service.file_repository.get_specific_file(
+            public_id=public_id
+        )
         if not file_record:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
@@ -133,7 +135,7 @@ async def file_upload(
     status_code=status.HTTP_200_OK
 )
 async def file_delete(
-    file_name: str,
+    public_id: str,
     service: Service = Depends(get_service)
 ) -> Response:
     """
@@ -151,7 +153,7 @@ async def file_delete(
     """
     try:
         record = service.file_repository.get_specific_file(
-            file_name=file_name
+            public_id=public_id
         )
         if not record:
             raise HTTPException(
@@ -159,7 +161,7 @@ async def file_delete(
                 detail="File not found"
             )
         service.file_management.delete_file(
-            file_name=file_name
+            public_id=public_id
         )
         return Response(
             status_code=status.HTTP_201_CREATED,
