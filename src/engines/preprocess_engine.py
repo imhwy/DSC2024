@@ -1,19 +1,20 @@
 """
-
+This module provides serveral step of pre-processing the query inputs
 """
 
 import re
-import time
 from underthesea import word_tokenize
 
-from src.prompt.prompt_template import (prompt_injection_patterns,
-                                        correct_vi_prompt,
-                                        translate_en_prompt,
-                                        translate_vi_en_prompt)
+from src.prompt.preprocessing_prompt import (PROMPT_INJECTION_PATTERNS,
+                                             CORRECT_VI_PROMPT,
+                                             TRANSLATE_EN_PROMPT,
+                                             TRANSLATE_VI_EN_PROMPT)
+from src.models.preprocess import ProcessedData
 
 
 class PreprocessQuestion:
     """
+    Handles the preprocessing of queries, including language detection and domain classification.
     """
 
     def __init__(
@@ -25,6 +26,14 @@ class PreprocessQuestion:
         lang_detect_vectorizer
     ) -> None:
         """
+        Initializes the PreprocessQuestion with the necessary models and vectorizers.
+
+        Args:
+            gemini: A reference to the Gemini model used for further processing.
+            domain_clf_model: The model used for classifying the query's domain.
+            domain_clf_vectorizer: The vectorizer.
+            lang_detect_model: The model used for detecting the language of the query.
+            lang_detect_vectorizer: The vectorizer.
         """
         self.gemini = gemini
         self.domain_clf_model = domain_clf_model
@@ -65,7 +74,10 @@ class PreprocessQuestion:
         prediction = self.domain_clf_model.predict(text_tfidf)
         return prediction[0]
 
-    def lang_detect(self, text):
+    def lang_detect(
+        self,
+        text: str = None
+    ):
         """
         Detects the language of the input text.
 
@@ -89,7 +101,7 @@ class PreprocessQuestion:
             bool: True if prompt injection is detected, False otherwise.
         """
 
-        for pattern in prompt_injection_patterns:
+        for pattern in PROMPT_INJECTION_PATTERNS:
             if re.search(pattern, text, re.IGNORECASE):
                 return True
         return False
@@ -105,7 +117,7 @@ class PreprocessQuestion:
             str: The corrected Vietnamese text.
         """
         response = self.gemini.generate_content(
-            correct_vi_prompt.format(text=text)
+            CORRECT_VI_PROMPT.format(text=text)
         )
         return response.text.strip()
 
@@ -121,7 +133,7 @@ class PreprocessQuestion:
         """
 
         response = self.gemini.generate_content(
-            translate_en_prompt.format(text=text)
+            TRANSLATE_EN_PROMPT.format(text=text)
         )
         return response.text.strip()
 
@@ -137,11 +149,11 @@ class PreprocessQuestion:
         """
 
         response = self.gemini.generate_content(
-            translate_vi_en_prompt.format(text=text)
+            TRANSLATE_VI_EN_PROMPT.format(text=text)
         )
         return response.text.strip()
 
-    def preprocess_text(self, text_input):
+    async def preprocess_text(self, text_input):
         """
         Processes the input text by performing language detection, correction/translation, 
         prompt injection detection, and domain classification.
@@ -150,57 +162,36 @@ class PreprocessQuestion:
             text_input (str): The text to process.
 
         Returns:
-            tuple: A tuple containing the processed query (str), 
+            ProcessedData: A tuple containing the processed query (str), 
                    a language flag (bool), and a prompt injection flag (bool).
         """
         query = ""
         language = True
-        flag = False
-
+        prompt_injection = False
+        outdomain = False
         if text_input:
-            s1 = time.time()
             lang = self.lang_detect(text_input)
-            e1 = time.time()
-            print(f"Language detection time: {e1 - s1}")
-
-            if lang == "vi" or lang == "no_tonemark_vi":
-                language = True
-                s2 = time.time()
+            if lang in {"vi", "no_tonemark_vi"}:
                 corrected_text = self.correct_vietnamese_text(text_input)
-                e2 = time.time()
             if lang == "en":
-                language = True
-                s2 = time.time()
                 corrected_text = self.translate_en_text(text_input)
-                e2 = time.time()
-
-            if lang == "vi_en" or lang == "no_tonemark_vi_en":
-                language = True
-                s2 = time.time()
+            if lang in {"vi_en", "no_tonemark_vi_en"}:
                 corrected_text = self.translate_vi_en_text(text_input)
-                e2 = time.time()
-
-            print(f"Text correction time: {e2 - s2}")
-
-            s3 = time.time()
             if self.is_prompt_injection(corrected_text):
-                flag = True
-            e3 = time.time()
-            print(f"Prompt injection detection time: {e3 - s3}")
-
-            s4 = time.time()
+                prompt_injection = True
+                outdomain = True
             domain = self.classify_domain(corrected_text)
-            e4 = time.time()
-            print(f"Domain classification time: {e4 - s4}")
-
             if domain == 0:
-                flag = True
-
-            if language and not flag:
+                outdomain = True
+            if language and not outdomain:
                 query = corrected_text
             else:
                 query = text_input
-
         else:
             query = ""
-        return query, language, flag
+        return ProcessedData(
+            query=query,
+            language=language,
+            is_prompt_injection=prompt_injection,
+            is_outdomain=outdomain
+        )

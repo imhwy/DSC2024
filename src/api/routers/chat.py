@@ -46,7 +46,7 @@ async def chat_domain(
             detail="Query is required"
         )
     try:
-        reponse, is_outdomain, retrieved_nodes = await service.retrieve_chat_engine.retrieve_chat(
+        reponse, is_outdomain, retrieved_nodes = await service.retrieve_chat_engine.preprocess_query(
             query=request_chat.query
         )
         await service.chat_repository.add_chat_domains(

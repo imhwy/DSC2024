@@ -20,7 +20,7 @@ from src.repositories.file_repository import FileRepository
 from src.data_loader.general_loader import GeneralLoader
 from src.services.file_management import FileManagement
 from src.repositories.suggestion_repository import SuggestionRepository
-from src.prompt.prompt_template import safety_settings
+from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
 
 from src.engines.preprocess_engine import PreprocessQuestion
 
@@ -52,18 +52,11 @@ class Service:
         genai.configure(
             api_key=GEMINI_API_KEY
         )
-        self._llm = OpenAI(
-            api_key=OPENAI_API_KEY,
-            model=OPENAI_MODEL,
-            temperature=TEMPERATURE_MODEL
+        self._clf_model = joblib.load(
+            filename=CLF_MODEL
         )
-
-        self._clf_model = joblib.load(CLF_MODEL)
-        self._clf_vectorizer = joblib.load(CLF_VECTORIZE)
-
-        self._embed_model = OpenAIEmbedding(
-            api_key=OPENAI_API_KEY,
-            model=OPENAI_EMBED_MODEL
+        self._clf_vectorizer = joblib.load(
+            filename=CLF_VECTORIZE
         )
         self._generation_config = {
             "temperature": TEMPERATURE,
@@ -71,12 +64,21 @@ class Service:
             "top_k": TOP_K,
             "max_output_tokens": MAX_OUTPUT_TOKENS,
         }
+        self._llm = OpenAI(
+            api_key=OPENAI_API_KEY,
+            model=OPENAI_MODEL,
+            temperature=TEMPERATURE_MODEL
+        )
+        self._embed_model = OpenAIEmbedding(
+            api_key=OPENAI_API_KEY,
+            model=OPENAI_EMBED_MODEL
+        )
         self._gemini = genai.GenerativeModel(
             model_name=GEMINI_LLM_MODEL,
             generation_config=self._generation_config,
-            safety_settings=safety_settings
+            safety_settings=SAFETY_SETTINGS
         )
-        Settings.llm = self._llm
+        Settings.llms = self._llm
         Settings.embed_model = self._embed_model
         self._vector_database = WeaviateDB()
         self._retriever = HybridRetriever(
@@ -85,9 +87,17 @@ class Service:
         self._chat_engine = ChatEngine(
             language_model=self._llm
         )
+        self._preprocess_engine = PreprocessQuestion(
+            gemini=self._gemini,
+            domain_clf_model=self._clf_model,
+            domain_clf_vectorizer=self._clf_vectorizer,
+            lang_detect_model=None,
+            lang_detect_vectorizer=None
+        )
         self._retrieve_chat_engine = RetrieveChat(
             retriever=self._retriever,
-            chat=self._chat_engine
+            chat=self._chat_engine,
+            preprocess=self._preprocess_engine
         )
         self._chat_repository = ChatRepository()
         self._file_repository = FileRepository()
@@ -98,13 +108,6 @@ class Service:
             vector_database=self._vector_database
         )
         self._suggestion_repository = SuggestionRepository()
-        self._preprocess_engine = PreprocessQuestion(
-            gemini=self._gemini,
-            domain_clf_model=self._clf_model,
-            domain_clf_vectorizer=self._clf_vectorizer,
-            lang_detect_model=None,
-            lang_detect_vectorizer=None
-        )
 
     @property
     def vector_database(self) -> WeaviateDB:
