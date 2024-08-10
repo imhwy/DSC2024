@@ -41,6 +41,8 @@ class RetrieveChat:
         cleaned_json = result.strip("```json\n").strip()
         try:
             data = json.loads(cleaned_json)
+            if data.get('response') in FAIL_CASE:
+                return data.get('response')
             title, session, page, data_type, link = "", "", "", "", ""
             for node in retrieved_nodes:
                 if node.id_ == data.get('id'):
@@ -61,7 +63,7 @@ class RetrieveChat:
             return processed_result
         except json.JSONDecodeError as e:
             print("Invalid JSON:", e)
-            return cleaned_json
+            return data.get('response')
 
     async def retrieve_chat(
         self,
@@ -87,7 +89,7 @@ class RetrieveChat:
             result=response,
             retrieved_nodes=retrieved_nodes
         )
-        if FAIL_CASE in processed_response:
+        if processed_response in FAIL_CASE:
             is_outdomain = True
         list_nodes = []
         for retrieved_node in retrieved_nodes:

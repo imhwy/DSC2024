@@ -12,11 +12,11 @@ The CONTEXT and QUERY are provided below, marked by '##CONTEXT' and '##QUERY'.
 Your answer must be in Vietnamese and json format not including markdown syntax.
 Each session in the context is separated by '================='.
 At the end of your response, please provide the `id` and session title from which you extracted the information.
-if you don't know the answer because the query is not mentioned in context, please respond the json format: 
+if you don't know the answer because the query is can not be answered in context, please respond the json format: 
 {{
     "response": "Nội dung bạn đề cập không nằm trong phạm vi của nhà trường.",
-    "id": None,
-    "session": None
+    "id": null,
+    "session": null
 }}
 
 ##INSTRUCTION:

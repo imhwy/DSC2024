@@ -17,6 +17,4 @@ SOURCE = """
 {link_text}
 """
 
-FAIL_CASE = """
-Nội dung bạn đề cập không nằm trong phạm vi của nhà trường
-"""
+FAIL_CASE = "Nội dung bạn đề cập không nằm trong phạm vi của nhà trường."
