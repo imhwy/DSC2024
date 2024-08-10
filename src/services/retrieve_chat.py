@@ -2,13 +2,11 @@
 this service provides retrieve and chat module for chatbot
 """
 
-from typing import Tuple
-
 from src.engines.chat_engine import ChatEngine
 from src.engines.retriever_engine import HybridRetriever
 from src.engines.preprocess_engine import PreprocessQuestion
 from src.models.chat import Chat
-from src.prompt.funny_chat_prompt import PROMPT_FUNNY_FLOW
+from src.prompt.preprocessing_prompt import PROMPT_INJECTION_ANNOUCEMENT
 
 
 class RetrieveChat:
@@ -71,16 +69,18 @@ class RetrieveChat:
         processed_query = await self._preprocess.preprocess_text(
             text_input=query
         )
+        print(processed_query)
         if processed_query.is_prompt_injection:
             return Chat(
-                response=PROMPT_FUNNY_FLOW,
+                response=PROMPT_INJECTION_ANNOUCEMENT,
                 is_outdomain=True,
                 retrieved_nodes=[]
             )
         if processed_query.is_outdomain:
-            response = self._chat.funny_chat(
+            response = await self._chat.funny_chat(
                 query=processed_query.query
             )
+            print(response)
             return Chat(
                 response=response,
                 is_outdomain=True,
