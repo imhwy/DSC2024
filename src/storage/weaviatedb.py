@@ -4,7 +4,7 @@ for managing a vector store using Weaviate and LlamaIndex.
 """
 
 import os
-from typing import List
+from typing import List, Optional
 from dotenv import load_dotenv
 import weaviate
 from llama_index.core import VectorStoreIndex, StorageContext
@@ -104,38 +104,69 @@ class WeaviateDB:
         """
         return self._client
 
-    def document_configuration(
+    def configure_documents(
         self,
-        file_name: str = None,
-        public_id: str = None,
-        documents: List[Document] = List[None]
+        documents: List[Document],
+        file_type: Optional[str] = None,
+        file_name: Optional[str] = None,
+        public_id: Optional[str] = None
     ) -> List[Document]:
         """
         Updates the metadata of a list of Document objects with a specified file name.
 
         Args:
-            file_name (str, optional): The default file name to set in the metadata 
-                                       if it is not already present.
-            documents (List[Document], optional): A list of Document objects to be configured. 
-                                                  Defaults to a list with a single Document 
-                                                  containing empty text if not provided.
+            file_type (Optional[str]): The default file type to set in the metadata
+                                        if it is not already present.
+            file_name (Optional[str]): The default file name to set in the metadata
+                                        if it is not already present.
+            public_id (Optional[str]): The default public ID to set in the metadata
+                                        if it is not already present.
+            documents (List[Document]): A list of Document objects to be configured.
 
         Returns:
             List[Document]: The list of Document objects with updated metadata.
         """
-        for document in documents:
-            if not document.metadata.get("public_id"):
-                document.metadata = {
-                    "file_name": file_name,
-                    "public_id": public_id
-                }
-                document.excluded_embed_metadata_keys = [
-                    "file_name",
-                    "public_id"
+        for idx, doc in enumerate(documents):
+            if 'file_path' not in doc.metadata:
+                doc.metadata.update({
+                    'public_id': public_id,
+                    'link': file_name,
+                    'file_type': file_type,
+                })
+                doc.excluded_embed_metadata_keys = [
+                    'file_path',
+                    'file_name',
+                    'public_id',
+                    'page',
+                    'file_type'
                 ]
-                document.excluded_llm_metadata_keys = [
-                    "file_name",
-                    "public_id"
+                doc.excluded_llm_metadata_keys = [
+                    'file_path'
+                    'file_name',
+                    'public_id',
+                    'page',
+                    'file_type'
+                ]
+            if 'public_id' not in doc.metadata:
+                doc.metadata.update({
+                    'public_id': public_id,
+                    'file_name': file_name,
+                    'file_type': file_type,
+                    'page': idx + 1
+                })
+                doc.excluded_embed_metadata_keys = [
+                    'file_name',
+                    'public_id',
+                    'page'
+                    'file_type',
+                    'file_path'
+                ]
+                doc.excluded_llm_metadata_keys = [
+                    'file_name',
+                    'public_id',
+                    'page',
+                    'file_type',
+                    'file_path'
                 ]
         return documents
 
@@ -232,6 +263,7 @@ class WeaviateDB:
 
     def add_knowledge(
         self,
+        file_type: str = None,
         public_id: str = None,
         file_name: str = None,
         documents: List[Document] = List[None]
@@ -248,7 +280,8 @@ class WeaviateDB:
             None
         """
         if documents:
-            processed_documents = self.document_configuration(
+            processed_documents = self.configure_documents(
+                file_type=file_type,
                 file_name=file_name,
                 public_id=public_id,
                 documents=documents

@@ -38,6 +38,9 @@ TOP_K = convert_value(os.getenv('TOP_K'))
 MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
 CLF_MODEL = convert_value(os.getenv('CLF_MODEL'))
 CLF_VECTORIZE = convert_value(os.getenv('CLF_VECTORIZE'))
+VECTOR_STORE_QUERY_MODE = convert_value(os.getenv('VECTOR_STORE_QUERY_MODE'))
+SIMILARITY_TOP_K = convert_value(os.getenv('SIMILARITY_TOP_K'))
+ALPHA = convert_value(os.getenv('ALPHA'))
 
 
 class Service:
@@ -81,8 +84,14 @@ class Service:
         Settings.llms = self._llm
         Settings.embed_model = self._embed_model
         self._vector_database = WeaviateDB()
+        self._hybrid_retriever = self._vector_database.index.as_retriever(
+            vector_store_query_mode=VECTOR_STORE_QUERY_MODE,
+            similarity_top_k=SIMILARITY_TOP_K,
+            alpha=ALPHA
+        )
         self._retriever = HybridRetriever(
-            index=self._vector_database.index
+            index=self._vector_database.index,
+            retriever=self._hybrid_retriever,
         )
         self._chat_engine = ChatEngine(
             language_model=self._llm

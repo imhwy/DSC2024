@@ -2,7 +2,6 @@
 ChatEngine: A class designed to facilitate conversation using a language model.
 """
 
-from typing import List
 from llama_index.llms.openai import OpenAI
 
 from src.prompt.instruction_prompt import PROMPT
@@ -38,7 +37,7 @@ class ChatEngine:
     async def generate_response(
         self,
         user_query: str,
-        relevant_information: List[str]
+        relevant_information: str
     ) -> str:
         """
         Generates a response to a user query using the language model.
