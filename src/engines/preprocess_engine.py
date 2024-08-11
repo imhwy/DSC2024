@@ -180,9 +180,13 @@ class PreprocessQuestion:
             if self.is_prompt_injection(corrected_text):
                 prompt_injection = True
                 outdomain = True
-            domain = self.classify_domain(corrected_text)
-            if domain == 0:
-                outdomain = True
+            if outdomain == False:
+                domain = self.classify_domain(corrected_text)
+                if domain == 0:
+                    outdomain = True
+                if domain == 1:
+                    outdomain = False
+                    prompt_injection = False
             if language and not outdomain:
                 query = corrected_text
             else:
