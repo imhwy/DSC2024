@@ -124,3 +124,85 @@ def format_document(
         source=cleaned_source
     )
     return cleaned_document
+
+
+import re
+
+def delete_non_vietnamese_characters(text):
+    """
+    Remove non-Vietnamese characters from the given text.
+
+    Args:
+        text (str): The input text to be cleaned.
+
+    Returns:
+        str: The text with only Vietnamese characters, numbers, and specific symbols.
+    """
+    pattern = r"[0-9a-zA-ZaăâbcdđeêghiklmnoôơpqrstuưvxyàằầbcdđèềghìklmnòồờpqrstùừvxỳáắấbcdđéếghíklmnóốớpqrstúứvxýảẳẩbcdđẻểghỉklmnỏổởpqrstủửvxỷạặậbcdđẹệghịklmnọộợpqrstụựvxỵãẵẫbcdđẽễghĩklmnõỗỡpqrstũữvxỹAĂÂBCDĐEÊGHIKLMNOÔƠPQRSTUƯVXYÀẰẦBCDĐÈỀGHÌKLMNÒỒỜPQRSTÙỪVXỲÁẮẤBCDĐÉẾGHÍKLMNÓỐỚPQRSTÚỨVXÝẠẶẬBCDĐẸỆGHỊKLMNỌỘỢPQRSTỤỰVXỴẢẲẨBCDĐẺỂGHỈKLMNỎỔỞPQRSTỦỬVXỶÃẴẪBCDĐẼỄGHĨKLMNÕỖỠPQRSTŨỮVXỸ,._]"
+    return re.sub(rf'[^{pattern}\s]', '', text).strip()
+
+def replace_synonyms(text, synonym_dict):
+    """
+    Replace synonyms in the text with their corresponding keywords.
+
+    Args:
+        text (str): The input text where synonyms should be replaced.
+        synonym_dict (dict): A dictionary where keys are keywords and values are lists of synonyms.
+
+    Returns:
+        str: The text with synonyms replaced by their respective keywords.
+    """
+    # Convert text to lowercase to make the replacement case-insensitive
+    text = text.lower()
+
+    # Iterate over each keyword and its associated synonyms
+    for keyword, synonyms in synonym_dict.items():
+        keyword = keyword.lower()
+        for synonym in synonyms:
+            synonym = synonym.strip().lower()
+            # Use regex to replace only whole words to avoid partial matches
+            text = re.sub(r'\b{}\b'.format(re.escape(synonym)), keyword, text)
+
+    return text
+
+def replace_symbols(text):
+    """
+    Replace specific symbols in the text with their word equivalents.
+
+    Args:
+        text (str): The input text containing symbols.
+
+    Returns:
+        str: The text with symbols replaced by their corresponding words.
+    """
+    replacements = {
+        ">": " lớn hơn ",
+        "<": " bé hơn ",
+        "=": " bằng ",
+        "$": " ",
+        "#": " ",
+        "^": " ",
+        "/": " ",
+        "!": " "
+    }
+    for symbol, replacement in replacements.items():
+        text = text.replace(symbol, replacement)
+    return " ".join(text.split())
+
+def clean_text(text, term_dict):
+    """
+    Perform a series of text cleaning operations, including removing non-Vietnamese characters,
+    replacing synonyms, symbols, and normalizing elongated words.
+
+    Args:
+        text (str): The input text to be cleaned.
+        table_keyword (pd.DataFrame): A DataFrame containing 'Synonym' and 'Keyword' columns.
+
+    Returns:
+        str: The cleaned text.
+    """
+    text = re.sub(r'\s+', ' ', text)
+    text = delete_non_vietnamese_characters(text.lower())
+    text = replace_synonyms(text, term_dict)
+    text = replace_symbols(text)
+    return text

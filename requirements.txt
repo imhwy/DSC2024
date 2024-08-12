@@ -10,6 +10,7 @@ tiktoken==0.7.0
 tqdm==4.66.4
 uvicorn==0.30.3
 weaviate_client==4.7.0
+transformers==4.42.4
 llama-cloud==0.0.6
 llama-index==0.10.58
 llama-index-agent-openai==0.2.8

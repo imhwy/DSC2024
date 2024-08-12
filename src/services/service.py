@@ -5,6 +5,10 @@ This module provides services for handling LLM and embedding models using OpenAI
 import os
 import joblib
 from dotenv import load_dotenv
+
+import torch
+from transformers import pipeline
+
 import google.generativeai as genai
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
@@ -36,8 +40,11 @@ TEMPERATURE = convert_value(os.getenv('TEMPERATURE'))
 TOP_P = convert_value(os.getenv('TOP_P'))
 TOP_K = convert_value(os.getenv('TOP_K'))
 MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
-CLF_MODEL = convert_value(os.getenv('CLF_MODEL'))
-CLF_VECTORIZE = convert_value(os.getenv('CLF_VECTORIZE'))
+DOMAIN_CLF_MODEL = convert_value(os.getenv('DOMAIN_CLF_MODEL'))
+DOMAIN_CLF_VECTORIZER = convert_value(os.getenv('DOMAIN_CLF_VECTORIZER'))
+PROMPT_INJECTION_CLF_MODEL = convert_value(os.getenv('PROMPT_INJECTION_CLF_MODEL'))
+PROMPT_INJECTION_CLF_VECTORIZER = convert_value(os.getenv('PROMPT_INJECTION_CLF_VECTORIZER'))
+LANG_DETECTOR = convert_value(os.getenv('LANG_DETECTOR'))
 VECTOR_STORE_QUERY_MODE = convert_value(os.getenv('VECTOR_STORE_QUERY_MODE'))
 SIMILARITY_TOP_K = convert_value(os.getenv('SIMILARITY_TOP_K'))
 ALPHA = convert_value(os.getenv('ALPHA'))
@@ -55,11 +62,22 @@ class Service:
         genai.configure(
             api_key=GEMINI_API_KEY
         )
-        self._clf_model = joblib.load(
-            filename=CLF_MODEL
+        self._domain_clf_model = joblib.load(
+            filename=DOMAIN_CLF_MODEL
         )
-        self._clf_vectorizer = joblib.load(
-            filename=CLF_VECTORIZE
+        self._domain_clf_vectorizer = joblib.load(
+            filename=DOMAIN_CLF_VECTORIZER
+        )
+        self._prompt_injection_clf_model = joblib.load(
+            filename=PROMPT_INJECTION_CLF_MODEL
+        )
+        self._prompt_injection_clf_vectorizer = joblib.load(
+            filename=PROMPT_INJECTION_CLF_VECTORIZER
+        )
+        self._lang_detector = pipeline(
+            'text-classification', 
+            model=LANG_DETECTOR, 
+            device='cuda' if torch.cuda.is_available() else 'cpu'
         )
         self._generation_config = {
             "temperature": TEMPERATURE,

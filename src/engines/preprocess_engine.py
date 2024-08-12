@@ -6,11 +6,13 @@ import re
 from underthesea import word_tokenize
 
 from src.prompt.preprocessing_prompt import (PROMPT_INJECTION_PATTERNS,
+                                             POTENTIAL_PROMPT_INJECTION_PATTERNS,
+                                             TERMS_DICT,
                                              CORRECT_VI_PROMPT,
                                              TRANSLATE_EN_PROMPT,
                                              TRANSLATE_VI_EN_PROMPT)
 from src.models.preprocess import ProcessedData
-
+from src.utils.utility import clean_text
 
 class PreprocessQuestion:
     """
@@ -87,7 +89,7 @@ class PreprocessQuestion:
         Returns:
             str: The detected language code.
         """
-        lang = "vi"  # or "en" or "vi_en" "no_tonemark_vi" "no_tonemark_vi_en"
+        lang = self.lang_detect_model(text)[0]['label'] 
         return lang
 
     def is_prompt_injection(self, text):
@@ -104,6 +106,11 @@ class PreprocessQuestion:
         for pattern in PROMPT_INJECTION_PATTERNS:
             if re.search(pattern, text, re.IGNORECASE):
                 return True
+        
+        for pattern in POTENTIAL_PROMPT_INJECTION_PATTERNS:
+            if re.search(pattern, text, re.IGNORECASE):
+                if self.prompt_injection_clf_model.predict(self.prompt_injection_clf_vectorizer.transform([text]))[0]:
+                    return True
         return False
 
     def correct_vietnamese_text(self, text):
@@ -169,6 +176,9 @@ class PreprocessQuestion:
         language = True
         prompt_injection = False
         outdomain = False
+        
+        text_input = clean_text(text_input)
+
         if text_input:
             lang = self.lang_detect(text_input)
             if lang in {"vi", "no_tonemark_vi"}:
