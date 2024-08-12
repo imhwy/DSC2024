@@ -106,8 +106,11 @@ class WeaviateDB:
 
     def configure_documents(
         self,
-        file_name: str = None,
-        documents: List[Document] = List[None]
+        url: Optional[str] = None,
+        documents: List[Document] = None,
+        file_type: Optional[str] = None,
+        file_name: Optional[str] = None,
+        public_id: Optional[str] = None
     ) -> List[Document]:
         """
         Updates the metadata of a list of Document objects with a specified file name.
@@ -124,16 +127,45 @@ class WeaviateDB:
         Returns:
             List[Document]: The list of Document objects with updated metadata.
         """
-        for document in documents:
-            if not document.metadata.get("file_name"):
-                document.metadata = {
-                    "file_name": file_name
-                }
-                document.excluded_embed_metadata_keys = [
-                    "file_name"
+        for idx, doc in enumerate(documents):
+            if 'file_path' not in doc.metadata:
+                doc.metadata.update({
+                    'public_id': public_id,
+                    'link': url,
+                    'file_type': file_type
+                })
+                doc.excluded_embed_metadata_keys = [
+                    'file_name',
+                    'public_id',
+                    'file_type',
+                    'link'
                 ]
-                document.excluded_llm_metadata_keys = [
-                    "file_name"
+                doc.excluded_llm_metadata_keys = [
+                    'file_name',
+                    'public_id',
+                    'file_type',
+                    'link'
+                ]
+            if 'public_id' not in doc.metadata:
+                doc.metadata.update({
+                    'public_id': public_id,
+                    'file_name': file_name,
+                    'file_type': file_type,
+                    'page': idx + 1
+                })
+                doc.excluded_embed_metadata_keys = [
+                    'file_name',
+                    'public_id',
+                    'page'
+                    'file_type',
+                    'file_path'
+                ]
+                doc.excluded_llm_metadata_keys = [
+                    'file_name',
+                    'public_id',
+                    'page',
+                    'file_type',
+                    'file_path'
                 ]
         return documents
 
@@ -230,6 +262,9 @@ class WeaviateDB:
 
     def add_knowledge(
         self,
+        url: str = None,
+        file_type: str = None,
+        public_id: str = None,
         file_name: str = None,
         documents: List[Document] = List[None]
     ) -> None:
@@ -245,7 +280,9 @@ class WeaviateDB:
             None
         """
         if documents:
-            processed_documents = self.document_configuration(
+            processed_documents = self.configure_documents(
+                url=url,
+                file_type=file_type,
                 file_name=file_name,
                 documents=documents
             )
