@@ -3,7 +3,9 @@ This module provides services for handling LLM and embedding models using OpenAI
 """
 
 import os
+import joblib
 from dotenv import load_dotenv
+import google.generativeai as genai
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.core import Settings
@@ -18,6 +20,9 @@ from src.repositories.file_repository import FileRepository
 from src.data_loader.general_loader import GeneralLoader
 from src.services.file_management import FileManagement
 from src.repositories.suggestion_repository import SuggestionRepository
+from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
+
+from src.engines.preprocess_engine import PreprocessQuestion
 
 load_dotenv()
 
@@ -25,6 +30,17 @@ OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
 OPENAI_MODEL = convert_value(os.getenv('OPENAI_MODEL'))
 OPENAI_EMBED_MODEL = convert_value(os.getenv('OPENAI_EMBED_MODEL'))
 TEMPERATURE_MODEL = convert_value(os.getenv('TEMPERATURE_MODEL'))
+GEMINI_API_KEY = convert_value(os.getenv('GEMINI_API_KEY'))
+GEMINI_LLM_MODEL = convert_value(os.getenv('GEMINI_LLM_MODEL'))
+TEMPERATURE = convert_value(os.getenv('TEMPERATURE'))
+TOP_P = convert_value(os.getenv('TOP_P'))
+TOP_K = convert_value(os.getenv('TOP_K'))
+MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
+CLF_MODEL = convert_value(os.getenv('CLF_MODEL'))
+CLF_VECTORIZE = convert_value(os.getenv('CLF_VECTORIZE'))
+VECTOR_STORE_QUERY_MODE = convert_value(os.getenv('VECTOR_STORE_QUERY_MODE'))
+SIMILARITY_TOP_K = convert_value(os.getenv('SIMILARITY_TOP_K'))
+ALPHA = convert_value(os.getenv('ALPHA'))
 
 
 class Service:
@@ -32,37 +48,65 @@ class Service:
     A service class that sets up and manages LLM and embedding models using OpenAI
     """
 
-    def __init__(
-        self,
-        openai_api_key: str = OPENAI_API_KEY,
-        openai_api_model: str = OPENAI_MODEL,
-        openai_api_embed_model: str = OPENAI_EMBED_MODEL,
-        temperature_model: str = TEMPERATURE_MODEL
-    ):
+    def __init__(self):
         """
         Initializes the Service class with LLM and embedding models.
         """
+        genai.configure(
+            api_key=GEMINI_API_KEY
+        )
+        self._clf_model = joblib.load(
+            filename=CLF_MODEL
+        )
+        self._clf_vectorizer = joblib.load(
+            filename=CLF_VECTORIZE
+        )
+        self._generation_config = {
+            "temperature": TEMPERATURE,
+            "top_p": TOP_P,
+            "top_k": TOP_K,
+            "max_output_tokens": MAX_OUTPUT_TOKENS,
+        }
         self._llm = OpenAI(
-            api_key=openai_api_key,
-            model=openai_api_model,
-            temperature=temperature_model
+            api_key=OPENAI_API_KEY,
+            model=OPENAI_MODEL,
+            temperature=TEMPERATURE_MODEL
         )
         self._embed_model = OpenAIEmbedding(
-            api_key=openai_api_key,
-            model=openai_api_embed_model
+            api_key=OPENAI_API_KEY,
+            model=OPENAI_EMBED_MODEL
         )
-        Settings.llm = self._llm
+        self._gemini = genai.GenerativeModel(
+            model_name=GEMINI_LLM_MODEL,
+            generation_config=self._generation_config,
+            safety_settings=SAFETY_SETTINGS
+        )
+        Settings.llms = self._llm
         Settings.embed_model = self._embed_model
         self._vector_database = WeaviateDB()
+        self._hybrid_retriever = self._vector_database.index.as_retriever(
+            vector_store_query_mode=VECTOR_STORE_QUERY_MODE,
+            similarity_top_k=SIMILARITY_TOP_K,
+            alpha=ALPHA
+        )
         self._retriever = HybridRetriever(
-            index=self._vector_database.index
+            index=self._vector_database.index,
+            retriever=self._hybrid_retriever,
         )
         self._chat_engine = ChatEngine(
             language_model=self._llm
         )
+        self._preprocess_engine = PreprocessQuestion(
+            gemini=self._gemini,
+            domain_clf_model=self._clf_model,
+            domain_clf_vectorizer=self._clf_vectorizer,
+            lang_detect_model=None,
+            lang_detect_vectorizer=None
+        )
         self._retrieve_chat_engine = RetrieveChat(
             retriever=self._retriever,
-            chat=self._chat_engine
+            chat=self._chat_engine,
+            preprocess=self._preprocess_engine
         )
         self._chat_repository = ChatRepository()
         self._file_repository = FileRepository()
@@ -174,3 +218,10 @@ class Service:
         Provides access to the SuggestionRepository instance.
         """
         return self._suggestion_repository
+
+    @property
+    def get_preprocess_engine(self) -> PreprocessQuestion:
+        """
+        Provides access to the PreprocessQuestion instance.
+        """
+        return self._preprocess_engine

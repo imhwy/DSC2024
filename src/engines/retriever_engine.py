@@ -15,9 +15,6 @@ from src.utils.utility import convert_value
 
 load_dotenv()
 
-VECTOR_STORE_QUERY_MODE = convert_value(os.getenv('VECTOR_STORE_QUERY_MODE'))
-SIMILARITY_TOP_K = convert_value(os.getenv('SIMILARITY_TOP_K'))
-ALPHA = convert_value(os.getenv('ALPHA'))
 MAX_TOKENS = convert_value(os.getenv('MAX_TOKENS'))
 
 
@@ -29,72 +26,40 @@ class HybridRetriever:
 
     def __init__(
         self,
-        query_mode: str = VECTOR_STORE_QUERY_MODE,
-        top_k: int = SIMILARITY_TOP_K,
-        alpha: float = ALPHA,
-        index: VectorStoreIndex = None
+        index: VectorStoreIndex = None,
+        retriever: BaseRetriever = None
     ):
         """
         Initializes the HybridRetriever with the given configuration parameters.
         """
-        self._query_mode = query_mode
-        self._top_k = top_k
-        self._alpha = alpha
         self._index = index
         self._encoding = tiktoken.get_encoding("cl100k_base")
-
-    async def get_retriever(self) -> BaseRetriever:
-        """
-        Constructs a BaseRetriever object from the stored vector index.
-
-        Returns:
-            BaseRetriever: A retriever object configured with the
-            current query mode, top-k, and alpha values.
-
-        Raises:
-            ValueError: If the index attribute is None, indicating no index has been set.
-        """
-        if self._index is None:
-            raise ValueError(
-                "Index must be initialized before creating a retriever."
-            )
-
-        retriever = self._index.as_retriever(
-            vector_store_query_mode=self._query_mode,
-            similarity_top_k=self._top_k,
-            alpha=self._alpha
-        )
-        return retriever
+        self._retriever = retriever
 
     async def combine_retrieved_nodes(
         self,
         retrieved_nodes: List[TextNode],
         max_tokens: int = MAX_TOKENS
-    ) -> List[str]:
+    ) -> str:
         """
-        Combines multiple retrieved TextNode objects into a list of strings.
-
+        Combines multiple retrieved TextNode objects into a single string.
         Args:
             retrieved_nodes (List[TextNode]): The list of TextNode objects to be combined.
-            max_tokens (int, optional): The maximum number of tokens to
-            include in each combined string. Defaults to MAX_TOKENS.
-
+            max_tokens (int, optional): The maximum number of tokens.
         Returns:
-            List[str]: The list of combined strings.
+            str: The combined string of text nodes up to the token limit.
         """
-        combined_strings = []
-        current_tokens = []
-        current_string = ""
+        combined_strings = ""
+        current_tokens = 0
         for retrieved_node in retrieved_nodes:
-            tokens = self._encoding.encode(retrieved_node.text)
-            if len(current_tokens) + len(tokens) > max_tokens:
-                combined_strings.append(current_string.strip())
-                current_tokens = []
-                current_string = ""
-            current_tokens.extend(tokens)
-            current_string += retrieved_node.text + " "
-        if current_string:
-            combined_strings.append(current_string.strip())
+            text = retrieved_node.text
+            metadata = str(retrieved_node.id_)
+            sub_combine = text + "\nmetadata:\n" + "id: " + metadata
+            tokens = len(self._encoding.encode(sub_combine))
+            if tokens + current_tokens > max_tokens:
+                break
+            combined_strings = combined_strings + "\n" + "=" * 20 + "\n" + sub_combine
+            current_tokens += tokens
         return combined_strings
 
     async def retrieve_nodes(
@@ -102,17 +67,17 @@ class HybridRetriever:
         query: str
     ) -> List[TextNode]:
         """
-        Retrieves nodes from the vector store based on the given query.
+        Retrieves nodes based on a given query.
 
         Args:
-            query (str): The query to be used for retrieving nodes.
+            query (str): The search query to retrieve TextNode objects.
 
         Returns:
-            List[TextNode]: A list of TextNode objects retrieved from the vector store.
+            Tuple[str, List[TextNode]]: A tuple containing the combined text
+                                         and the list of original TextNode objects.
         """
-        retriever = await self.get_retriever()
-        retrieved_nodes = await retriever.aretrieve(query)
+        retrieved_nodes = await self._retriever.aretrieve(query)
         combined_retrieved_nodes = await self.combine_retrieved_nodes(
             retrieved_nodes=retrieved_nodes,
         )
-        return combined_retrieved_nodes
+        return combined_retrieved_nodes, retrieved_nodes

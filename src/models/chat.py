@@ -6,6 +6,21 @@ from typing import List
 from pydantic import BaseModel
 
 
+class Chat(BaseModel):
+    """
+    Represents a chat response model.
+
+    Attributes:
+        response (str): The text response generated for the chat.
+        is_outdomain (bool): Indicates if the response is outside the expected domain.
+        retrieved_nodes (List[str]): A list of node identifiers 
+                                     that were retrieved to generate the response.
+    """
+    response: str
+    is_outdomain: bool
+    retrieved_nodes: List[str]
+
+
 class ChatDomain(BaseModel):
     """
     A Pydantic model representing a chat domain entry.

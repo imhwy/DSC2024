@@ -10,7 +10,6 @@ from src.api.routers import chat_router
 from src.api.routers import file_router
 from src.api.routers import suggestion_router
 
-
 app = FastAPI()
 
 # app.include_router(root_router)

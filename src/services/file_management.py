@@ -46,7 +46,7 @@ class FileManagement:
             documents = self._general_loader.load_data(sources=[file_path])
             try:
                 self._vector_database.add_knowledge(
-                    public_id=data.public_id,
+                    file_name=data.file_name,
                     documents=documents,
                 )
                 self._file_repository.add_file(

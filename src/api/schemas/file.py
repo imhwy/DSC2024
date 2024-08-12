@@ -29,6 +29,7 @@ class FileUploadResponse(BaseModel):
     """
     message: str
 
+
 class File(BaseModel):
     """
     A Pydantic model representing a file with key attributes.
@@ -45,6 +46,7 @@ class File(BaseModel):
     file_type: str
     file_path: str
     time: str
+
 
 class AllFiles(BaseModel):
     """

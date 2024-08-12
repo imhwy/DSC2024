@@ -7,6 +7,10 @@ from typing import Optional
 from datetime import datetime
 import uuid
 import time
+import re
+
+from src.prompt.postprocessing_prompt import (SOURCE,
+                                              POST_PROCESS)
 
 
 def convert_value(value):
@@ -79,3 +83,47 @@ def get_last_part_of_url(url: str) -> str:
         str: The last part of the URL path.
     """
     return url.rstrip('/').split('/')[-1]
+
+
+def format_document(
+    result,
+    title,
+    session,
+    page,
+    data_type,
+    link
+):
+    """
+    Formats the document with the given information.
+
+    Args:
+        result (str): The result of the document.
+        title (str): The title of the document.
+        session_name (str): The name of the session.
+        page_number (str): The page number of the document.
+        data_type (str): The type of the data.
+        link (str): The link to the document.
+
+    Returns:
+        str: The formatted document.
+    """
+    title_section = f"**Nguồn tài liệu:** {title}" if title else ""
+    session_section = f"**Chương:** {session}" if session else ""
+    page_section = f"**Trang:** {page}" if page else ""
+    data_type_section = f"**Dạng dữ liệu:** {data_type}" if data_type else ""
+    link_section = f"**Đường dẫn:** {link}" if link else ""
+
+    source = SOURCE.format(
+        title_text=title_section,
+        session_text=session_section,
+        page_text=page_section,
+        data_type_text=data_type_section,
+        link_text=link_section
+    )
+    cleaned_source = re.sub(r'\n+', '\n', source.strip())
+    cleaned_document = POST_PROCESS.format(
+        result=result,
+        source=cleaned_source
+    )
+
+    return cleaned_document

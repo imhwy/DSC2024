@@ -56,7 +56,7 @@ async def get_all_files_upload(
     response_model=File
 )
 async def get_file_upload(
-    file_name: str,
+    public_id: str,
     service: Service = Depends(get_service)
 ) -> File:
     """
@@ -73,7 +73,9 @@ async def get_file_upload(
         File: The details of the requested file if found.
     """
     try:
-        file_record = service.file_repository.get_specific_file(file_name)
+        file_record = service.file_repository.get_specific_file(
+            public_id=public_id
+        )
         if not file_record:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
