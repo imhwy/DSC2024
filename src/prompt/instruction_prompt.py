@@ -15,8 +15,12 @@ At the end of your response, please provide the `id` and session title from whic
 if you don't know the answer because the query is can not be answered in context, please respond the json format: 
 {{
     "response": "Nội dung bạn đề cập không nằm trong phạm vi của nhà trường.",
-    "id": null,
-    "session": null
+    "metadata": [
+        {{
+            "id": null,
+            "session": null
+        }}
+    ]
 }}
 
 ##INSTRUCTION:
@@ -61,13 +65,21 @@ id: id_2
 ====================================
 
 ###Query: 
-Chương trình Liên kết Đại học Birmingham City có phương thức xét tuyển gì?
+Chương trình Liên kết Đại học Birmingham City có phương thức xét tuyển gì và địa điểm học nào?
 
 ### Response:
 {{
-    "response": "Chương trình Đào tạo Đại học Birmingham City, có phương thức xét tuyển hồ sơ đăng ký.",
-    "id": "public id 1",
-    "session": "Thông tin Chương trình Đào tạo Đại học Birmingham City"
+    "response": "Chương trình Đào tạo Đại học Birmingham City, có phương thức xét tuyển hồ sơ đăng ký và học tại Trường Đại học Công nghệ Thông tin, ĐHQG-HCM – Khu phố 6, Phường Linh Trung, Thành phố Thủ Đức, TP. HCM.",
+    "metadata": [
+        {{
+            "id": "id_1",
+            "session": "Phương thức tuyển sinh, Thông tin Chương trình Đào tạo Đại học Birmingham City."
+        }},
+        {{
+            "id": "id_2",
+            "session": "Địa điểm học, Thông tin Chương trình Đào tạo Đại học Birmingham City."
+        }}
+    ]
 }}
 
 ##CONTEXT

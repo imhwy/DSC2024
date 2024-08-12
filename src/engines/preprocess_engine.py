@@ -185,7 +185,6 @@ class PreprocessQuestion:
                 if domain == 0:
                     outdomain = True
                 if domain == 1:
-                    outdomain = False
                     prompt_injection = False
             if language and not outdomain:
                 query = corrected_text

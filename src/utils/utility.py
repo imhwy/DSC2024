@@ -3,7 +3,7 @@ this module provides utility functions
 """
 
 import json
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 import uuid
 import time
@@ -86,44 +86,41 @@ def get_last_part_of_url(url: str) -> str:
 
 
 def format_document(
-    result,
-    title,
-    session,
-    page,
-    data_type,
-    link
-):
+    result: str,
+    titles: List[str],
+    sessions: List[str],
+    pages: List[str],
+    data_types: List[str],
+    links: List[str]
+) -> str:
     """
-    Formats the document with the given information.
+    Format the document based on the provided metadata.
 
     Args:
-        result (str): The result of the document.
-        title (str): The title of the document.
-        session_name (str): The name of the session.
-        page_number (str): The page number of the document.
-        data_type (str): The type of the data.
-        link (str): The link to the document.
+        result (str): The API response.
+        titles (List[str]): The list of titles.
+        sessions (List[str]): The list of sessions.
+        pages (List[str]): The list of pages.
+        data_types (List[str]): The list of data types.
+        links (List[str]): The list of links.
 
     Returns:
         str: The formatted document.
     """
-    title_section = f"**Nguồn tài liệu:** {title}" if title else ""
-    session_section = f"**Chương:** {session}" if session else ""
-    page_section = f"**Trang:** {page}" if page else ""
-    data_type_section = f"**Dạng dữ liệu:** {data_type}" if data_type else ""
-    link_section = f"**Đường dẫn:** {link}" if link else ""
+    sources = ""
+    for index, _ in enumerate(sessions):
+        sources += "\n" + SOURCE.format(
+            idx=index + 1,
+            title_text=f"**Tên tài liệu:** {titles[index]}" if titles[index] else "",
+            session_text=f"**Chương:** {sessions[index]}" if sessions[index] else "",
+            page_text=f"**Trang:** {pages[index]}" if pages[index] else "",
+            data_type_text=f"**Dạng dữ liệu:** {data_types[index]}" if data_types[index] else "",
+            link_text=f"**Đường dẫn:** {links[index]}" if links[index] else ""
+        )
 
-    source = SOURCE.format(
-        title_text=title_section,
-        session_text=session_section,
-        page_text=page_section,
-        data_type_text=data_type_section,
-        link_text=link_section
-    )
-    cleaned_source = re.sub(r'\n+', '\n', source.strip())
+    cleaned_source = re.sub(r'\n+', '\n', sources.strip())
     cleaned_document = POST_PROCESS.format(
         result=result,
         source=cleaned_source
     )
-
     return cleaned_document

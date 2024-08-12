@@ -54,7 +54,7 @@ class HybridRetriever:
         for retrieved_node in retrieved_nodes:
             text = retrieved_node.text
             metadata = str(retrieved_node.id_)
-            sub_combine = text + "\nmetadata:\n" + "id: " + metadata
+            sub_combine = text + "\nmetadata:\n" + "id: " + '"' + metadata + '"'
             tokens = len(self._encoding.encode(sub_combine))
             if tokens + current_tokens > max_tokens:
                 break
