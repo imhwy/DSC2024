@@ -11,7 +11,8 @@ from src.engines.retriever_engine import HybridRetriever
 from src.engines.preprocess_engine import PreprocessQuestion
 from src.models.chat import Chat
 from src.prompt.preprocessing_prompt import PROMPT_INJECTION_ANNOUCEMENT
-from src.prompt.postprocessing_prompt import FAIL_CASE
+from src.prompt.postprocessing_prompt import (FAIL_CASE,
+                                              RESPONSE_FAIL_CASE)
 from src.utils.utility import format_document
 
 
@@ -33,47 +34,52 @@ class RetrieveChat:
     async def post_processing(
         self,
         result: str,
-        retrieved_nodes: List[TextNode]
+        retrieved_nodes: List["TextNode"]
     ) -> str:
         """
         Processes the result by extracting metadata and formatting it.
         """
         cleaned_json = result.strip("```json\n").strip()
+
         try:
             data = json.loads(cleaned_json)
-            if data.get('response') in FAIL_CASE:
-                return data.get('response')
-            title, session, page, data_type, link = "", "", "", "", ""
+            if data.get("response") in FAIL_CASE:
+                return RESPONSE_FAIL_CASE
+            metadata_dict = {
+                meta["id"]: meta for meta in data.get("metadata", [])
+            }
+            titles, sessions, pages, data_types, links = [], [], [], [], []
             for node in retrieved_nodes:
-                if node.id_ == data.get('id'):
-                    title = node.metadata.get('file_name', "")
-                    session = data.get('session', "")
-                    page = node.metadata.get('page', "")
-                    data_type = node.metadata.get('file_type', "")
-                    link = node.metadata.get('link', "")
-                    break
+                if node.id_ in metadata_dict:
+                    meta = metadata_dict[node.id_]
+                    titles.append(node.metadata.get("file_name", ""))
+                    sessions.append(meta.get("session", ""))
+                    pages.append(node.metadata.get("page", ""))
+                    data_types.append(node.metadata.get("file_type", ""))
+                    links.append(node.metadata.get("link", ""))
             processed_result = format_document(
-                result=data.get('response'),
-                title=title,
-                session=session,
-                page=page,
-                data_type=data_type,
-                link=link
+                result=data.get("response"),
+                titles=titles,
+                sessions=sessions,
+                pages=pages,
+                data_types=data_types,
+                links=links
             )
             return processed_result
+
         except json.JSONDecodeError as e:
             print("Invalid JSON:", e)
-            return data.get('response')
+            return RESPONSE_FAIL_CASE
 
     async def retrieve_chat(
         self,
         query: str
     ) -> Chat:
         """
-        Processes a user's query by retrieving relevant information and generating a chat response.
+        Processes a user"s query by retrieving relevant information and generating a chat response.
 
         Parameters:
-            query(str): The user's input query.
+            query(str): The user"s input query.
 
         Returns:
             response (str): The chat response generated for the query.
@@ -89,8 +95,9 @@ class RetrieveChat:
             result=response,
             retrieved_nodes=retrieved_nodes
         )
-        if response in "Nội dung bạn đề cập không nằm trong phạm vi của nhà trường.":
+        if processed_response in FAIL_CASE:
             is_outdomain = True
+            
         list_nodes = []
         for retrieved_node in retrieved_nodes:
             list_nodes.append(retrieved_node.text)
