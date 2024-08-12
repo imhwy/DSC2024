@@ -95,7 +95,7 @@ class RetrieveChat:
             result=response,
             retrieved_nodes=retrieved_nodes
         )
-        if processed_response == RESPONSE_FAIL_CASE:
+        if processed_response in FAIL_CASE:
             is_outdomain = True
             
         list_nodes = []
