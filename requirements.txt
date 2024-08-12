@@ -30,3 +30,5 @@ llama-index-vector-stores-weaviate==1.0.2
 llama-index-readers-web==0.1.23
 underthesea
 llama-index-storage-docstore-mongodb
+pymongo 
+motor
