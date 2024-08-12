@@ -106,7 +106,8 @@ class WeaviateDB:
 
     def configure_documents(
         self,
-        documents: List[Document],
+        url: Optional[str] = None,
+        documents: List[Document] = None,
         file_type: Optional[str] = None,
         file_name: Optional[str] = None,
         public_id: Optional[str] = None
@@ -130,22 +131,20 @@ class WeaviateDB:
             if 'file_path' not in doc.metadata:
                 doc.metadata.update({
                     'public_id': public_id,
-                    'link': file_name,
-                    'file_type': file_type,
+                    'link': url,
+                    'file_type': file_type
                 })
                 doc.excluded_embed_metadata_keys = [
-                    'file_path',
                     'file_name',
                     'public_id',
-                    'page',
-                    'file_type'
+                    'file_type',
+                    'link'
                 ]
                 doc.excluded_llm_metadata_keys = [
-                    'file_path'
                     'file_name',
                     'public_id',
-                    'page',
-                    'file_type'
+                    'file_type',
+                    'link'
                 ]
             if 'public_id' not in doc.metadata:
                 doc.metadata.update({
@@ -263,6 +262,7 @@ class WeaviateDB:
 
     def add_knowledge(
         self,
+        url: str = None,
         file_type: str = None,
         public_id: str = None,
         file_name: str = None,
@@ -281,6 +281,7 @@ class WeaviateDB:
         """
         if documents:
             processed_documents = self.configure_documents(
+                url=url,
                 file_type=file_type,
                 file_name=file_name,
                 public_id=public_id,
