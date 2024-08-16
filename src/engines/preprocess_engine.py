@@ -74,6 +74,22 @@ class PreprocessQuestion:
         prediction = self.domain_clf_model.predict(text_tfidf)
         return prediction[0]
 
+    # def lang_detect(
+    #     self,
+    #     text: str = None
+    # ):
+    #     """
+    #     Detects the language of the input text.
+
+    #     Args:
+    #         text (str): The text to analyze.
+
+    #     Returns:
+    #         str: The detected language code.
+    #     """
+    #     lang = "vi"  # or "en" or "vi_en" "no_tonemark_vi" "no_tonemark_vi_en"
+    #     return lang
+
     def lang_detect(
         self,
         text: str = None
