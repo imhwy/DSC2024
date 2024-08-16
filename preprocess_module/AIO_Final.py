@@ -67,18 +67,26 @@ def classify_domain(text):
     prediction = svm_model.predict(text_tfidf)
     return prediction[0]
 
+# def lang_detect(text):
+#     """
+#     Detects the language of the input text.
+
+#     Args:
+#         text (str): The text to analyze.
+
+#     Returns:
+#         str: The detected language code.
+#     """
+#     lang = "vi" # or "en" or "vi_en" "no_tonemark_vi" "no_tonemark_vi_en"
+#     return lang
+
 def lang_detect(text):
-    """
-    Detects the language of the input text.
+    try:
+        lang = langdetect.detect(text)
+        return lang == 'vi'
+    except langdetect.lang_detect_exception.LangDetectException:
+        return False
 
-    Args:
-        text (str): The text to analyze.
-
-    Returns:
-        str: The detected language code.
-    """
-    lang = "vi" # or "en" or "vi_en" "no_tonemark_vi" "no_tonemark_vi_en"
-    return lang
 
 def is_prompt_injection(text):
     """
