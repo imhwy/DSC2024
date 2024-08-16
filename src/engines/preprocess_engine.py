@@ -74,22 +74,6 @@ class PreprocessQuestion:
         prediction = self.domain_clf_model.predict(text_tfidf)
         return prediction[0]
 
-    # def lang_detect(
-    #     self,
-    #     text: str = None
-    # ):
-    #     """
-    #     Detects the language of the input text.
-
-    #     Args:
-    #         text (str): The text to analyze.
-
-    #     Returns:
-    #         str: The detected language code.
-    #     """
-    #     lang = "vi"  # or "en" or "vi_en" "no_tonemark_vi" "no_tonemark_vi_en"
-    #     return lang
-
     def lang_detect(
         self,
         text: str = None
@@ -196,9 +180,13 @@ class PreprocessQuestion:
             if self.is_prompt_injection(corrected_text):
                 prompt_injection = True
                 outdomain = True
-            domain = self.classify_domain(corrected_text)
-            if domain == 0:
-                outdomain = True
+            if outdomain == False:
+                domain = self.classify_domain(corrected_text)
+                if domain == 0:
+                    outdomain = True
+                if domain == 1:
+                    outdomain = False
+                    prompt_injection = False
             if language and not outdomain:
                 query = corrected_text
             else:
