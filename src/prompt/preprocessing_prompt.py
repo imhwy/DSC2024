@@ -59,7 +59,8 @@ SAFETY_SETTINGS = [
 ]
 
 PROMPT_INJECTION_ANNOUCEMENT = """
-Xin chào! Chúng tôi nhận thấy rằng nội dung bạn đã nhập có thể chứa thông tin đe dọa bảo mật hoặc không phù hợp với quy tắc sử dụng của chúng tôi. 
+Xin chào! Chúng tôi nhận thấy rằng nội dung bạn đã nhập có thể chứa thông tin đe dọa bảo mật hoặc không phù hợp với quy tắc sử dụng của chúng tôi.
+
 Để bảo đảm an toàn và trải nghiệm tốt nhất cho tất cả người dùng, xin vui lòng tuân thủ các hướng dẫn và quy định của nền tảng.
 
 Nếu bạn có bất kỳ thắc mắc nào hoặc cần hỗ trợ, vui lòng liên hệ với đội ngũ hỗ trợ chatbot. Cảm ơn bạn đã hợp tác!

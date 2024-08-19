@@ -20,6 +20,7 @@ load_dotenv()
 WEAVIATE_HOST = convert_value(os.getenv("WEAVIATE_HOST"))
 WEAVIATE_PORT = convert_value(os.getenv("WEAVIATE_PORT"))
 WEAVIATE_NAME = convert_value(os.getenv("WEAVIATE_NAME"))
+SUGGESTION_NAME = convert_value(os.getenv("SUGGESTION_NAME"))
 MONGODB_URL = convert_value(os.getenv("MONGODB_URL"))
 MONGODB_NAME = convert_value(os.getenv("MONGODB_NAME"))
 
@@ -27,14 +28,6 @@ MONGODB_NAME = convert_value(os.getenv("MONGODB_NAME"))
 class WeaviateDB:
     """
     WeaviateDB is a wrapper class for managing a Weaviate-based vector store.
-
-    Attributes:
-        embed_model (GeminiEmbedding): The embedding model used for document embedding.
-        documents (List[Document]): A list of documents to be added to the vector store.
-        client (weaviate.Client): The client instance to interact with the Weaviate server.
-        vector_store (WeaviateVectorStore): The vector store for managing document vectors.
-        storage_context (StorageContext): The context for storing and retrieving vector data.
-        index (VectorStoreIndex): The index of documents in the vector store.
     """
 
     def __init__(
@@ -42,6 +35,7 @@ class WeaviateDB:
         host: str = WEAVIATE_HOST,
         port: str = WEAVIATE_PORT,
         index_name: str = WEAVIATE_NAME,
+        suggestion_name: str = SUGGESTION_NAME,
         mongodb_url: str = MONGODB_URL,
         mongodb_name: str = MONGODB_NAME,
         documents: List[Document] = None
@@ -54,6 +48,7 @@ class WeaviateDB:
         self._host = host
         self._port = port
         self._index_name = index_name
+        self._suggestion_name = suggestion_name
         self._documents = documents
         self._mongodb_url = mongodb_url
         self._mongodb_name = mongodb_name
@@ -65,12 +60,19 @@ class WeaviateDB:
             weaviate_client=self._client,
             index_name=self._index_name
         )
+        self._suggestion_vector_store = WeaviateVectorStore(
+            weaviate_client=self._client,
+            index_name=self._suggestion_name
+        )
         self._storage_context = StorageContext.from_defaults(
             docstore=MongoDocumentStore.from_uri(
                 uri=self._mongodb_url,
                 db_name=self._mongodb_name
             ),
             vector_store=self._vector_store
+        )
+        self._suggestion_storage_context = StorageContext.from_defaults(
+            vector_store=self._suggestion_vector_store
         )
         self.parser = SentenceSplitter()
         if self._documents:
@@ -82,6 +84,9 @@ class WeaviateDB:
             self._index = VectorStoreIndex.from_vector_store(
                 vector_store=self._vector_store
             )
+        self._suggestion_index = VectorStoreIndex.from_vector_store(
+            vector_store=self._suggestion_vector_store
+        )
 
     @property
     def index(self) -> VectorStoreIndex:
@@ -134,6 +139,55 @@ class WeaviateDB:
                     "file_name"
                 ]
         return documents
+
+    async def suggestion_config(
+        self,
+        question: str = None,
+        answer: str = None
+    ) -> List[Document]:
+        """
+        Creates a list of Document objects based on the provided question and answer.
+
+        Args:
+            question (str): The question text.
+            answer (str): The corresponding answer text.
+
+        Returns:
+            List[Document]: A list of Document objects with metadata, or None if inputs are missing.
+        """
+        if question and answer:
+            document = [
+                Document(
+                    text=question,
+                    metadata={
+                        "question": question,
+                        "answer": answer
+                    },
+                    excluded_embed_metadata_keys=[
+                        "question",
+                        "answer"
+                    ],
+                    excluded_llm_metadata_keys=[
+                        "question",
+                        "answer"
+                    ]
+                )
+            ]
+            return self.documents_to_nodes(documents=document)
+        return None
+
+    async def insert_suggestion_nodes(
+        self,
+        nodes: List[TextNode]
+    ) -> None:
+        """
+        Inserts a list of TextNode objects into the suggestion index.
+
+        Args:
+            nodes (List[TextNode]): A list of nodes to be inserted.
+        """
+        if nodes:
+            self._suggestion_index.insert_nodes(nodes=nodes)
 
     def documents_to_nodes(
         self,

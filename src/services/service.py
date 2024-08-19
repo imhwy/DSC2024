@@ -21,9 +21,8 @@ from src.data_loader.general_loader import GeneralLoader
 from src.services.file_management import FileManagement
 from src.repositories.suggestion_repository import SuggestionRepository
 from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
-
 from src.engines.preprocess_engine import PreprocessQuestion
-
+from src.engines.semantic_engine import SemanticSearch
 load_dotenv()
 
 OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
@@ -85,7 +84,8 @@ class Service:
             index=self._vector_database.index
         )
         self._chat_engine = ChatEngine(
-            language_model=self._llm
+            language_model=self._llm,
+            weaviate_db=self._vector_database
         )
         self._preprocess_engine = PreprocessQuestion(
             gemini=self._gemini,
@@ -108,6 +108,9 @@ class Service:
             vector_database=self._vector_database
         )
         self._suggestion_repository = SuggestionRepository()
+        self._semantic_engine = SemanticSearch(
+            index=self._vector_database._suggestion_index
+        )
 
     @property
     def vector_database(self) -> WeaviateDB:
@@ -216,3 +219,10 @@ class Service:
         Provides access to the PreprocessQuestion instance.
         """
         return self._preprocess_engine
+
+    @property
+    def semantic_engine(self) -> SemanticSearch:
+        """
+        Provides access to the SemanticEngine instance.
+        """
+        return self._semantic_engine
