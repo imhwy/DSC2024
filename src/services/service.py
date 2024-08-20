@@ -24,23 +24,24 @@ from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
 
 from src.engines.preprocess_engine import PreprocessQuestion
 
+
 load_dotenv()
 
-OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
-OPENAI_MODEL = convert_value(os.getenv('OPENAI_MODEL'))
-OPENAI_EMBED_MODEL = convert_value(os.getenv('OPENAI_EMBED_MODEL'))
-TEMPERATURE_MODEL = convert_value(os.getenv('TEMPERATURE_MODEL'))
-GEMINI_API_KEY = convert_value(os.getenv('GEMINI_API_KEY'))
-GEMINI_LLM_MODEL = convert_value(os.getenv('GEMINI_LLM_MODEL'))
-TEMPERATURE = convert_value(os.getenv('TEMPERATURE'))
-TOP_P = convert_value(os.getenv('TOP_P'))
-TOP_K = convert_value(os.getenv('TOP_K'))
-MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
-CLF_MODEL = convert_value(os.getenv('CLF_MODEL'))
-CLF_VECTORIZE = convert_value(os.getenv('CLF_VECTORIZE'))
-VECTOR_STORE_QUERY_MODE = convert_value(os.getenv('VECTOR_STORE_QUERY_MODE'))
-SIMILARITY_TOP_K = convert_value(os.getenv('SIMILARITY_TOP_K'))
-ALPHA = convert_value(os.getenv('ALPHA'))
+OPENAI_API_KEY = convert_value(os.getenv("OPENAI_API_KEY"))
+OPENAI_MODEL = convert_value(os.getenv("OPENAI_MODEL"))
+OPENAI_EMBED_MODEL = convert_value(os.getenv("OPENAI_EMBED_MODEL"))
+TEMPERATURE_MODEL = convert_value(os.getenv("TEMPERATURE_MODEL"))
+GEMINI_API_KEY = convert_value(os.getenv("GEMINI_API_KEY"))
+GEMINI_LLM_MODEL = convert_value(os.getenv("GEMINI_LLM_MODEL"))
+TEMPERATURE = convert_value(os.getenv("TEMPERATURE"))
+TOP_P = convert_value(os.getenv("TOP_P"))
+TOP_K = convert_value(os.getenv("TOP_K"))
+MAX_OUTPUT_TOKENS = convert_value(os.getenv("MAX_OUTPUT_TOKENS"))
+CLF_MODEL = convert_value(os.getenv("CLF_MODEL"))
+CLF_VECTORIZE = convert_value(os.getenv("CLF_VECTORIZE"))
+VECTOR_STORE_QUERY_MODE = convert_value(os.getenv("VECTOR_STORE_QUERY_MODE"))
+SIMILARITY_TOP_K = convert_value(os.getenv("SIMILARITY_TOP_K"))
+ALPHA = convert_value(os.getenv("ALPHA"))
 
 
 class Service:
@@ -52,15 +53,9 @@ class Service:
         """
         Initializes the Service class with LLM and embedding models.
         """
-        genai.configure(
-            api_key=GEMINI_API_KEY
-        )
-        self._clf_model = joblib.load(
-            filename=CLF_MODEL
-        )
-        self._clf_vectorizer = joblib.load(
-            filename=CLF_VECTORIZE
-        )
+        genai.configure(api_key=GEMINI_API_KEY)
+        self._clf_model = joblib.load(filename=CLF_MODEL)
+        self._clf_vectorizer = joblib.load(filename=CLF_VECTORIZE)
         self._generation_config = {
             "temperature": TEMPERATURE,
             "top_p": TOP_P,
@@ -68,18 +63,15 @@ class Service:
             "max_output_tokens": MAX_OUTPUT_TOKENS,
         }
         self._llm = OpenAI(
-            api_key=OPENAI_API_KEY,
-            model=OPENAI_MODEL,
-            temperature=TEMPERATURE_MODEL
+            api_key=OPENAI_API_KEY, model=OPENAI_MODEL, temperature=TEMPERATURE_MODEL
         )
         self._embed_model = OpenAIEmbedding(
-            api_key=OPENAI_API_KEY,
-            model=OPENAI_EMBED_MODEL
+            api_key=OPENAI_API_KEY, model=OPENAI_EMBED_MODEL
         )
         self._gemini = genai.GenerativeModel(
             model_name=GEMINI_LLM_MODEL,
             generation_config=self._generation_config,
-            safety_settings=SAFETY_SETTINGS
+            safety_settings=SAFETY_SETTINGS,
         )
         Settings.llms = self._llm
         Settings.embed_model = self._embed_model
@@ -87,26 +79,24 @@ class Service:
         self._hybrid_retriever = self._vector_database.index.as_retriever(
             vector_store_query_mode=VECTOR_STORE_QUERY_MODE,
             similarity_top_k=SIMILARITY_TOP_K,
-            alpha=ALPHA
+            alpha=ALPHA,
         )
         self._retriever = HybridRetriever(
             index=self._vector_database.index,
             retriever=self._hybrid_retriever,
         )
-        self._chat_engine = ChatEngine(
-            language_model=self._llm
-        )
+        self._chat_engine = ChatEngine(language_model=self._llm)
         self._preprocess_engine = PreprocessQuestion(
             gemini=self._gemini,
             domain_clf_model=self._clf_model,
             domain_clf_vectorizer=self._clf_vectorizer,
             lang_detect_model=None,
-            lang_detect_vectorizer=None
+            lang_detect_vectorizer=None,
         )
         self._retrieve_chat_engine = RetrieveChat(
             retriever=self._retriever,
             chat=self._chat_engine,
-            preprocess=self._preprocess_engine
+            preprocess=self._preprocess_engine,
         )
         self._chat_repository = ChatRepository()
         self._file_repository = FileRepository()
@@ -114,7 +104,7 @@ class Service:
         self._file_management = FileManagement(
             file_repository=self._file_repository,
             general_loader=self._general_loader,
-            vector_database=self._vector_database
+            vector_database=self._vector_database,
         )
         self._suggestion_repository = SuggestionRepository()
 
@@ -225,3 +215,4 @@ class Service:
         Provides access to the PreprocessQuestion instance.
         """
         return self._preprocess_engine
+
