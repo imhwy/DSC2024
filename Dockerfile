@@ -10,7 +10,8 @@ WORKDIR /app
 RUN python -m venv .venv
 COPY requirements.txt ./
 RUN .venv/bin/pip install -r requirements.txt
-# RUN playwright install
+RUN pip install playwright==1.46.0 && \
+    playwright install --with-deps
 
 # Stage 2: Final image
 FROM python:3.11.9-slim-bookworm

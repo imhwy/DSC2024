@@ -22,6 +22,7 @@ from src.utils.utility import convert_value
 from scrapegraphai.graphs import SmartScraperGraph
 from src.prompt.loader_prompt import URL_SPLITER_PROMPT
 
+
 load_dotenv()
 
 WEAVIATE_HOST = convert_value(os.getenv("WEAVIATE_HOST"))
@@ -201,10 +202,10 @@ class WeaviateDB:
                 "model": OPENAI_MODEL,
                 "temperature": 0.1,
             },
-            "embeddings": {
-                "model": OPENAI_EMBED_MODEL,
-                "temperature": 0,
-            },
+            # "embeddings": {
+            #     "model": OPENAI_EMBED_MODEL,
+            #     "temperature": 0,
+            # },
             # "verbose": True,
         }
 
@@ -378,7 +379,7 @@ class WeaviateDB:
             )
             # nodes = self.documents_to_nodes(documents=processed_documents)
             nodes = self.documents_to_nodes_by_sessions(documents=processed_documents)
-            print(nodes)
+            # print(nodes)
             try:
                 print("Sucess!")
                 self.insert_nodes(nodes=nodes)
