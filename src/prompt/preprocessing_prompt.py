@@ -48,7 +48,7 @@ PROMPT_INJECTION_PATTERNS = [
     r"chế độ ẩn",
     r"ẩn danh",
     r"vượt qua giám sát",
-    
+
     # Role manipulation keywords
     r"đóng vai trò",
     r"hành động như",
@@ -125,7 +125,7 @@ PROMPT_INJECTION_PATTERNS = [
     r"vô hiệu hóa bảo mật",
     r"chế độ developer",
     r"thay đổi quyền truy cập",
-    
+
     # Keywords related to unauthorized access
     r"truy cập trái phép",
     r"quyền admin",
@@ -137,7 +137,7 @@ PROMPT_INJECTION_PATTERNS = [
     r"thay đổi file hệ thống",
     r"modify system files",
     r"xem cấu hình",
-    
+
     # Keywords related to injection or manipulation
     r"injection",
     r"chèn mã độc",
@@ -147,7 +147,7 @@ PROMPT_INJECTION_PATTERNS = [
     r"xss attack",
     r"thao tác API",
     r"gửi lệnh API",
-    
+
     # Keywords related to control and manipulation
     r"đóng vai trò",
     r"giả mạo vai trò",
@@ -156,7 +156,7 @@ PROMPT_INJECTION_PATTERNS = [
     r"escalate privileges",
     r"bypass validation",
     r"bypass check",
-    
+
     # General security-related keywords
     r"bypass log",
     r"disable logging",
@@ -165,7 +165,7 @@ PROMPT_INJECTION_PATTERNS = [
     r"thay đổi bảo mật",
     r"cấp quyền truy cập",
     r"xem thông tin cấu hình",
-    
+
     # Miscellaneous potentially risky keywords
     r"tắt bảo mật",
     r"bypass restriction",

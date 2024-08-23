@@ -4,7 +4,7 @@ for managing a vector store using Weaviate and LlamaIndex.
 """
 
 import os
-from typing import List, Optional
+from typing import List
 from dotenv import load_dotenv
 import weaviate
 from llama_index.core import VectorStoreIndex, StorageContext
@@ -20,6 +20,7 @@ load_dotenv()
 WEAVIATE_HOST = convert_value(os.getenv("WEAVIATE_HOST"))
 WEAVIATE_PORT = convert_value(os.getenv("WEAVIATE_PORT"))
 WEAVIATE_NAME = convert_value(os.getenv("WEAVIATE_NAME"))
+SUGGESTION_NAME = convert_value(os.getenv("SUGGESTION_NAME"))
 MONGODB_URL = convert_value(os.getenv("MONGODB_URL"))
 MONGODB_NAME = convert_value(os.getenv("MONGODB_NAME"))
 
@@ -27,14 +28,6 @@ MONGODB_NAME = convert_value(os.getenv("MONGODB_NAME"))
 class WeaviateDB:
     """
     WeaviateDB is a wrapper class for managing a Weaviate-based vector store.
-
-    Attributes:
-        embed_model (GeminiEmbedding): The embedding model used for document embedding.
-        documents (List[Document]): A list of documents to be added to the vector store.
-        client (weaviate.Client): The client instance to interact with the Weaviate server.
-        vector_store (WeaviateVectorStore): The vector store for managing document vectors.
-        storage_context (StorageContext): The context for storing and retrieving vector data.
-        index (VectorStoreIndex): The index of documents in the vector store.
     """
 
     def __init__(
@@ -42,6 +35,7 @@ class WeaviateDB:
         host: str = WEAVIATE_HOST,
         port: str = WEAVIATE_PORT,
         index_name: str = WEAVIATE_NAME,
+        suggestion_name: str = SUGGESTION_NAME,
         mongodb_url: str = MONGODB_URL,
         mongodb_name: str = MONGODB_NAME,
         documents: List[Document] = None
@@ -54,6 +48,7 @@ class WeaviateDB:
         self._host = host
         self._port = port
         self._index_name = index_name
+        self._suggestion_name = suggestion_name
         self._documents = documents
         self._mongodb_url = mongodb_url
         self._mongodb_name = mongodb_name
@@ -65,12 +60,19 @@ class WeaviateDB:
             weaviate_client=self._client,
             index_name=self._index_name
         )
+        self._suggestion_vector_store = WeaviateVectorStore(
+            weaviate_client=self._client,
+            index_name=self._suggestion_name
+        )
         self._storage_context = StorageContext.from_defaults(
             docstore=MongoDocumentStore.from_uri(
                 uri=self._mongodb_url,
                 db_name=self._mongodb_name
             ),
             vector_store=self._vector_store
+        )
+        self._suggestion_storage_context = StorageContext.from_defaults(
+            vector_store=self._suggestion_vector_store
         )
         self.parser = SentenceSplitter()
         if self._documents:
@@ -82,6 +84,9 @@ class WeaviateDB:
             self._index = VectorStoreIndex.from_vector_store(
                 vector_store=self._vector_store
             )
+        self._suggestion_index = VectorStoreIndex.from_vector_store(
+            vector_store=self._suggestion_vector_store
+        )
 
     @property
     def index(self) -> VectorStoreIndex:
@@ -104,70 +109,85 @@ class WeaviateDB:
         """
         return self._client
 
-    def configure_documents(
+    def document_configuration(
         self,
-        url: Optional[str] = None,
-        documents: List[Document] = None,
-        file_type: Optional[str] = None,
-        file_name: Optional[str] = None,
-        public_id: Optional[str] = None
+        file_name: str = None,
+        documents: List[Document] = List[None]
     ) -> List[Document]:
         """
         Updates the metadata of a list of Document objects with a specified file name.
 
         Args:
-            file_type (Optional[str]): The default file type to set in the metadata
-                                        if it is not already present.
-            file_name (Optional[str]): The default file name to set in the metadata
-                                        if it is not already present.
-            public_id (Optional[str]): The default public ID to set in the metadata
-                                        if it is not already present.
-            documents (List[Document]): A list of Document objects to be configured.
+            file_name (str, optional): The default file name to set in the metadata 
+                                       if it is not already present.
+            documents (List[Document], optional): A list of Document objects to be configured. 
+                                                  Defaults to a list with a single Document 
+                                                  containing empty text if not provided.
 
         Returns:
             List[Document]: The list of Document objects with updated metadata.
         """
-        for idx, doc in enumerate(documents):
-            if 'file_path' not in doc.metadata:
-                doc.metadata.update({
-                    'public_id': public_id,
-                    'link': url,
-                    'file_type': file_type
-                })
-                doc.excluded_embed_metadata_keys = [
-                    'file_name',
-                    'public_id',
-                    'file_type',
-                    'link'
+        for document in documents:
+            if not document.metadata.get("file_name"):
+                document.metadata = {
+                    "file_name": file_name
+                }
+                document.excluded_embed_metadata_keys = [
+                    "file_name"
                 ]
-                doc.excluded_llm_metadata_keys = [
-                    'file_name',
-                    'public_id',
-                    'file_type',
-                    'link'
-                ]
-            if 'public_id' not in doc.metadata:
-                doc.metadata.update({
-                    'public_id': public_id,
-                    'file_name': file_name,
-                    'file_type': file_type,
-                    'page': idx + 1
-                })
-                doc.excluded_embed_metadata_keys = [
-                    'file_name',
-                    'public_id',
-                    'page'
-                    'file_type',
-                    'file_path'
-                ]
-                doc.excluded_llm_metadata_keys = [
-                    'file_name',
-                    'public_id',
-                    'page',
-                    'file_type',
-                    'file_path'
+                document.excluded_llm_metadata_keys = [
+                    "file_name"
                 ]
         return documents
+
+    async def suggestion_config(
+        self,
+        question: str = None,
+        answer: str = None
+    ) -> List[Document]:
+        """
+        Creates a list of Document objects based on the provided question and answer.
+
+        Args:
+            question (str): The question text.
+            answer (str): The corresponding answer text.
+
+        Returns:
+            List[Document]: A list of Document objects with metadata, or None if inputs are missing.
+        """
+        if question and answer:
+            document = [
+                Document(
+                    text=question,
+                    metadata={
+                        "question": question,
+                        "answer": answer
+                    },
+                    excluded_embed_metadata_keys=[
+                        "question",
+                        "answer"
+                    ],
+                    excluded_llm_metadata_keys=[
+                        "question",
+                        "answer"
+                    ]
+                )
+            ]
+            return self.documents_to_nodes(documents=document)
+        return None
+
+    async def insert_suggestion_nodes(
+        self,
+        nodes: List[TextNode]
+    ) -> None:
+        """
+        Inserts a list of TextNode objects into the suggestion index.
+
+        Args:
+            nodes (List[TextNode]): A list of nodes to be inserted.
+        """
+        if nodes:
+            self._suggestion_index.insert_nodes(nodes=nodes)
 
     def documents_to_nodes(
         self,
@@ -262,9 +282,6 @@ class WeaviateDB:
 
     def add_knowledge(
         self,
-        url: str = None,
-        file_type: str = None,
-        public_id: str = None,
         file_name: str = None,
         documents: List[Document] = List[None]
     ) -> None:
@@ -280,9 +297,7 @@ class WeaviateDB:
             None
         """
         if documents:
-            processed_documents = self.configure_documents(
-                url=url,
-                file_type=file_type,
+            processed_documents = self.document_configuration(
                 file_name=file_name,
                 documents=documents
             )
@@ -301,7 +316,7 @@ class WeaviateDB:
 
     def delete_knowlegde(
         self,
-        public_id: str = None
+        file_name: str = None
     ) -> None:
         """
         Deletes documents from the knowledge base by file name.
@@ -312,7 +327,7 @@ class WeaviateDB:
         """
         ref_doc_ids = []
         for _, node in self._storage_context.docstore.docs.items():
-            if node.metadata.get("public_id") == public_id and node.ref_doc_id not in ref_doc_ids:
+            if node.metadata.get("file_name") == file_name and node.ref_doc_id not in ref_doc_ids:
                 self.delete_nodes(
                     ref_doc_id=node.ref_doc_id
                 )
