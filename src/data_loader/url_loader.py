@@ -72,14 +72,21 @@ class URLLoader(BaseLoader):
             List[Document]: A list of Document objects containing 
                             the loaded data in markdown format.
         """
+        # Read html tag
         reader = SimpleWebPageReader()
         documents = reader.load_data(sources)
         processed_documents = []
         for doc in documents:
+            # Get file_name
             file_name = get_last_part_of_url(doc.id_)
+            # Extract <article> tag of HTML content
             articles = self.extract_articles(doc.text)
+            # Remove duplicate new line
             articles = self.remove_duplicate_new_line(articles)
+            # Convert to markdown format
             markdown_text = markdownify.markdownify(articles)
+
+            # Add metadata
             document = Document(
                 excluded_llm_metadata_keys=[
                     "url",
