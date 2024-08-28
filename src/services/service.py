@@ -4,11 +4,17 @@ This module provides services for handling LLM and embedding models using OpenAI
 
 import os
 import joblib
+import requests
 from dotenv import load_dotenv
 import google.generativeai as genai
+import fasttext
+import torch
+from huggingface_hub import hf_hub_download
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.core import Settings
+from transformers import (AutoTokenizer,
+                          AutoModelForTokenClassification)
 
 from src.storage.weaviatedb import WeaviateDB
 from src.engines.retriever_engine import HybridRetriever
@@ -23,6 +29,7 @@ from src.repositories.suggestion_repository import SuggestionRepository
 from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
 from src.engines.preprocess_engine import PreprocessQuestion
 from src.engines.semantic_engine import SemanticSearch
+
 load_dotenv()
 
 OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
@@ -35,8 +42,12 @@ TEMPERATURE = convert_value(os.getenv('TEMPERATURE'))
 TOP_P = convert_value(os.getenv('TOP_P'))
 TOP_K = convert_value(os.getenv('TOP_K'))
 MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
-CLF_MODEL = convert_value(os.getenv('CLF_MODEL'))
-CLF_VECTORIZE = convert_value(os.getenv('CLF_VECTORIZE'))
+DOMAIN_CLF_MODEL = convert_value(os.getenv('DOMAIN_CLF_MODEL'))
+DOMAIN_CLF_VECTORIZER = convert_value(os.getenv('DOMAIN_CLF_VECTORIZER'))
+PROMPT_INJECTION_MODEL = convert_value(os.getenv('PROMPT_INJECTION_MODEL'))
+PROMPT_INJECTION_VECTORIZER = convert_value(os.getenv('PROMPT_INJECTION_VECTORIZER'))
+TONE_MODEL = convert_value(os.getenv('TONE_MODEL'))
+URL = convert_value(os.getenv('LABEL_LIST'))
 
 
 class Service:
@@ -48,21 +59,37 @@ class Service:
         """
         Initializes the Service class with LLM and embedding models.
         """
+        self._device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         genai.configure(
             api_key=GEMINI_API_KEY
         )
-        self._clf_model = joblib.load(
-            filename=CLF_MODEL
+        self._domain_clf_model = joblib.load(
+            filename=DOMAIN_CLF_MODEL
         )
-        self._clf_vectorizer = joblib.load(
-            filename=CLF_VECTORIZE
+        self._domain_clf_vectorizer = joblib.load(
+            filename=DOMAIN_CLF_VECTORIZER
         )
+        self._prompt_injection_model = joblib.load(
+            filename=PROMPT_INJECTION_MODEL
+        )
+        self._prompt_injection_vectorizer = joblib.load(
+            filename=PROMPT_INJECTION_VECTORIZER
+        )
+        self._tone_tokenizer = AutoTokenizer.from_pretrained(TONE_MODEL, add_prefix_space=True)
+        self._tone_model = AutoModelForTokenClassification.from_pretrained(TONE_MODEL)
         self._generation_config = {
             "temperature": TEMPERATURE,
             "top_p": TOP_P,
             "top_k": TOP_K,
             "max_output_tokens": MAX_OUTPUT_TOKENS,
         }
+        self._lang_detect_model_path = hf_hub_download(
+            repo_id="facebook/fasttext-language-identification",
+            filename="model.bin"
+        )
+        self._lang_detector = fasttext.load_model(self._lang_detect_model_path)
+        self._raw_text = requests.get(URL, timeout=60).text
+        self._label_list = self._raw_text.split("\n")
         self._llm = OpenAI(
             api_key=OPENAI_API_KEY,
             model=OPENAI_MODEL,
@@ -88,11 +115,15 @@ class Service:
             weaviate_db=self._vector_database
         )
         self._preprocess_engine = PreprocessQuestion(
-            gemini=self._gemini,
-            domain_clf_model=self._clf_model,
-            domain_clf_vectorizer=self._clf_vectorizer,
-            lang_detect_model=None,
-            lang_detect_vectorizer=None
+            domain_clf_model=self._domain_clf_model,
+            domain_clf_vectorizer=self._domain_clf_vectorizer,
+            lang_detect_model=self._lang_detector,
+            tonemark_model=self._tone_model,
+            tonemark_tokenizer=self._tone_tokenizer,
+            prompt_injection_model=self._prompt_injection_model,
+            prompt_injection_vectorizer=self._prompt_injection_vectorizer,
+            device_type=self._device,
+            label_list=self._label_list
         )
         self._retrieve_chat_engine = RetrieveChat(
             retriever=self._retriever,
@@ -214,7 +245,7 @@ class Service:
         return self._suggestion_repository
 
     @property
-    def get_preprocess_engine(self) -> PreprocessQuestion:
+    def preprocess_engine(self) -> PreprocessQuestion:
         """
         Provides access to the PreprocessQuestion instance.
         """

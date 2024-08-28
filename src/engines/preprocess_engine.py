@@ -1,15 +1,26 @@
 """
-This module provides serveral step of pre-processing the query inputs
 """
 
+import time
 import re
 from underthesea import word_tokenize
+from difflib import SequenceMatcher
+import torch
+import numpy as np
 
-from src.prompt.preprocessing_prompt import (PROMPT_INJECTION_PATTERNS,
-                                             CORRECT_VI_PROMPT,
-                                             TRANSLATE_EN_PROMPT,
-                                             TRANSLATE_VI_EN_PROMPT)
-from src.models.preprocess import ProcessedData
+from src.models.preprocess import (ProcessedData,
+                                   ShortChat,
+                                   UnsupportedLanguage,
+                                   PromptInjection)
+from src.prompt.postprocessing_prompt import (RESPONSE_UNSUPPORTED_LANGUAGE,
+                                              RESPONSE_PROMPT_INJECTION)
+from src.prompt.preprocessing_prompt import (FILLTER_WORDS,
+                                             TERMS_DICT,
+                                             SHORT_CHAT,
+                                             RESPONSE_DICT,
+                                             TOKENIZER_WORD_PREFIX,
+                                             PROMPT_INJECTION_PATTERNS,
+                                             POTENTIAL_PROMPT_INJECTION_PATTERNS)
 
 
 class PreprocessQuestion:
@@ -19,182 +30,346 @@ class PreprocessQuestion:
 
     def __init__(
         self,
-        gemini,
         domain_clf_model,
         domain_clf_vectorizer,
         lang_detect_model,
-        lang_detect_vectorizer
+        tonemark_model,
+        tonemark_tokenizer,
+        prompt_injection_model,
+        prompt_injection_vectorizer,
+        device_type,
+        label_list
     ) -> None:
         """
-        Initializes the PreprocessQuestion with the necessary models and vectorizers.
-
-        Args:
-            gemini: A reference to the Gemini model used for further processing.
-            domain_clf_model: The model used for classifying the query's domain.
-            domain_clf_vectorizer: The vectorizer.
-            lang_detect_model: The model used for detecting the language of the query.
-            lang_detect_vectorizer: The vectorizer.
         """
-        self.gemini = gemini
         self.domain_clf_model = domain_clf_model
         self.domain_clf_vectorizer = domain_clf_vectorizer
         self.lang_detect_model = lang_detect_model
-        self.lang_detect_vectorizer = lang_detect_vectorizer
+        self.tonemark_model = tonemark_model
+        self.tonemark_tokenizer = tonemark_tokenizer
+        self.prompt_injection_model = prompt_injection_model
+        self.prompt_injection_vectorizer = prompt_injection_vectorizer
+        self.device_type = device_type
+        self.label_list = label_list
+
+    @staticmethod
+    def normalize_elonge_word(text):
+        """
+        """
+        s_new = ''
+        for word in text.split(' '):
+            word_new = ' '
+            for char in word.strip():
+                if char != word_new[-1]:
+                    word_new += char
+            s_new += word_new.strip() + ' '
+        return s_new.strip()
+
+    @staticmethod
+    def replace_symbols(text):
+        """
+        """
+        replacements = {
+            ">": " lớn hơn ",
+            "<": " bé hơn ",
+            "=": " bằng ",
+            "$": " ",
+            "#": " ",
+            "^": " ",
+            "/": " ",
+            "!": " "
+        }
+        for symbol, replacement in replacements.items():
+            text = text.replace(symbol, replacement)
+        return " ".join(text.split())
+
+    @staticmethod
+    def replace_synonyms(text, synonym_dict):
+        """
+        """
+        text = text.lower()
+        for keyword, synonyms in synonym_dict.items():
+            keyword = keyword.lower()
+            for synonym in synonyms:
+                synonym = synonym.strip().lower()
+                text = re.sub(r'\b{}\b'.format(
+                    re.escape(synonym)), keyword, text)
+        return text
+
+    @staticmethod
+    def remove_emojis(text):
+        """
+        """
+        emoji_pattern = re.compile(
+            "["
+            u"\U0001F600-\U0001F64F"
+            u"\U0001F300-\U0001F5FF"
+            u"\U0001F680-\U0001F6FF"
+            u"\U0001F700-\U0001F77F"
+            u"\U0001F780-\U0001F7FF"
+            u"\U0001F800-\U0001F8FF"
+            u"\U0001F900-\U0001F9FF"
+            u"\U0001FA00-\U0001FA6F"
+            u"\U0001FA70-\U0001FAFF"
+            u"\U00002702-\U000027B0"
+            u"\U000024C2-\U0001F251"
+            "]+",
+            flags=re.UNICODE
+        )
+        return emoji_pattern.sub(r'', text)
+
+    @staticmethod
+    def remove_filler_words(text, filler_words):
+        """
+        """
+        text = text.lower()
+        for word in filler_words:
+            pattern = r'\b{}\b'.format(re.escape(word.strip().lower()))
+            text = re.sub(pattern, '', text)
+        text = re.sub(r'\s+', ' ', text).strip()
+        return text
+
+    @staticmethod
+    def delete_non_vietnamese_characters(text):
+        """
+        """
+        pattern = r"[0-9a-zA-ZaăâbcdđeêghiklmnoôơpqrstuưvxyàằầbcdđèềghìklmnòồờpqrstùừvxỳáắấbcdđéếghíklmnóốớpqrstúứvxýảẳẩbcdđẻểghỉklmnỏổởpqrstủửvxỷạặậbcdđẹệghịklmnọộợpqrstụựvxỵãẵẫbcdđẽễghĩklmnõỗỡpqrstũữvxỹAĂÂBCDĐEÊGHIKLMNOÔƠPQRSTUƯVXYÀẰẦBCDĐÈỀGHÌKLMNÒỒỜPQRSTÙỪVXỲÁẮẤBCDĐÉẾGHÍKLMNÓỐỚPQRSTÚỨVXÝẠẶẬBCDĐẸỆGHỊKLMNỌỘỢPQRSTỤỰVXỴẢẲẨBCDĐẺỂGHỈKLMNỎỔỞPQRSTỦỬVXỶÃẴẪBCDĐẼỄGHĨKLMNÕỖỠPQRSTŨỮVXỸ,._]"
+        return re.sub(rf'[^{pattern}\s]', '', text).strip()
+
+    @staticmethod
+    def merge_tokens_and_preds(tokens, predictions):
+        """
+        """
+        merged_tokens_preds = []
+        i = 0
+        while i < len(tokens):
+            tok = tokens[i]
+            label_indexes = set([predictions[i]])
+            if tok.startswith(TOKENIZER_WORD_PREFIX):
+                tok_no_prefix = tok[len(TOKENIZER_WORD_PREFIX):]
+                cur_word_toks = [tok_no_prefix]
+                j = i + 1
+                while j < len(tokens):
+                    if not tokens[j].startswith(TOKENIZER_WORD_PREFIX):
+                        cur_word_toks.append(tokens[j])
+                        label_indexes.add(predictions[j])
+                        j += 1
+                    else:
+                        break
+                cur_word = ''.join(cur_word_toks)
+                merged_tokens_preds.append((cur_word, label_indexes))
+                i = j
+            else:
+                merged_tokens_preds.append((tok, label_indexes))
+                i += 1
+        return merged_tokens_preds
+
+    @staticmethod
+    def get_accented_words(merged_tokens_preds, label_list):
+        """
+        """
+        accented_words = []
+        for word_raw, label_indexes in merged_tokens_preds:
+            for label_index in label_indexes:
+                tag_name = label_list[int(label_index)]
+                raw, vowel = tag_name.split("-")
+                if raw and raw in word_raw:
+                    word_accented = word_raw.replace(raw, vowel)
+                    break
+            else:
+                word_accented = word_raw
+            accented_words.append(word_accented)
+        return accented_words
+
+    def is_prompt_injection(self, text):
+        """
+        """
+
+        for pattern in PROMPT_INJECTION_PATTERNS:
+            if re.search(pattern, text, re.IGNORECASE):
+                return True
+
+        for pattern in POTENTIAL_PROMPT_INJECTION_PATTERNS:
+            if re.search(pattern, text, re.IGNORECASE):
+                if self.prompt_injection_model.predict(self.prompt_injection_vectorizer.transform([text]))[0]:
+                    return True
+        return False
+
+    def detect_short_chat(self, text_input):
+        """
+        """
+        emoji_pattern = re.compile(
+            "["
+            u"\U0001F600-\U0001F64F"
+            u"\U0001F300-\U0001F5FF"
+            u"\U0001F680-\U0001F6FF"
+            u"\U0001F700-\U0001F77F"
+            u"\U0001F780-\U0001F7FF"
+            u"\U0001F800-\U0001F8FF"
+            u"\U0001F900-\U0001F9FF"
+            u"\U0001FA00-\U0001FA6F"
+            u"\U0001FA70-\U0001FAFF"
+            u"\U00002702-\U000027B0"
+            u"\U000024C2-\U0001F251"
+            "]+",
+            flags=re.UNICODE
+        )
+        normalized_text = text_input.lower().strip()
+        has_emoji = bool(emoji_pattern.search(normalized_text))
+
+        def is_similar(text1, text2, threshold=0.85):
+            return SequenceMatcher(None, text1, text2).ratio() >= threshold
+        matches_pattern = any(is_similar(normalized_text, pattern)
+                              for pattern in SHORT_CHAT)
+        if has_emoji:
+            if matches_pattern or normalized_text == '':
+                return True
+        elif matches_pattern:
+            return True
+
+        return False
+
+    def insert_accents(self, text, model, tokenizer):
+        """
+        """
+        our_tokens = text.strip().split()
+        inputs = tokenizer(our_tokens,
+                           is_split_into_words=True,
+                           truncation=True,
+                           padding=True,
+                           return_tensors="pt"
+                           )
+        input_ids = inputs['input_ids']
+        tokens = tokenizer.convert_ids_to_tokens(input_ids[0])
+        tokens = tokens[1:-1]
+        with torch.no_grad():
+            # inputs.to(self.device_type)
+            outputs = model(**inputs)
+        predictions = outputs["logits"].cpu().numpy()
+        predictions = np.argmax(predictions, axis=2)
+        predictions = predictions[0][1:-1]
+        assert len(tokens) == len(predictions)
+        return tokens, predictions
+
+    def get_response(self, input_text, short_chats, response_dict, threshold=0.9):
+        """
+        """
+        input_text = input_text.lower().strip()
+        best_match = None
+        best_ratio = 0.0
+        for chat in short_chats:
+            ratio = SequenceMatcher(None, input_text, chat).ratio()
+            if ratio > best_ratio and ratio >= threshold:
+                best_ratio = ratio
+                best_match = chat
+        if best_match and best_match in response_dict:
+            return response_dict[best_match]
+        return "Mình chưa hiểu rõ ý bạn lắm."
+
+    def clean_text(self, text, term_dict):
+        """
+        """
+        text = re.sub(r'\s+', ' ', text)
+        text = self.delete_non_vietnamese_characters(text.lower())
+        text = self.remove_filler_words(text, FILLTER_WORDS)
+        text = self.remove_emojis(text)
+        text = self.replace_synonyms(text, term_dict)
+        text = self.replace_symbols(text)
+        text = self.normalize_elonge_word(text)
+        return text
+
+    def lang_detect_2(self, text: str = None):
+        """
+        """
+        prediction = self.lang_detect_model.predict(text)
+        lang_scores = {label.replace('__label__', ''): score for label, score in zip(
+            prediction[0], prediction[1])}
+        if lang_scores:
+            most_likely_lang = max(lang_scores, key=lang_scores.get)
+            highest_score = lang_scores[most_likely_lang]
+        else:
+            most_likely_lang = None
+            highest_score = 0
+        return most_likely_lang, highest_score
+
+    def correct_vietnamese_text(self, text):
+        """
+        """
+        tokens, predictions = self.insert_accents(
+            text, self.tonemark_model, self.tonemark_tokenizer)
+        merged_tokens_preds = self.merge_tokens_and_preds(tokens, predictions)
+        accented_words = self.get_accented_words(
+            merged_tokens_preds, self.label_list)
+        return ' '.join(accented_words)
 
     def tokenize_text(self, text):
         """
-        Tokenizes the input text using underthesea.
-
-        Args:
-            text (str): The text to be tokenized.
-
-        Returns:
-            str: The tokenized text.
         """
         tokens = word_tokenize(text, format='text')
         return tokens
 
     def classify_domain(self, text):
         """
-        Classifies the domain of the input text using a pre-trained SVM model.
-
-        Args:
-            text (str): The text to classify.
-
-        Returns:
-            int: The predicted domain label of the text.
         """
         # Preprocess the text
         processed_text = self.tokenize_text(text)
-
-        # Convert to TF-IDF features
         text_tfidf = self.domain_clf_vectorizer.transform([processed_text])
-
-        # Predict and measure time
         prediction = self.domain_clf_model.predict(text_tfidf)
         return prediction[0]
 
-    def lang_detect(
-        self,
-        text: str = None
-    ):
+    def preprocess_text(self, text_input):
         """
-        Detects the language of the input text.
-
-        Args:
-            text (str): The text to analyze.
-
-        Returns:
-            str: The detected language code.
-        """
-        lang = "vi"  # or "en" or "vi_en" "no_tonemark_vi" "no_tonemark_vi_en"
-        return lang
-
-    def is_prompt_injection(self, text):
-        """
-        Checks if the input text contains any prompt injection patterns.
-
-        Args:
-            text (str): The text to analyze.
-
-        Returns:
-            bool: True if prompt injection is detected, False otherwise.
-        """
-
-        for pattern in PROMPT_INJECTION_PATTERNS:
-            if re.search(pattern, text, re.IGNORECASE):
-                return True
-        return False
-
-    def correct_vietnamese_text(self, text):
-        """
-        Uses Google Generative AI to correct and add Vietnamese tone marks to the text.
-
-        Args:
-            text (str): The Vietnamese text to correct.
-
-        Returns:
-            str: The corrected Vietnamese text.
-        """
-        response = self.gemini.generate_content(
-            CORRECT_VI_PROMPT.format(text=text)
-        )
-        return response.text.strip()
-
-    def translate_en_text(self, text):
-        """
-        Translates English text to Vietnamese using Google Generative AI.
-
-        Args:
-            text (str): The English text to translate.
-
-        Returns:
-            str: The translated Vietnamese text.
-        """
-
-        response = self.gemini.generate_content(
-            TRANSLATE_EN_PROMPT.format(text=text)
-        )
-        return response.text.strip()
-
-    def translate_vi_en_text(self, text):
-        """
-        Translates a mixed Vietnamese-English text to Vietnamese using Google Generative AI.
-
-        Args:
-            text (str): The mixed Vietnamese-English text to translate.
-
-        Returns:
-            str: The fully translated and corrected Vietnamese text.
-        """
-
-        response = self.gemini.generate_content(
-            TRANSLATE_VI_EN_PROMPT.format(text=text)
-        )
-        return response.text.strip()
-
-    async def preprocess_text(self, text_input):
-        """
-        Processes the input text by performing language detection, correction/translation, 
-        prompt injection detection, and domain classification.
-
-        Args:
-            text_input (str): The text to process.
-
-        Returns:
-            ProcessedData: A tuple containing the processed query (str), 
-                   a language flag (bool), and a prompt injection flag (bool).
         """
         query = ""
         language = True
         prompt_injection = False
         outdomain = False
-        if text_input:
-            lang = self.lang_detect(text_input)
-            if lang in {"vi", "no_tonemark_vi"}:
-                corrected_text = self.correct_vietnamese_text(text_input)
-            if lang == "en":
-                corrected_text = self.translate_en_text(text_input)
-            if lang in {"vi_en", "no_tonemark_vi_en"}:
-                corrected_text = self.translate_vi_en_text(text_input)
-            if self.is_prompt_injection(corrected_text):
-                prompt_injection = True
-                outdomain = True
-            if outdomain == False:
+        short_chat = False
+
+        clean_text_input = self.clean_text(text_input, TERMS_DICT)
+        is_short_chat = self.detect_short_chat(clean_text_input)
+
+        if is_short_chat:
+            query = self.get_response(
+                text_input, SHORT_CHAT, RESPONSE_DICT, threshold=0.9)
+            return ShortChat(
+                query=query,
+                clean_query=clean_text_input,
+                short_chat=True,
+                short_chat_response=query
+            )
+
+        if short_chat is False:
+            lang, _ = self.lang_detect_2(clean_text_input)
+            corrected_text = clean_text_input
+            if lang == "vie_Latn":
+                corrected_text = self.correct_vietnamese_text(clean_text_input)
+            else:
+                language = False
+                return UnsupportedLanguage(
+                    language=language,
+                    response=RESPONSE_UNSUPPORTED_LANGUAGE
+                )
+            if language:
+                if self.is_prompt_injection(corrected_text):
+                    prompt_injection = True
+                    return PromptInjection(
+                        prompt_injection=prompt_injection,
+                        response=RESPONSE_PROMPT_INJECTION
+                    )
                 domain = self.classify_domain(corrected_text)
                 if domain == 0:
                     outdomain = True
-                if domain == 1:
-                    prompt_injection = False
-            if language and not outdomain:
-                query = corrected_text
+                if language and not outdomain:
+                    query = corrected_text
+                else:
+                    query = text_input
             else:
                 query = text_input
-        else:
-            query = ""
         return ProcessedData(
             query=query,
             language=language,
             is_prompt_injection=prompt_injection,
-            is_outdomain=outdomain
+            is_outdomain=outdomain,
+            is_short_chat=short_chat
         )

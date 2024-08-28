@@ -30,3 +30,11 @@ Xin chào! Rất tiếc, tôi chưa thể cung cấp thông tin mà bạn đang 
 
 Cảm ơn bạn đã sử dụng dịch vụ của UITAdminBot! Nếu có thắc mắc khác, đừng ngần ngại hỏi tôi nhé.
 """
+
+RESPONSE_UNSUPPORTED_LANGUAGE = """
+
+"""
+
+RESPONSE_PROMPT_INJECTION = """
+
+"""
