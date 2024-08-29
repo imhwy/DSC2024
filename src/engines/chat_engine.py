@@ -8,6 +8,7 @@ from llama_index.llms.openai import OpenAI
 from src.prompt.instruction_prompt import PROMPT
 from src.prompt.funny_chat_prompt import PROMPT_FUNNY_FLOW
 from src.storage.weaviatedb import WeaviateDB
+from src.repositories.suggestion_repository import SuggestionRepository
 
 
 class ChatEngine:
@@ -19,7 +20,8 @@ class ChatEngine:
         self,
         prompt_template: str = PROMPT,
         language_model: OpenAI = None,
-        weaviate_db: WeaviateDB = None
+        weaviate_db: WeaviateDB = None,
+        suggestion_repository: SuggestionRepository = None
     ):
         """
         Initializes the ChatEngine with a prompt template, language model, and Weaviate database.
@@ -32,6 +34,7 @@ class ChatEngine:
         self._prompt_template = prompt_template
         self._language_model = language_model
         self._weaviate_dbs = weaviate_db
+        self._suggestion_repository = suggestion_repository
 
     async def generate_response(
         self,
@@ -77,4 +80,8 @@ class ChatEngine:
             answer=response.text
         )
         await self._weaviate_dbs.insert_suggestion_nodes(nodes=nodes)
+        self._suggestion_repository.add_suggestion(
+            question=query,
+            answer=response.text
+        )
         return response.text

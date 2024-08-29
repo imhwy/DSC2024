@@ -114,9 +114,11 @@ class Service:
         self._retriever = HybridRetriever(
             index=self._vector_database.index
         )
+        self._suggestion_repository = SuggestionRepository()
         self._chat_engine = ChatEngine(
             language_model=self._llm,
-            weaviate_db=self._vector_database
+            weaviate_db=self._vector_database,
+            suggestion_repository=self._suggestion_repository
         )
         self._preprocess_engine = PreprocessQuestion(
             domain_clf_model=self._domain_clf_model,
@@ -129,7 +131,6 @@ class Service:
             device_type=self._device,
             label_list=self._label_list
         )
-        self._suggestion_repository = SuggestionRepository()
         self._semantic_engine = SemanticSearch(
             index=self._vector_database._suggestion_index
         )
