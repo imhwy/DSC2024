@@ -16,6 +16,10 @@ from src.utils.utility import convert_value
 load_dotenv()
 
 MAX_TOKENS = convert_value(os.getenv('MAX_TOKENS'))
+VECTOR_STORE_QUERY_MODE = convert_value(os.getenv('VECTOR_STORE_QUERY_MODE'))
+SIMILARITY_TOP_K = convert_value(os.getenv('SIMILARITY_TOP_K'))
+ALPHA = convert_value(os.getenv('ALPHA'))
+THRESHOLD = convert_value(os.getenv('THRESHOLD'))
 
 
 class HybridRetriever:
@@ -26,15 +30,18 @@ class HybridRetriever:
 
     def __init__(
         self,
-        index: VectorStoreIndex = None,
-        retriever: BaseRetriever = None
+        index: VectorStoreIndex = None
     ):
         """
         Initializes the HybridRetriever with the given configuration parameters.
         """
         self._index = index
         self._encoding = tiktoken.get_encoding("cl100k_base")
-        self._retriever = retriever
+        self._retriever = self._index.as_retriever(
+            vector_store_query_mode=VECTOR_STORE_QUERY_MODE,
+            similarity_top_k=SIMILARITY_TOP_K,
+            alpha=ALPHA
+        )
 
     async def combine_retrieved_nodes(
         self,
@@ -53,8 +60,8 @@ class HybridRetriever:
         current_tokens = 0
         for retrieved_node in retrieved_nodes:
             text = retrieved_node.text
-            metadata = str(retrieved_node.id_)
-            sub_combine = text + "\nmetadata:\n" + "id: " + '"' + metadata + '"'
+            metadata = str(retrieved_node.metadata)
+            sub_combine = text + "\nmetadata:\n" + metadata
             tokens = len(self._encoding.encode(sub_combine))
             if tokens + current_tokens > max_tokens:
                 break

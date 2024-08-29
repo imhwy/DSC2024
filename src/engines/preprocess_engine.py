@@ -465,7 +465,7 @@ class PreprocessQuestion:
         prediction = self.domain_clf_model.predict(text_tfidf)
         return prediction[0]
 
-    def preprocess_text(self, text_input):
+    async def preprocess_text(self, text_input):
         """
         Preprocesses the input text to classify it and detect various conditions
         such as short chat, language, and prompt injection.
@@ -495,7 +495,7 @@ class PreprocessQuestion:
             return ShortChat(
                 query=query,
                 clean_query=clean_text_input,
-                short_chat=True,
+                is_short_chat=True,
                 short_chat_response=query
             )
 
@@ -514,7 +514,7 @@ class PreprocessQuestion:
                 if self.is_prompt_injection(corrected_text):
                     prompt_injection = True
                     return PromptInjection(
-                        prompt_injection=prompt_injection,
+                        is_prompt_injection=prompt_injection,
                         response=RESPONSE_PROMPT_INJECTION
                     )
                 domain = self.classify_domain(corrected_text)

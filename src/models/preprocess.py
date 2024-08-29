@@ -27,7 +27,7 @@ class ShortChat(BaseModel):
     """
     query: str
     clean_query: str
-    short_chat: bool
+    is_short_chat: bool
     short_chat_response: str
 
 
@@ -41,5 +41,5 @@ class UnsupportedLanguage(BaseModel):
 class PromptInjection(BaseModel):
     """
     """
-    prompt_injection: bool
+    is_prompt_injection: bool
     response: str

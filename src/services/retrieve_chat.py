@@ -8,11 +8,10 @@ from llama_index.core.schema import TextNode
 
 from src.engines.chat_engine import ChatEngine
 from src.engines.retriever_engine import HybridRetriever
+from src.engines.semantic_engine import SemanticSearch
 from src.engines.preprocess_engine import PreprocessQuestion
 from src.models.chat import Chat
-from src.prompt.preprocessing_prompt import PROMPT_INJECTION_ANNOUCEMENT
-from src.prompt.postprocessing_prompt import (FAIL_CASE,
-                                              RESPONSE_FAIL_CASE)
+from src.prompt.postprocessing_prompt import FAIL_CASES, RESPONSE_FAIL_CASE
 from src.utils.utility import format_document
 
 
@@ -25,51 +24,13 @@ class RetrieveChat:
         self,
         retriever: HybridRetriever = None,
         chat: ChatEngine = None,
-        preprocess: PreprocessQuestion = None
+        preprocess: PreprocessQuestion = None,
+        semantic: SemanticSearch = None
     ):
         self._retriever = retriever
         self._chat = chat
         self._preprocess = preprocess
-
-    async def post_processing(
-        self,
-        result: str,
-        retrieved_nodes: List["TextNode"]
-    ) -> str:
-        """
-        Processes the result by extracting metadata and formatting it.
-        """
-        cleaned_json = result.strip("```json\n").strip()
-
-        try:
-            data = json.loads(cleaned_json)
-            if data.get("response") in FAIL_CASE:
-                return RESPONSE_FAIL_CASE
-            metadata_dict = {
-                meta["id"]: meta for meta in data.get("metadata", [])
-            }
-            titles, sessions, pages, data_types, links = [], [], [], [], []
-            for node in retrieved_nodes:
-                if node.id_ in metadata_dict:
-                    meta = metadata_dict[node.id_]
-                    titles.append(node.metadata.get("file_name", ""))
-                    sessions.append(meta.get("session", ""))
-                    pages.append(node.metadata.get("page", ""))
-                    data_types.append(node.metadata.get("file_type", ""))
-                    links.append(node.metadata.get("link", ""))
-            processed_result = format_document(
-                result=data.get("response"),
-                titles=titles,
-                sessions=sessions,
-                pages=pages,
-                data_types=data_types,
-                links=links
-            )
-            return processed_result
-
-        except json.JSONDecodeError as e:
-            print("Invalid JSON:", e)
-            return RESPONSE_FAIL_CASE
+        self._semantic = semantic
 
     async def retrieve_chat(
         self,
@@ -85,25 +46,23 @@ class RetrieveChat:
             response (str): The chat response generated for the query.
             is_outdomain (bool): True if the query is outside the domain scope, otherwise False.
         """
-        is_outdomain = False
         combined_retrieved_nodes, retrieved_nodes = await self._retriever.retrieve_nodes(query)
         response = await self._chat.generate_response(
             user_query=query,
             relevant_information=combined_retrieved_nodes
         )
-        processed_response = await self.post_processing(
-            result=response,
-            retrieved_nodes=retrieved_nodes
-        )
-        if processed_response in FAIL_CASE:
-            is_outdomain = True
-            
+        if response in FAIL_CASES:
+            return Chat(
+                response=RESPONSE_FAIL_CASE,
+                is_outdomain=False,
+                retrieved_nodes=[]
+            )
         list_nodes = []
         for retrieved_node in retrieved_nodes:
             list_nodes.append(retrieved_node.text)
         return Chat(
-            response=processed_response,
-            is_outdomain=is_outdomain,
+            response=response,
+            is_outdomain=False,
             retrieved_nodes=list_nodes
         )
 
@@ -124,18 +83,39 @@ class RetrieveChat:
         processed_query = await self._preprocess.preprocess_text(
             text_input=query
         )
+        if processed_query.is_short_chat:
+            return Chat(
+                response=processed_query.short_chat_response,
+                is_outdomain=True,
+                retrieved_nodes=[]
+            )
+        if processed_query.language is False:
+            return Chat(
+                response=processed_query.response,
+                is_outdomain=True,
+                retrieved_nodes=[]
+            )
         if processed_query.is_prompt_injection:
             return Chat(
-                response=PROMPT_INJECTION_ANNOUCEMENT,
+                response=processed_query.response,
                 is_outdomain=True,
                 retrieved_nodes=[]
             )
         if processed_query.is_outdomain:
-            response = await self._chat.funny_chat(
+            answer = await self._semantic.get_relevant_answer(
+                query=processed_query.query
+            )
+            if answer:
+                return Chat(
+                    response=answer,
+                    is_outdomain=True,
+                    retrieved_nodes=[]
+                )
+            result = await self._chat.funny_chat(
                 query=processed_query.query
             )
             return Chat(
-                response=response,
+                response=result,
                 is_outdomain=True,
                 retrieved_nodes=[]
             )

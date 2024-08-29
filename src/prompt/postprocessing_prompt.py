@@ -18,7 +18,11 @@ SOURCE = """
 {link_text}
 """
 
-FAIL_CASE = "Nội dung bạn đề cập không nằm trong phạm vi của nhà trường."
+FAIL_CASES = [
+    "Nội dung bạn đề cập không nằm trong phạm vi của nhà trường.",
+    None,
+    "None"
+]
 
 RESPONSE_FAIL_CASE = """
 Xin chào! Rất tiếc, tôi chưa thể cung cấp thông tin mà bạn đang tìm kiếm vào lúc này. Nhưng đừng lo, tôi luôn sẵn sàng hỗ trợ bạn!
