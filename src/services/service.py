@@ -45,7 +45,8 @@ MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
 DOMAIN_CLF_MODEL = convert_value(os.getenv('DOMAIN_CLF_MODEL'))
 DOMAIN_CLF_VECTORIZER = convert_value(os.getenv('DOMAIN_CLF_VECTORIZER'))
 PROMPT_INJECTION_MODEL = convert_value(os.getenv('PROMPT_INJECTION_MODEL'))
-PROMPT_INJECTION_VECTORIZER = convert_value(os.getenv('PROMPT_INJECTION_VECTORIZER'))
+PROMPT_INJECTION_VECTORIZER = convert_value(
+    os.getenv('PROMPT_INJECTION_VECTORIZER'))
 TONE_MODEL = convert_value(os.getenv('TONE_MODEL'))
 URL = convert_value(os.getenv('LABEL_LIST'))
 
@@ -59,7 +60,8 @@ class Service:
         """
         Initializes the Service class with LLM and embedding models.
         """
-        self._device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        self._device = torch.device(
+            "cuda") if torch.cuda.is_available() else torch.device("cpu")
         genai.configure(
             api_key=GEMINI_API_KEY
         )
@@ -75,8 +77,10 @@ class Service:
         self._prompt_injection_vectorizer = joblib.load(
             filename=PROMPT_INJECTION_VECTORIZER
         )
-        self._tone_tokenizer = AutoTokenizer.from_pretrained(TONE_MODEL, add_prefix_space=True)
-        self._tone_model = AutoModelForTokenClassification.from_pretrained(TONE_MODEL)
+        self._tone_tokenizer = AutoTokenizer.from_pretrained(
+            TONE_MODEL, add_prefix_space=True)
+        self._tone_model = AutoModelForTokenClassification.from_pretrained(
+            TONE_MODEL).to(self._device)
         self._generation_config = {
             "temperature": TEMPERATURE,
             "top_p": TOP_P,
