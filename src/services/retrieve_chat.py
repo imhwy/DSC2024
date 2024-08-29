@@ -83,21 +83,22 @@ class RetrieveChat:
         processed_query = await self._preprocess.preprocess_text(
             text_input=query
         )
+        print(processed_query)
         if processed_query.is_short_chat:
             return Chat(
-                response=processed_query.short_chat_response,
+                response=processed_query.query,
                 is_outdomain=True,
                 retrieved_nodes=[]
             )
         if processed_query.language is False:
             return Chat(
-                response=processed_query.response,
+                response=processed_query.query,
                 is_outdomain=True,
                 retrieved_nodes=[]
             )
         if processed_query.is_prompt_injection:
             return Chat(
-                response=processed_query.response,
+                response=processed_query.query,
                 is_outdomain=True,
                 retrieved_nodes=[]
             )

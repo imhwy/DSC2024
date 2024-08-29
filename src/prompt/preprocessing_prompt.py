@@ -302,7 +302,7 @@ FILLTER_WORDS = [
 ]
 
 SHORT_CHAT = [
-    "xin chào", "chào", "hello", "hi",
+    "xin chào", "chào", "hello", "hi", "xin chao", "xin chào UITAdminBot"
     "bạn khỏe không", "ban khoe khong", "khỏe không", "khoe khong",
     "dạ vâng", "da vang", "vâng", "vang",
     "cảm ơn bạn", "cam on ban", "cảm ơn", "cam on", "thank you", "thanks",

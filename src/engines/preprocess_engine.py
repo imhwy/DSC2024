@@ -492,11 +492,12 @@ class PreprocessQuestion:
         if is_short_chat:
             query = self.get_response(
                 clean_text_input, SHORT_CHAT, RESPONSE_DICT, threshold=0.9)
-            return ShortChat(
+            return ProcessedData(
                 query=query,
-                clean_query=clean_text_input,
-                is_short_chat=True,
-                short_chat_response=query
+                language=language,
+                is_prompt_injection=prompt_injection,
+                is_outdomain=outdomain,
+                is_short_chat=is_short_chat
             )
 
         if short_chat is False:
@@ -506,16 +507,22 @@ class PreprocessQuestion:
                 corrected_text = self.correct_vietnamese_text(clean_text_input)
             else:
                 language = False
-                return UnsupportedLanguage(
+                return ProcessedData(
+                    query=RESPONSE_UNSUPPORTED_LANGUAGE,
                     language=language,
-                    response=RESPONSE_UNSUPPORTED_LANGUAGE
+                    is_prompt_injection=prompt_injection,
+                    is_outdomain=outdomain,
+                    is_short_chat=short_chat
                 )
             if language:
                 if self.is_prompt_injection(corrected_text):
                     prompt_injection = True
-                    return PromptInjection(
+                    return ProcessedData(
+                        query=RESPONSE_PROMPT_INJECTION,
+                        language=language,
                         is_prompt_injection=prompt_injection,
-                        response=RESPONSE_PROMPT_INJECTION
+                        is_outdomain=outdomain,
+                        is_short_chat=short_chat
                     )
                 domain = self.classify_domain(corrected_text)
                 if domain == 0:

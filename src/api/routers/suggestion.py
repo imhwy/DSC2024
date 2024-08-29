@@ -120,7 +120,7 @@ async def upload_suggestion(
         HTTPException: If an internal server error occurs, a 500 status code is returned.
     """
     try:
-        response = await service.retrieve_chat_engine.retrieve_chat(
+        response = await service.chat_engine.funny_chat(
             query=question
         )
         service.suggestion_repository.add_suggestion(

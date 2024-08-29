@@ -129,10 +129,15 @@ class Service:
             device_type=self._device,
             label_list=self._label_list
         )
+        self._suggestion_repository = SuggestionRepository()
+        self._semantic_engine = SemanticSearch(
+            index=self._vector_database._suggestion_index
+        )
         self._retrieve_chat_engine = RetrieveChat(
             retriever=self._retriever,
             chat=self._chat_engine,
-            preprocess=self._preprocess_engine
+            preprocess=self._preprocess_engine,
+            semantic=self._semantic_engine
         )
         self._chat_repository = ChatRepository()
         self._file_repository = FileRepository()
@@ -141,10 +146,6 @@ class Service:
             file_repository=self._file_repository,
             general_loader=self._general_loader,
             vector_database=self._vector_database
-        )
-        self._suggestion_repository = SuggestionRepository()
-        self._semantic_engine = SemanticSearch(
-            index=self._vector_database._suggestion_index
         )
 
     @property
