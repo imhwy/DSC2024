@@ -37,3 +37,6 @@ motor==3.5.1
 underthesea==6.8.4
 openpyxl==3.1.5
 xlrd==2.0.1
+scrapegraphai==1.13.3
+burr==0.22.1
+fasttext==0.9.3
