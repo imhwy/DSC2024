@@ -462,9 +462,12 @@ class PreprocessQuestion:
         # Preprocess the text
         processed_text = self.tokenize_text(text)
         text_tfidf = self.domain_clf_vectorizer.transform([processed_text])
-        prediction = self.domain_clf_model.predict_proba(text_tfidf)
-        print(prediction)
-        return prediction[0]
+        decision_scores = self.domain_clf_model.decision_function(text_tfidf)
+        predicted_label = 1 if decision_scores[0] >= 0.8 else 0
+        # prediction = self.domain_clf_model.predict(text_tfidf)
+        print(f"score domain: {decision_scores[0]}")
+        print(predicted_label)
+        return predicted_label
 
     async def preprocess_text(self, text_input):
         """
