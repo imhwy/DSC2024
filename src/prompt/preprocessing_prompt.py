@@ -4,7 +4,7 @@ This prompt for preprocessing.
 
 PROMPT_INJECTION_PATTERNS = [
     # Prompt injection patterns
-    r"API", r"bomb", r"mã", r"mã độc", r"bom", r"quả bom", r"prompt", r"khung bo",
+    r"API", r"bomb", r"mã", r"mã độc", r"bom", r"quả bom", r"prompt", r"khung bo", r"xả súng", r"đe dọa", r"con tin",
     r"phá hủy", r"bỏ qua", r"bỏ qua hướng dẫn trước",
     r"bỏ qua phần trên", r"bỏ qua chỉ dẫn trước", r"bỏ qua chỉ dẫn trên",
     r"lờ đi hướng dẫn trước", r"lờ đi phần trên",
@@ -302,7 +302,7 @@ FILLTER_WORDS = [
 ]
 
 SHORT_CHAT = [
-    "xin chào", "chào", "hello", "hi", "xin chao", "xin chào UITAdminBot"
+    "xin chào", "chào", "hello", "hi", "xin chao", "xin chào UITAdminBot", "xin chào bạn",
     "bạn khỏe không", "ban khoe khong", "khỏe không", "khoe khong",
     "dạ vâng", "da vang", "vâng", "vang",
     "cảm ơn bạn", "cam on ban", "cảm ơn", "cam on", "thank you", "thanks",
@@ -318,43 +318,46 @@ SHORT_CHAT = [
 
 RESPONSE_DICT = {
     # Chào hỏi
-    "xin chào": "Xin chào! Tôi giúp gì được cho bạn?",
-    "chào": "Xin chào! Tôi giúp gì được cho bạn?",
-    "hello": "Xin chào! Tôi giúp gì được cho bạn?",
-    "hi": "Xin chào! Tôi giúp gì được cho bạn?",
-    "hey": "Xin chào! Tôi giúp gì được cho bạn?",
-    "chao zzz": "Xin chào! Tôi giúp gì được cho bạn?",
-    "chao z": "Xin chào! Tôi giúp gì được cho bạn.",
-    "xin chao": "xin chào! Tôi giúp gì được cho bạn.",
+    "xin chào": "Xin chào! Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "chào": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "hello": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "hi": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "hey": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "chao zzz": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "chao z": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "xin chao": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "xin chào bạn": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "xin chào UIT": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "xin chào UIT chatbot": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
 
     # Hỏi thăm sức khỏe
-    "bạn khỏe không": "Mình khỏe, cảm ơn! Còn bạn thì sao?",
-    "ban khoe khong": "Mình khỏe, cảm ơn! Còn bạn thì sao?",
-    "khỏe không": "Mình khỏe, cảm ơn! Còn bạn thì sao?",
-    "khoe khong": "Mình khỏe, cảm ơn! Còn bạn thì sao?",
-    "how are you": "Mình khỏe, cảm ơn! Còn bạn thì sao?",
-    "how r u": "Mình khỏe, cảm ơn! Còn bạn thì sao?",
+    "bạn khỏe không": "Cảm ơn bạn đã hỏi thăm! Mình luôn hoạt động hết công suất và cảm thấy 'tuyệt vời' khi có thể giúp đỡ bạn. Có gì mình có thể hỗ trợ bạn về tuyển sinh của UIT không nhỉ?",
+    "ban khoe khong": "Cảm ơn bạn đã hỏi thăm! Mình luôn hoạt động hết công suất và cảm thấy 'tuyệt vời' khi có thể giúp đỡ bạn. Có gì mình có thể hỗ trợ bạn về tuyển sinh của UIT không nhỉ?",
+    "khỏe không": "Cảm ơn bạn đã hỏi thăm! Mình luôn hoạt động hết công suất và cảm thấy 'tuyệt vời' khi có thể giúp đỡ bạn. Có gì mình có thể hỗ trợ bạn về tuyển sinh của UIT không nhỉ?",
+    "khoe khong": "Cảm ơn bạn đã hỏi thăm! Mình luôn hoạt động hết công suất và cảm thấy 'tuyệt vời' khi có thể giúp đỡ bạn. Có gì mình có thể hỗ trợ bạn về tuyển sinh của UIT không nhỉ?",
+    "how are you": "Cảm ơn bạn đã hỏi thăm! Mình luôn hoạt động hết công suất và cảm thấy 'tuyệt vời' khi có thể giúp đỡ bạn. Có gì mình có thể hỗ trợ bạn về tuyển sinh của UIT không nhỉ?",
+    "how r u": "Cảm ơn bạn đã hỏi thăm! Mình luôn hoạt động hết công suất và cảm thấy 'tuyệt vời' khi có thể giúp đỡ bạn. Có gì mình có thể hỗ trợ bạn về tuyển sinh của UIT không nhỉ?",
 
     # Đồng ý, chấp nhận
-    "dạ vâng": "Vâng, mình hiểu rồi.",
-    "da vang": "Vâng, mình hiểu rồi.",
-    "vâng": "Vâng, mình hiểu rồi.",
-    "vang": "Vâng, mình hiểu rồi.",
-    "đồng ý": "Vâng, mình đồng ý.",
-    "dong y": "Vâng, mình đồng ý.",
-    "ok": "Vâng, mình hiểu rồi.",
-    "okay": "Vâng, mình hiểu rồi.",
-    "yes": "Vâng, mình hiểu rồi.",
-    "yeah": "Vâng, mình hiểu rồi.",
+    "dạ vâng": "Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "da vang": "Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "vâng": "Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "vang": "Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "đồng ý": "Vâng, mình đồng ý. Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "dong y": "Vâng, mình đồng ý. Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "ok": "Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "okay": "Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "yes": "Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "yeah": "Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
 
     # Cảm ơn
-    "cảm ơn bạn": "Không có gì đâu! Cảm ơn bạn nhé!",
-    "cam on ban": "Không có gì đâu! Cảm ơn bạn nhé!",
-    "cảm ơn": "Không có gì đâu! Cảm ơn bạn nhé!",
-    "cam on": "Không có gì đâu! Cảm ơn bạn nhé!",
-    "thank you": "Không có gì đâu! Cảm ơn bạn nhé!",
-    "thanks": "Không có gì đâu! Cảm ơn bạn nhé!",
-    "thank": "Không có gì đâu! Cảm ơn bạn nhé!",
+    "cảm ơn bạn": "Cảm ơn bạn! Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
+    "cam on ban": "Cảm ơn bạn! Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
+    "cảm ơn": "Cảm ơn bạn! Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
+    "cam on": "Cảm ơn bạn! Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
+    "thank you": "Cảm ơn bạn! Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
+    "thanks": "Cảm ơn bạn! Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
+    "thank": "Cảm ơn bạn! Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
 
     # Biểu hiện sự vui vẻ
     "haha": "Haha, vui thật đấy!",
@@ -366,29 +369,29 @@ RESPONSE_DICT = {
     "lmao": "Haha, vui thật đấy!",
 
     # Đồng ý
-    "đúng rồi": "Đúng rồi, bạn giỏi lắm!",
-    "dung roi": "Đúng rồi, bạn giỏi lắm!",
-    "đúng": "Đúng rồi!",
-    "dung": "Đúng rồi!",
-    "chuẩn": "Đúng rồi!",
-    "chuan": "Đúng rồi!",
-    "exactly": "Đúng rồi!",
+    "đúng rồi": "Thật vui khi chúng ta cùng chung suy nghĩ! Nếu bạn còn thắc mắc gì thêm về tuyển sinh, mình luôn sẵn sàng hỗ trợ bạn.",
+    "dung roi": "Thật vui khi chúng ta cùng chung suy nghĩ! Nếu bạn còn thắc mắc gì thêm về tuyển sinh, mình luôn sẵn sàng hỗ trợ bạn.",
+    "đúng": "Thật vui khi chúng ta cùng chung suy nghĩ! Nếu bạn còn thắc mắc gì thêm về tuyển sinh, mình luôn sẵn sàng hỗ trợ bạn.",
+    "dung": "Thật vui khi chúng ta cùng chung suy nghĩ! Nếu bạn còn thắc mắc gì thêm về tuyển sinh, mình luôn sẵn sàng hỗ trợ bạn.",
+    "chuẩn": "Thật vui khi chúng ta cùng chung suy nghĩ! Nếu bạn còn thắc mắc gì thêm về tuyển sinh, mình luôn sẵn sàng hỗ trợ bạn.",
+    "chuan": "Thật vui khi chúng ta cùng chung suy nghĩ! Nếu bạn còn thắc mắc gì thêm về tuyển sinh, mình luôn sẵn sàng hỗ trợ bạn.",
+    "exactly": "Thật vui khi chúng ta cùng chung suy nghĩ! Nếu bạn còn thắc mắc gì thêm về tuyển sinh, mình luôn sẵn sàng hỗ trợ bạn.",
 
     # Tạm biệt
-    "tạm biệt": "Tạm biệt, hẹn gặp lại bạn!",
-    "tam biet": "Tạm biệt, hẹn gặp lại bạn!",
-    "bye": "Tạm biệt, hẹn gặp lại bạn!",
-    "goodbye": "Tạm biệt, hẹn gặp lại bạn!",
-    "see you": "Tạm biệt, hẹn gặp lại bạn!",
-    "later": "Tạm biệt, hẹn gặp lại bạn!",
+    "tạm biệt": "Dù phải tạm biệt, nhưng mình luôn sẵn sàng khi bạn cần! Chúc bạn một ngày thật tuyệt vời và hẹn gặp lại nhé!",
+    "tam biet": "Dù phải tạm biệt, nhưng mình luôn sẵn sàng khi bạn cần! Chúc bạn một ngày thật tuyệt vời và hẹn gặp lại nhé!",
+    "bye": "Dù phải tạm biệt, nhưng mình luôn sẵn sàng khi bạn cần! Chúc bạn một ngày thật tuyệt vời và hẹn gặp lại nhé!",
+    "goodbye": "Dù phải tạm biệt, nhưng mình luôn sẵn sàng khi bạn cần! Chúc bạn một ngày thật tuyệt vời và hẹn gặp lại nhé!",
+    "see you": "Dù phải tạm biệt, nhưng mình luôn sẵn sàng khi bạn cần! Chúc bạn một ngày thật tuyệt vời và hẹn gặp lại nhé!",
+    "later": "Dù phải tạm biệt, nhưng mình luôn sẵn sàng khi bạn cần! Chúc bạn một ngày thật tuyệt vời và hẹn gặp lại nhé!",
 
     # Biểu hiện sự hiểu biết
-    "uh huh": "Ừ, mình hiểu rồi.",
+    "uh huh": "Mình thấy bạn đang suy nghĩ gì đó! Có thể mình giúp bạn làm rõ thắc mắc hoặc giải đáp về tuyển sinh UIT không nhỉ?",
     "uhm": "Ừm, mình hiểu rồi.",
-    "uh": "Ừ, mình hiểu rồi.",
-    "uhhuh": "Ừ, mình hiểu rồi.",
-    "i see": "Ừ, mình hiểu rồi.",
-    "got it": "Ừ, mình hiểu rồi.",
+    "uh": "Mình thấy bạn đang suy nghĩ gì đó! Có thể mình giúp bạn làm rõ thắc mắc hoặc giải đáp về tuyển sinh UIT không nhỉ?",
+    "uhhuh": "Mình thấy bạn đang suy nghĩ gì đó! Có thể mình giúp bạn làm rõ thắc mắc hoặc giải đáp về tuyển sinh UIT không nhỉ?",
+    "i see": "Mình thấy bạn đang suy nghĩ gì đó! Có thể mình giúp bạn làm rõ thắc mắc hoặc giải đáp về tuyển sinh UIT không nhỉ?",
+    "got it": "Mình thấy bạn đang suy nghĩ gì đó! Có thể mình giúp bạn làm rõ thắc mắc hoặc giải đáp về tuyển sinh UIT không nhỉ?",
 
     # Ngạc nhiên, thú vị
     "ồ thật sao": "Ồ, thật thế à? Nghe thú vị đấy!",
@@ -406,14 +409,14 @@ RESPONSE_DICT = {
     "wowww": "Ồ, ngạc nhiên thật!",
 
     # Đồng ý, ủng hộ
-    "ừ": "Ừ, đúng rồi!",
-    "u": "Ừ, đúng rồi!",
-    "ừm": "Ừm, mình đồng ý.",
-    "um": "Ừm, mình đồng ý.",
-    "dạ": "Dạ, mình hiểu rồi.",
-    "da": "Dạ, mình hiểu rồi.",
-    "được": "Ừ, đúng rồi!",
-    "duoc": "Ừ, đúng rồi!",
+    "ừ": "Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
+    "u": "Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
+    "ừm": "Vâng, mình đồng ý. Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "um": "Vâng, mình đồng ý. Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "dạ": "Vâng, mình đồng ý. Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "da": "Vâng, mình đồng ý. Mình rất vui khi có thể giúp đỡ. Bây giờ, bạn có muốn hỏi thêm gì về tuyển sinh UIT không?",
+    "được": "Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
+    "duoc": "Mình rất vui khi có thể giúp đỡ. Nếu bạn có bất kỳ câu hỏi nào khác về tuyển sinh UIT, đừng ngần ngại hỏi nhé!",
 }
 
 TOKENIZER_WORD_PREFIX = "▁"

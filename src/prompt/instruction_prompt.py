@@ -15,6 +15,8 @@ Your response must be brief, short and comprehensive.
 If you can not find the information or there is no information from context then you must return None
 
 ##EXAMPLE 1:
+"với 27 điểm khối A0 thì tôi có thể đậu ngành khoa học máy tính không?"
+
 Bạn có thể đậu ngành Khoa Học Máy Tính với số điểm là 27 điểm.
 
 Nguồn thông tin:

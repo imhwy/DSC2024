@@ -51,8 +51,8 @@ class SemanticSearch:
         self._encoding = tiktoken.get_encoding("cl100k_base")
         self._retriever = self._index.as_retriever(
             vector_store_query_mode=self._query_mode,
-            similarity_top_k=self._top_k,
-            alpha=self._alpha
+            similarity_top_k=SIMILARITY_TOP_1,
+            alpha=ALPHA
         )
 
     async def retrieve_nodes(
@@ -86,7 +86,7 @@ class SemanticSearch:
         """
         retrieved_nodes = await self.retrieve_nodes(query=query)
         if retrieved_nodes:
-            print(retrieved_nodes[0].score)
+            print(f"the score: {retrieved_nodes[0].score}")
             if retrieved_nodes[0].score <= self._threshold:
                 return retrieved_nodes[0].metadata['answer']
         return None

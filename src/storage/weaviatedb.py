@@ -202,19 +202,11 @@ class WeaviateDB:
         if question and answer:
             document = [
                 Document(
-                    text=question,
+                    text=answer,
                     metadata={
                         "question": question,
                         "answer": answer
-                    },
-                    excluded_embed_metadata_keys=[
-                        "question",
-                        "answer"
-                    ],
-                    excluded_llm_metadata_keys=[
-                        "question",
-                        "answer"
-                    ]
+                    }
                 )
             ]
             return self.documents_to_nodes(documents=document)

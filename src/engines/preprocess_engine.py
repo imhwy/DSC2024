@@ -462,7 +462,8 @@ class PreprocessQuestion:
         # Preprocess the text
         processed_text = self.tokenize_text(text)
         text_tfidf = self.domain_clf_vectorizer.transform([processed_text])
-        prediction = self.domain_clf_model.predict(text_tfidf)
+        prediction = self.domain_clf_model.predict_proba(text_tfidf)
+        print(prediction)
         return prediction[0]
 
     async def preprocess_text(self, text_input):

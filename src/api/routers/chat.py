@@ -1,7 +1,7 @@
 """
 This module defines FastAPI endpoints for chat.
 """
-
+import time
 from fastapi import (status,
                      Depends,
                      APIRouter,
@@ -46,9 +46,12 @@ async def chat_domain(
             detail="Query is required"
         )
     try:
+        start_time = time.time()
         result = await service.retrieve_chat_engine.preprocess_query(
             query=request_chat.query
         )
+        end_time = time.time()
+        print(f"Full processing time: {end_time - start_time}")
         await service.chat_repository.add_chat_domains(
             query=request_chat.query,
             answer=result.response,

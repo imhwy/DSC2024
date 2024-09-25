@@ -1,18 +1,12 @@
 """
 this service provides retrieve and chat module for chatbot
 """
-
-import json
-from typing import List
-from llama_index.core.schema import TextNode
-
 from src.engines.chat_engine import ChatEngine
 from src.engines.retriever_engine import HybridRetriever
 from src.engines.semantic_engine import SemanticSearch
 from src.engines.preprocess_engine import PreprocessQuestion
 from src.models.chat import Chat
 from src.prompt.postprocessing_prompt import FAIL_CASES, RESPONSE_FAIL_CASE
-from src.utils.utility import format_document
 
 
 class RetrieveChat:

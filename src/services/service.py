@@ -12,6 +12,7 @@ import torch
 from huggingface_hub import hf_hub_download
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import Settings
 from transformers import (AutoTokenizer,
                           AutoModelForTokenClassification)
@@ -45,8 +46,7 @@ MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
 DOMAIN_CLF_MODEL = convert_value(os.getenv('DOMAIN_CLF_MODEL'))
 DOMAIN_CLF_VECTORIZER = convert_value(os.getenv('DOMAIN_CLF_VECTORIZER'))
 PROMPT_INJECTION_MODEL = convert_value(os.getenv('PROMPT_INJECTION_MODEL'))
-PROMPT_INJECTION_VECTORIZER = convert_value(
-    os.getenv('PROMPT_INJECTION_VECTORIZER'))
+PROMPT_INJECTION_VECTORIZER = convert_value(os.getenv('PROMPT_INJECTION_VECTORIZER'))
 TONE_MODEL = convert_value(os.getenv('TONE_MODEL'))
 URL = convert_value(os.getenv('LABEL_LIST'))
 
@@ -80,7 +80,8 @@ class Service:
         self._tone_tokenizer = AutoTokenizer.from_pretrained(
             TONE_MODEL, add_prefix_space=True)
         self._tone_model = AutoModelForTokenClassification.from_pretrained(
-            TONE_MODEL).to(self._device)
+            TONE_MODEL
+        ).to(self._device)
         self._generation_config = {
             "temperature": TEMPERATURE,
             "top_p": TOP_P,
@@ -99,9 +100,14 @@ class Service:
             model=OPENAI_MODEL,
             temperature=TEMPERATURE_MODEL
         )
-        self._embed_model = OpenAIEmbedding(
-            api_key=OPENAI_API_KEY,
-            model=OPENAI_EMBED_MODEL
+        # self._embed_model = OpenAIEmbedding(
+        #     api_key=OPENAI_API_KEY,
+        #     model=OPENAI_EMBED_MODEL
+        # )
+        self._embed_model = HuggingFaceEmbedding(
+            model_name="hiieu/halong_embedding",
+            truncate_dim=768,
+            trust_remote_code=True
         )
         self._gemini = genai.GenerativeModel(
             model_name=GEMINI_LLM_MODEL,
