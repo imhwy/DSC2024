@@ -196,6 +196,7 @@ UITAdminBot
 """
 
 TERMS_DICT = {
+    "HUTECH": ["đại học công nghệ"],
     "THPT": ["trung học phổ thông", "TH PT", "trung học PT", "TH phổ thông", "th-pt", "high school", "secondary education"],
     "đánh giá năng lực": ["dgnl", "đgnl", "đg nl", "kỳ thi ĐHQG TPHCM", "kỳ thi ĐHQG", "đánh giá NL", "competency assessment", "aptitude test"],
     "UIT": ["trường đại học công nghệ thông tin", "trường đại học UIT", "trường UIT", "University of Information Technology", "UIT"],

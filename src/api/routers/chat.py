@@ -52,6 +52,7 @@ async def chat_domain(
         )
         end_time = time.time()
         print(f"Full processing time: {end_time - start_time}")
+        print(result.response)
         await service.chat_repository.add_chat_domains(
             query=request_chat.query,
             answer=result.response,
