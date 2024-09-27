@@ -1,6 +1,7 @@
 """
 ChatEngine: A class designed to facilitate conversation using a language model.
 """
+import re
 import json
 from typing import List
 from llama_index.llms.openai import OpenAI
@@ -101,6 +102,7 @@ class ChatEngine:
         response = await self._language_model.acomplete(prompt)
         try:
             query_processed = json.loads(response.text)
+            query_processed = re.sub(r"```json|```", "", query_processed)
         except json.JSONDecodeError as e:
             print("JSON Error:", e)
             query_processed = query
