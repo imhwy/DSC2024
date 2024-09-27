@@ -52,6 +52,7 @@ class ChatRepository:
 
     async def add_chat_domains(
         self,
+        room_id: str,
         query: str,
         answer: str,
         retrieved_nodes: List[str],
@@ -75,6 +76,7 @@ class ChatRepository:
         timestamp = get_datetime()
         chat_instance = ChatDomain(
             Id=chat_domain_id,
+            room_id=room_id,
             query=query,
             answer=answer,
             retrieved_nodes=retrieved_nodes,

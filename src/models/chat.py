@@ -34,6 +34,7 @@ class ChatDomain(BaseModel):
                              the expected domain of questions.
     """
     Id: str
+    room_id: str
     query: str
     answer: str
     retrieved_nodes: List[str]
