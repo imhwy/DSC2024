@@ -44,9 +44,7 @@ TOP_P = convert_value(os.getenv('TOP_P'))
 TOP_K = convert_value(os.getenv('TOP_K'))
 MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
 DOMAIN_CLF_MODEL = convert_value(os.getenv('DOMAIN_CLF_MODEL'))
-DOMAIN_CLF_VECTORIZER = convert_value(os.getenv('DOMAIN_CLF_VECTORIZER'))
 PROMPT_INJECTION_MODEL = convert_value(os.getenv('PROMPT_INJECTION_MODEL'))
-PROMPT_INJECTION_VECTORIZER = convert_value(os.getenv('PROMPT_INJECTION_VECTORIZER'))
 TONE_MODEL = convert_value(os.getenv('TONE_MODEL'))
 URL = convert_value(os.getenv('LABEL_LIST'))
 
@@ -68,14 +66,8 @@ class Service:
         self._domain_clf_model = joblib.load(
             filename=DOMAIN_CLF_MODEL
         )
-        self._domain_clf_vectorizer = joblib.load(
-            filename=DOMAIN_CLF_VECTORIZER
-        )
         self._prompt_injection_model = joblib.load(
             filename=PROMPT_INJECTION_MODEL
-        )
-        self._prompt_injection_vectorizer = joblib.load(
-            filename=PROMPT_INJECTION_VECTORIZER
         )
         self._tone_tokenizer = AutoTokenizer.from_pretrained(
             TONE_MODEL, add_prefix_space=True)
@@ -128,12 +120,10 @@ class Service:
         )
         self._preprocess_engine = PreprocessQuestion(
             domain_clf_model=self._domain_clf_model,
-            domain_clf_vectorizer=self._domain_clf_vectorizer,
             lang_detect_model=self._lang_detector,
             tonemark_model=self._tone_model,
             tonemark_tokenizer=self._tone_tokenizer,
             prompt_injection_model=self._prompt_injection_model,
-            prompt_injection_vectorizer=self._prompt_injection_vectorizer,
             device_type=self._device,
             label_list=self._label_list
         )
