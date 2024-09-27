@@ -136,3 +136,13 @@ class CRUDDocuments():
         if limit > 0:
             cursor = cursor.limit(limit)
         return cursor
+
+    async def find_many_doc(self, obj):
+        """
+        """
+        return self.collection.find(filter=obj)
+
+    async def delete_many_doc(self, obj):
+        """
+        """
+        return self.collection.delete_many(filter=obj)

@@ -98,3 +98,29 @@ class ChatRepository:
             limit=10
         )
         return latest_chats
+
+    async def get_room_chat(
+        self,
+        room_id: str
+    ):
+        """
+        """
+        filter_obj = {"room_id": room_id}
+        records = self.collection.find_one_doc(
+            obj=filter_obj
+        )
+        return records
+
+    async def delete_room_chat(
+        self,
+        room_id: str
+    ):
+        """
+        """
+        filter_obj = {"room_id": room_id}
+        records = await self.collection.delete_many_doc(
+            obj=filter_obj
+        )
+        if records.deleted_count > 0:
+            return True
+        return False

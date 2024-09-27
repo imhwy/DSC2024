@@ -5,7 +5,8 @@ import time
 from fastapi import (status,
                      Depends,
                      APIRouter,
-                     HTTPException)
+                     HTTPException,
+                     Response)
 
 from src.services.service import Service
 from src.api.dependencies.dependency import get_service
@@ -68,3 +69,41 @@ async def chat_domain(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)) from e
+
+
+@chat_router.delete(
+    "/deleteChat",
+    status_code=status.HTTP_200_OK
+)
+async def history_chat_deletion(
+    room_id: str,
+    service: Service = Depends(get_service)
+) -> Response:
+    """
+    """
+    if not room_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Room ID is required"
+        )
+    try:
+        records = await service.chat_repository.get_room_chat(
+            room_id=room_id
+        )
+        if not records:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Room ID not found"
+            )
+        await service.chat_repository.delete_room_chat(
+            room_id=room_id
+        )
+        return Response(
+            status_code=status.HTTP_201_CREATED,
+            content="Deleted room chat successfully"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        ) from e
