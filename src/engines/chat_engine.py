@@ -1,11 +1,12 @@
 """
 ChatEngine: A class designed to facilitate conversation using a language model.
 """
-
+import json
 from typing import List
 from llama_index.llms.openai import OpenAI
 
-from src.prompt.instruction_prompt import PROMPT
+from src.prompt.instruction_prompt import (PROMPT,
+                                           CONVERSATION_TRACKING)
 from src.prompt.funny_chat_prompt import PROMPT_FUNNY_FLOW
 from src.storage.weaviatedb import WeaviateDB
 from src.repositories.suggestion_repository import SuggestionRepository
@@ -85,3 +86,22 @@ class ChatEngine:
             answer=response.text
         )
         return response.text
+
+    async def conversation_tracking(
+        self,
+        history: str,
+        query: str
+    ) -> str:
+        """
+        """
+        prompt = CONVERSATION_TRACKING.format(
+            history=history,
+            query=query
+        )
+        response = await self._language_model.acomplete(prompt)
+        try:
+            query_processed = json.loads(response.text)
+        except json.JSONDecodeError as e:
+            print("JSON Error:", e)
+            query_processed = query
+        return query_processed

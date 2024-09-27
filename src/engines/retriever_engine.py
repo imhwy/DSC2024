@@ -43,6 +43,12 @@ class HybridRetriever:
             alpha=ALPHA
         )
 
+    @property
+    def token_counter(self):
+        """
+        """
+        return self._encoding
+
     async def combine_retrieved_nodes(
         self,
         retrieved_nodes: List[TextNode],

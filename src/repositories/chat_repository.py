@@ -84,3 +84,17 @@ class ChatRepository:
             is_outdomain=is_out_of_domain
         )
         await self.add_one_record(chat=chat_instance)
+
+    async def get_last_chat(
+        self,
+        room_id: str
+    ) -> ChatDomain:
+        """
+        """
+        filter_obj = {"room_id": room_id}
+        latest_chats = await self.collection.find_with_filter(
+            filter_obj=filter_obj,
+            sort_by=("time", -1),
+            limit=10
+        )
+        return latest_chats

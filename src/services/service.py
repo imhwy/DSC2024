@@ -47,6 +47,7 @@ DOMAIN_CLF_MODEL = convert_value(os.getenv('DOMAIN_CLF_MODEL'))
 PROMPT_INJECTION_MODEL = convert_value(os.getenv('PROMPT_INJECTION_MODEL'))
 TONE_MODEL = convert_value(os.getenv('TONE_MODEL'))
 URL = convert_value(os.getenv('LABEL_LIST'))
+MAX_HISTORY_TOKENS = convert_value(os.getenv('MAX_HISTORY_TOKENS'))
 
 
 class Service:
@@ -130,13 +131,15 @@ class Service:
         self._semantic_engine = SemanticSearch(
             index=self._vector_database._suggestion_index
         )
+        self._chat_repository = ChatRepository()
         self._retrieve_chat_engine = RetrieveChat(
             retriever=self._retriever,
             chat=self._chat_engine,
             preprocess=self._preprocess_engine,
-            semantic=self._semantic_engine
+            semantic=self._semantic_engine,
+            chat_history_tracker=self._chat_repository,
+            max_chat_token=MAX_OUTPUT_TOKENS
         )
-        self._chat_repository = ChatRepository()
         self._file_repository = FileRepository()
         self._general_loader = GeneralLoader()
         self._file_management = FileManagement(

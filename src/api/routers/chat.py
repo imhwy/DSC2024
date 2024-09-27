@@ -48,11 +48,11 @@ async def chat_domain(
     try:
         start_time = time.time()
         result = await service.retrieve_chat_engine.preprocess_query(
-            query=request_chat.query
+            query=request_chat.query,
+            room_id=request_chat.room_id
         )
         end_time = time.time()
         print(f"Full processing time: {end_time - start_time}")
-        print(result.response)
         await service.chat_repository.add_chat_domains(
             room_id=request_chat.room_id,
             query=request_chat.query,
