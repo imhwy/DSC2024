@@ -162,7 +162,7 @@ class RetrieveChat:
             )
             conversation_tracking = await self._chat.conversation_tracking(
                 history=history_chat,
-                query=query
+                query=processed_query.query
             )
             if isinstance(conversation_tracking, dict):
                 if conversation_tracking["is_answer"]:

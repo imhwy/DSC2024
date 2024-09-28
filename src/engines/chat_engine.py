@@ -101,8 +101,9 @@ class ChatEngine:
         )
         response = await self._language_model.acomplete(prompt)
         try:
-            query_processed = json.loads(response.text)
-            query_processed = re.sub(r"```json|```", "", query_processed)
+            string_processed = re.sub(r"```json|```", "", response.text)
+            print(string_processed)
+            query_processed = json.loads(string_processed)
         except json.JSONDecodeError as e:
             print("JSON Error:", e)
             query_processed = query

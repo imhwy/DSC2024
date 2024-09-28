@@ -196,10 +196,9 @@ UITAdminBot
 """
 
 TERMS_DICT = {
-    "HUTECH": ["đại học công nghệ"],
     "THPT": ["trung học phổ thông", "TH PT", "trung học PT", "TH phổ thông", "th-pt", "high school", "secondary education"],
     "đánh giá năng lực": ["dgnl", "đgnl", "đg nl", "kỳ thi ĐHQG TPHCM", "kỳ thi ĐHQG", "đánh giá NL", "competency assessment", "aptitude test"],
-    "UIT": ["trường đại học công nghệ thông tin", "trường đại học UIT", "trường UIT", "University of Information Technology", "UIT"],
+    "UIT": ["trường đại học UIT", "trường UIT", "University of Information Technology", "UIT"],
     "Bộ GD&ĐT": ["bộ giáo dục và đào tạo", "bộ giáo dục & đào tạo", "GDDT", "GD ĐT", "bộ GD-ĐT", "gdđt", "Ministry of Education and Training"],
     "kỹ thuật máy tính": ["ktmt", "kt mt", "kỹ thuật mt", "computer engineering", "computer tech", "ce"],
     "kỹ thuật phần mềm": ["ktpm", "công nghệ phần mềm", "kt phần mềm", "kt pm", "ktpt", "cnpt", "cnpm", "công nghệ pm", "cn phần mềm", "cmpn", "cpmn", "se", "software engineering", "software tech", "software engineer"],

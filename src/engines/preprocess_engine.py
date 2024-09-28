@@ -460,7 +460,7 @@ class PreprocessQuestion:
         score_prediction = self.domain_clf_model.predict_proba([processed_text])[
             0][0]
         print(f"score domain: {score_prediction}")
-        if score_prediction >= 0.3:
+        if score_prediction >= 0.8:
             return 0
         return 1
 
