@@ -456,11 +456,13 @@ class PreprocessQuestion:
             str: The predicted domain for the input text.
         """
         # Preprocess the text
+        if len(text) <= 30:
+            return 1
         processed_text = self.tokenize_text(text)
         score_prediction = self.domain_clf_model.predict_proba([processed_text])[
             0][0]
         print(f"score domain: {score_prediction}")
-        if score_prediction >= 0.8:
+        if score_prediction >= 0.9:
             return 0
         return 1
 

@@ -7,7 +7,8 @@ from typing import List
 from llama_index.llms.openai import OpenAI
 
 from src.prompt.instruction_prompt import (PROMPT,
-                                           CONVERSATION_TRACKING)
+                                           CONVERSATION_TRACKING,
+                                           REASONING_PROMPT)
 from src.prompt.funny_chat_prompt import PROMPT_FUNNY_FLOW
 from src.storage.weaviatedb import WeaviateDB
 from src.repositories.suggestion_repository import SuggestionRepository
@@ -108,3 +109,17 @@ class ChatEngine:
             print("JSON Error:", e)
             query_processed = query
         return query_processed
+
+    async def reasoning_query(
+        self,
+        query: str,
+        context: str
+    ) -> str:
+        """
+        """
+        prompt = REASONING_PROMPT.format(
+            query=query,
+            context=context
+        )
+        response = await self._language_model.acomplete(prompt)
+        return response.text

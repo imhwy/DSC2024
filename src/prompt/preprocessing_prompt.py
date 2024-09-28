@@ -420,3 +420,40 @@ RESPONSE_DICT = {
 }
 
 TOKENIZER_WORD_PREFIX = "▁"
+
+CALCULATION_TOKENS = [
+    "Điểm Toán", "Điểm Văn", "Điểm Anh", "Điểm Lý", "Điểm Hóa", "Điểm Sinh", "Điểm Sử",
+    "Điểm Địa", "Điểm GDCD", "Điểm tổng", "Điểm xét tuyển", "Điểm trung bình", "Điểm ưu tiên",
+    "Ngưỡng điểm", "Điểm cộng", "Điểm chuẩn", "Khối A", "Khối B", "Khối C", "Khối D",
+    "Tổ hợp môn", "Điểm sàn", "Điểm chuẩn ngành", "toán", "văn", "anh", "Lý", "Hóa",
+    "Sinh", "Sử", "Địa", "GDCD", "đánh giá năng lực", "năng lực", "chứng chỉ", "SAT", "điểm đgnl",
+
+    # Các biến thể không dấu, viết thường
+    "diem toan", "diem van", "diem anh", "diem ly", "diem hoa", "diem sinh",
+    "diem su", "diem dia", "diem gdcd", "diem tong", "diem xet tuyen", "diem trung binh",
+    "diem uu tien", "nguong diem", "diem cong", "diem chuan", "khoi a", "khoi b", "khoi c",
+    "khoi d", "to hop mon", "diem san", "diem chuan nganh", "toan", "van", "anh", "ly",
+    "hoa", "sinh", "su", "dia", "gdcd", "diem danh gia nang luc", "nang luc", "chung chi",
+    "sat", "diem dgnl",
+
+    # Từ đồng nghĩa và biến thể khác
+    "điểm thi", "điểm xét", "điểm trúng tuyển", "điểm học tập", "học bạ", "tổng điểm",
+    "điểm môn", "điểm bài thi", "thang điểm", "điểm tối đa", "điểm tối thiểu",
+    "bảng điểm", "điểm thành phần", "điểm môn học", "điểm chấm", "điểm đạt",
+    "điểm đáp", "điểm đáp tuyến sinh", "điểm đáp tuyến sinh UIT",
+
+    # Biến thể khác của các từ
+    "điểm xét tuyển", "điểm đầu vào", "điểm chuyển tiếp", "điểm cộng thêm",
+    "điểm tương đương", "hệ số điểm", "hệ số môn", "khối thi", "điểm kiểm tra",
+    "điểm sàn tuyển sinh", "chỉ tiêu tuyển sinh",
+
+    "điểm toan", "điểm văn", "điểm anh", "điểm lý", "điểm hóa",
+    "điểm sinh", "điểm sử", "điểm địa", "điểm gdcd", "điểm tổng",
+    "điểm xét tuyển", "điểm trung bình", "điểm ưu tiên", "ngưỡng điểm",
+    "điểm cộng", "điểm chuẩn", "khối a", "khối b", "khối c", "khối d",
+    "tổ hợp môn", "điểm sàn", "điểm chuẩn ngành", "toán", "văn", "anh",
+    "lý", "hóa", "sinh", "sử", "địa", "gdcd", "điểm đánh giá năng lực",
+    "năng lực", "chứng chỉ", "sat", "điểm đgnl",
+
+    "điểm thi đại học", "diem thi dai hoc", "Điểm thi đại học"
+]

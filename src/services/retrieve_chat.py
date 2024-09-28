@@ -8,6 +8,7 @@ from src.engines.preprocess_engine import PreprocessQuestion
 from src.repositories.chat_repository import ChatRepository
 from src.models.chat import Chat
 from src.prompt.postprocessing_prompt import FAIL_CASES, RESPONSE_FAIL_CASE
+from src.prompt.preprocessing_prompt import CALCULATION_TOKENS
 
 
 class RetrieveChat:
@@ -61,10 +62,23 @@ class RetrieveChat:
         combined_retrieved_nodes, retrieved_nodes = await self._retriever.retrieve_nodes(
             query=query
         )
-        response = await self._chat.generate_response(
-            user_query=query,
-            relevant_information=combined_retrieved_nodes
-        )
+        query_lower = query.lower()
+        # Kiểm tra từng token
+        flag = 0
+        for token in CALCULATION_TOKENS:
+            if token.lower() in query_lower:
+                response = await self._chat.reasoning_query(
+                    query=query,
+                    context=combined_retrieved_nodes
+                )
+                flag = 1
+                print("reasoning")
+                break
+        if not flag:
+            response = await self._chat.generate_response(
+                user_query=query,
+                relevant_information=combined_retrieved_nodes
+            )
         if response in FAIL_CASES:
             return Chat(
                 response=RESPONSE_FAIL_CASE,
