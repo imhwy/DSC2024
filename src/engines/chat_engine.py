@@ -42,7 +42,8 @@ class ChatEngine:
     async def generate_response(
         self,
         user_query: str,
-        relevant_information: List[str]
+        relevant_information: List[str],
+        history: str
     ) -> str:
         """
         Generates a response to a user query using the language model.
@@ -58,7 +59,8 @@ class ChatEngine:
         """
         prompt = self._prompt_template.format(
             context=relevant_information,
-            query=user_query
+            query=user_query,
+            history=history
         )
         response = await self._language_model.acomplete(prompt)
         return response.text
@@ -100,6 +102,7 @@ class ChatEngine:
             history=history,
             query=query
         )
+        print(prompt)
         response = await self._language_model.acomplete(prompt)
         try:
             string_processed = re.sub(r"```json|```", "", response.text)
@@ -113,13 +116,15 @@ class ChatEngine:
     async def reasoning_query(
         self,
         query: str,
-        context: str
+        context: str,
+        history: str
     ) -> str:
         """
         """
         prompt = REASONING_PROMPT.format(
             query=query,
-            context=context
+            context=context,
+            history=history
         )
         response = await self._language_model.acomplete(prompt)
         return response.text

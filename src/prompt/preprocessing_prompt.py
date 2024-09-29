@@ -4,7 +4,7 @@ This prompt for preprocessing.
 
 PROMPT_INJECTION_PATTERNS = [
     # Prompt injection patterns
-    r"API", r"bomb", r"mã", r"mã độc", r"bom", r"quả bom", r"prompt", r"khung bo", r"xả súng", r"đe dọa", r"con tin",
+    r"API", r"bomb", r"mã độc", r"bom", r"quả bom", r"prompt", r"khung bo", r"xả súng", r"đe dọa", r"con tin",
     r"phá hủy", r"bỏ qua", r"bỏ qua hướng dẫn trước",
     r"bỏ qua phần trên", r"bỏ qua chỉ dẫn trước", r"bỏ qua chỉ dẫn trên",
     r"lờ đi hướng dẫn trước", r"lờ đi phần trên",
@@ -198,7 +198,6 @@ UITAdminBot
 TERMS_DICT = {
     "THPT": ["trung học phổ thông", "TH PT", "trung học PT", "TH phổ thông", "th-pt", "high school", "secondary education"],
     "đánh giá năng lực": ["dgnl", "đgnl", "đg nl", "kỳ thi ĐHQG TPHCM", "kỳ thi ĐHQG", "đánh giá NL", "competency assessment", "aptitude test"],
-    "UIT": ["trường đại học UIT", "trường UIT", "University of Information Technology", "UIT"],
     "Bộ GD&ĐT": ["bộ giáo dục và đào tạo", "bộ giáo dục & đào tạo", "GDDT", "GD ĐT", "bộ GD-ĐT", "gdđt", "Ministry of Education and Training"],
     "kỹ thuật máy tính": ["ktmt", "kt mt", "kỹ thuật mt", "computer engineering", "computer tech", "ce"],
     "kỹ thuật phần mềm": ["ktpm", "công nghệ phần mềm", "kt phần mềm", "kt pm", "ktpt", "cnpt", "cnpm", "công nghệ pm", "cn phần mềm", "cmpn", "cpmn", "se", "software engineering", "software tech", "software engineer"],
@@ -217,7 +216,6 @@ TERMS_DICT = {
     "ký túc xá": ["ktx", "kí túc xá", "k t x", "kí túc", "chỗ ở sinh viên", "chỗ ở sv", "dormitory", "student accommodation"],
     "sinh viên": ["sv", "student"],
     "bus": ["být", "buýt", "bus"],
-    "trí tuệ nhân tạo": ["ttnt", "ngành AI", "chương trình AI", "hệ AI", "AI", "artificial intelligence"],
     "học sinh giỏi": ["hsg", "excellent student", "honor student"],
     "học sinh": ["hs", "student"],
     "khu du lịch": ["kdl", "tourist area", "resort"],
@@ -455,5 +453,5 @@ CALCULATION_TOKENS = [
     "lý", "hóa", "sinh", "sử", "địa", "gdcd", "điểm đánh giá năng lực",
     "năng lực", "chứng chỉ", "sat", "điểm đgnl",
 
-    "điểm thi đại học", "diem thi dai hoc", "Điểm thi đại học"
+    "điểm thi đại học", "diem thi dai hoc", "Điểm thi đại học", "dau nganh nao", "đậu ngành nào", "đậu", "đỗ", "đỗ ngành nào"
 ]

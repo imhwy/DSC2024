@@ -459,12 +459,13 @@ class PreprocessQuestion:
         if len(text) <= 30:
             return 1
         processed_text = self.tokenize_text(text)
-        score_prediction = self.domain_clf_model.predict_proba([processed_text])[
-            0][0]
+        score_prediction = self.domain_clf_model.predict_proba(
+            [processed_text]
+        )[0][1]
         print(f"score domain: {score_prediction}")
-        if score_prediction >= 0.9:
-            return 0
-        return 1
+        if score_prediction >= 0.5:
+            return 1
+        return 0
 
     async def preprocess_text(self, text_input):
         """

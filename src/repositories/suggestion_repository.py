@@ -20,9 +20,9 @@ class SuggestionRepository:
         Initialize the SuggestionRepository.
         """
         self.collection = CRUDSuggestionCollection()
-        self.data = self.load_all_data()
+        self.data = self.load_data()
 
-    def load_all_data(self):
+    def load_data(self):
         """
         Load all documents from the collection.
 

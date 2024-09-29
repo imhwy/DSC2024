@@ -41,7 +41,7 @@ async def get_all_suggestion(
         HTTPException: If an internal server error occurs, a 500 status code is returned.
     """
     try:
-        suggestion_records = service.suggestion_repository.load_all_data()
+        suggestion_records = service.suggestion_repository.load_data()
         if not suggestion_records:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
