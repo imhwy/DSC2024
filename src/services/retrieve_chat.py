@@ -56,6 +56,7 @@ class RetrieveChat:
     async def retriever_config(
         self,
         query: str,
+        history: str
     ):
         """
         """
@@ -69,7 +70,8 @@ class RetrieveChat:
             if token.lower() in query_lower:
                 response = await self._chat.reasoning_query(
                     query=query,
-                    context=combined_retrieved_nodes
+                    context=combined_retrieved_nodes,
+                    history=history
                 )
                 flag = 1
                 print("reasoning")
@@ -77,7 +79,8 @@ class RetrieveChat:
         if not flag:
             response = await self._chat.generate_response(
                 user_query=query,
-                relevant_information=combined_retrieved_nodes
+                relevant_information=combined_retrieved_nodes,
+                history=history
             )
         if response in FAIL_CASES:
             return Chat(
@@ -126,11 +129,13 @@ class RetrieveChat:
                 )
             else:
                 result = await self.retriever_config(
-                    query=conversation_tracking["query"]
+                    query=conversation_tracking["query"],
+                    history=history_chat
                 )
                 return result
         return await self.retriever_config(
-            query=query
+            query=query,
+            history=history_chat
         )
 
     async def preprocess_query(

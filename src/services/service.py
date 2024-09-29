@@ -1,213 +1,264 @@
 """
-this service provides retrieve and chat module for chatbot
+This module provides services for handling LLM and embedding models using OpenAI's API
 """
-from src.engines.chat_engine import ChatEngine
+
+import os
+import joblib
+import requests
+from dotenv import load_dotenv
+import google.generativeai as genai
+import fasttext
+import torch
+from huggingface_hub import hf_hub_download
+from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core import Settings
+from transformers import (AutoTokenizer,
+                          AutoModelForTokenClassification)
+
+from src.storage.weaviatedb import WeaviateDB
 from src.engines.retriever_engine import HybridRetriever
-from src.engines.semantic_engine import SemanticSearch
-from src.engines.preprocess_engine import PreprocessQuestion
+from src.engines.chat_engine import ChatEngine
+from src.services.retrieve_chat import RetrieveChat
+from src.utils.utility import convert_value
 from src.repositories.chat_repository import ChatRepository
-from src.models.chat import Chat
-from src.prompt.postprocessing_prompt import FAIL_CASES, RESPONSE_FAIL_CASE
-from src.prompt.preprocessing_prompt import CALCULATION_TOKENS
+from src.repositories.file_repository import FileRepository
+from src.data_loader.general_loader import GeneralLoader
+from src.services.file_management import FileManagement
+from src.repositories.suggestion_repository import SuggestionRepository
+from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
+from src.engines.preprocess_engine import PreprocessQuestion
+from src.engines.semantic_engine import SemanticSearch
+
+load_dotenv()
+
+OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
+OPENAI_MODEL = convert_value(os.getenv('OPENAI_MODEL'))
+OPENAI_EMBED_MODEL = convert_value(os.getenv('OPENAI_EMBED_MODEL'))
+TEMPERATURE_MODEL = convert_value(os.getenv('TEMPERATURE_MODEL'))
+GEMINI_API_KEY = convert_value(os.getenv('GEMINI_API_KEY'))
+GEMINI_LLM_MODEL = convert_value(os.getenv('GEMINI_LLM_MODEL'))
+TEMPERATURE = convert_value(os.getenv('TEMPERATURE'))
+TOP_P = convert_value(os.getenv('TOP_P'))
+TOP_K = convert_value(os.getenv('TOP_K'))
+MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
+DOMAIN_CLF_MODEL = convert_value(os.getenv('DOMAIN_CLF_MODEL'))
+PROMPT_INJECTION_MODEL = convert_value(os.getenv('PROMPT_INJECTION_MODEL'))
+TONE_MODEL = convert_value(os.getenv('TONE_MODEL'))
+URL = convert_value(os.getenv('LABEL_LIST'))
+MAX_HISTORY_TOKENS = convert_value(os.getenv('MAX_HISTORY_TOKENS'))
 
 
-class RetrieveChat:
+class Service:
     """
-    RetrieveChat: A class designed to retrieve chat responses.
+    A service class that sets up and manages LLM and embedding models using OpenAI
     """
 
-    def __init__(
-        self,
-        retriever: HybridRetriever = None,
-        chat: ChatEngine = None,
-        preprocess: PreprocessQuestion = None,
-        semantic: SemanticSearch = None,
-        chat_history_tracker: ChatRepository = None,
-        max_chat_token: float = 2000
-    ):
-        self._retriever = retriever
-        self._chat = chat
-        self._preprocess = preprocess
-        self._semantic = semantic
-        self._chat_history_tracker = chat_history_tracker
-        self._max_chat_token = max_chat_token
-
-    async def history_chat_config(
-        self,
-        room_id: str
-    ):
+    def __init__(self):
         """
+        Initializes the Service class with LLM and embedding models.
         """
-        lastest_chats = await self._chat_history_tracker.get_last_chat(
-            room_id=room_id
+        self._device = torch.device(
+            "cuda") if torch.cuda.is_available() else torch.device("cpu")
+        genai.configure(
+            api_key=GEMINI_API_KEY
         )
-        lastest_chats = list(lastest_chats)
-        combine_history_chat = ""
-        sum_token = 0
-        for idx, chat in enumerate(reversed(lastest_chats)):
-            record = f"question {idx + 1}: {chat['query']}\nanswer {idx + 1}: {chat['answer']}"
-            tokens = len(self._retriever.token_counter.encode(record))
-            if tokens + sum_token > self._max_chat_token:
-                break
-            combine_history_chat = combine_history_chat + record + "\n"
-            sum_token += tokens
-        return combine_history_chat
-
-    async def retriever_config(
-        self,
-        query: str,
-        history: str
-    ):
-        """
-        """
-        combined_retrieved_nodes, retrieved_nodes = await self._retriever.retrieve_nodes(
-            query=query
+        self._domain_clf_model = joblib.load(
+            filename=DOMAIN_CLF_MODEL
         )
-        query_lower = query.lower()
-        # Kiểm tra từng token
-        flag = 0
-        for token in CALCULATION_TOKENS:
-            if token.lower() in query_lower:
-                response = await self._chat.reasoning_query(
-                    query=query,
-                    context=combined_retrieved_nodes,
-                    history=history
-                )
-                flag = 1
-                print("reasoning")
-                break
-        if not flag:
-            response = await self._chat.generate_response(
-                user_query=query,
-                relevant_information=combined_retrieved_nodes,
-                history=history
-            )
-        if response in FAIL_CASES:
-            return Chat(
-                response=RESPONSE_FAIL_CASE,
-                is_outdomain=False,
-                retrieved_nodes=[]
-            )
-        list_nodes = []
-        for retrieved_node in retrieved_nodes:
-            list_nodes.append(retrieved_node.text)
-        return Chat(
-            response=response,
-            is_outdomain=False,
-            retrieved_nodes=list_nodes
+        self._prompt_injection_model = joblib.load(
+            filename=PROMPT_INJECTION_MODEL
+        )
+        self._tone_tokenizer = AutoTokenizer.from_pretrained(
+            TONE_MODEL, add_prefix_space=True)
+        self._tone_model = AutoModelForTokenClassification.from_pretrained(
+            TONE_MODEL
+        ).to(self._device)
+        self._generation_config = {
+            "temperature": TEMPERATURE,
+            "top_p": TOP_P,
+            "top_k": TOP_K,
+            "max_output_tokens": MAX_OUTPUT_TOKENS,
+        }
+        self._lang_detect_model_path = hf_hub_download(
+            repo_id="facebook/fasttext-language-identification",
+            filename="model.bin"
+        )
+        self._lang_detector = fasttext.load_model(self._lang_detect_model_path)
+        self._raw_text = requests.get(URL, timeout=60).text
+        self._label_list = self._raw_text.split("\n")
+        self._llm = OpenAI(
+            api_key=OPENAI_API_KEY,
+            model=OPENAI_MODEL,
+            temperature=TEMPERATURE_MODEL
+        )
+        # self._embed_model = OpenAIEmbedding(
+        #     api_key=OPENAI_API_KEY,
+        #     model=OPENAI_EMBED_MODEL
+        # )
+        self._embed_model = HuggingFaceEmbedding(
+            model_name="hiieu/halong_embedding",
+            truncate_dim=768,
+            trust_remote_code=True
+        )
+        self._gemini = genai.GenerativeModel(
+            model_name=GEMINI_LLM_MODEL,
+            generation_config=self._generation_config,
+            safety_settings=SAFETY_SETTINGS
+        )
+        Settings.llms = self._llm
+        Settings.embed_model = self._embed_model
+        self._vector_database = WeaviateDB()
+        self._retriever = HybridRetriever(
+            index=self._vector_database.index
+        )
+        self._suggestion_repository = SuggestionRepository()
+        self._chat_engine = ChatEngine(
+            language_model=self._llm,
+            weaviate_db=self._vector_database,
+            suggestion_repository=self._suggestion_repository
+        )
+        self._preprocess_engine = PreprocessQuestion(
+            domain_clf_model=self._domain_clf_model,
+            lang_detect_model=self._lang_detector,
+            tonemark_model=self._tone_model,
+            tonemark_tokenizer=self._tone_tokenizer,
+            prompt_injection_model=self._prompt_injection_model,
+            device_type=self._device,
+            label_list=self._label_list
+        )
+        self._semantic_engine = SemanticSearch(
+            index=self._vector_database._suggestion_index
+        )
+        self._chat_repository = ChatRepository()
+        self._retrieve_chat_engine = RetrieveChat(
+            retriever=self._retriever,
+            chat=self._chat_engine,
+            preprocess=self._preprocess_engine,
+            semantic=self._semantic_engine,
+            chat_history_tracker=self._chat_repository,
+            max_chat_token=MAX_OUTPUT_TOKENS
+        )
+        self._file_repository = FileRepository()
+        self._general_loader = GeneralLoader()
+        self._file_management = FileManagement(
+            file_repository=self._file_repository,
+            general_loader=self._general_loader,
+            vector_database=self._vector_database
         )
 
-    async def retrieve_chat(
-        self,
-        query: str,
-        room_id: str
-    ) -> Chat:
+    @property
+    def vector_database(self) -> WeaviateDB:
         """
-        Processes a user"s query by retrieving relevant information and generating a chat response.
-
-        Parameters:
-            query(str): The user"s input query.
+        Retrieves the vector database instance.
 
         Returns:
-            response (str): The chat response generated for the query.
-            is_outdomain (bool): True if the query is outside the domain scope, otherwise False.
+            WeaviateDB: The initialized vector database object.
         """
-        history_chat = await self.history_chat_config(
-            room_id=room_id
-        )
-        conversation_tracking = await self._chat.conversation_tracking(
-            history=history_chat,
-            query=query
-        )
-        print(conversation_tracking)
-        if isinstance(conversation_tracking, dict):
-            if conversation_tracking["is_answer"]:
-                return Chat(
-                    response=conversation_tracking["query"],
-                    is_outdomain=False,
-                    retrieved_nodes=[]
-                )
-            else:
-                result = await self.retriever_config(
-                    query=conversation_tracking["query"],
-                    history=history_chat
-                )
-                return result
-        return await self.retriever_config(
-            query=query,
-            history=history_chat
-        )
+        return self._vector_database
 
-    async def preprocess_query(
-        self,
-        query: str,
-        room_id: str
-    ) -> Chat:
+    @property
+    def llm(self) -> OpenAI:
         """
-        Preprocesses the user's query and generates an appropriate response.
-
-        Args:
-            query (str): The input query from the user.
+        Retrieves the LLM instance.
 
         Returns:
-            Chat: A Chat object containing the response, a flag indicating if the response
-                is out of domain, and a list of retrieved nodes.
+            OpenAI: The initialized LLM object.
         """
-        processed_query = await self._preprocess.preprocess_text(
-            text_input=query
-        )
-        print(processed_query)
-        if processed_query.is_short_chat:
-            return Chat(
-                response=processed_query.query,
-                is_outdomain=True,
-                retrieved_nodes=[]
-            )
-        if processed_query.language is False:
-            return Chat(
-                response=processed_query.query,
-                is_outdomain=True,
-                retrieved_nodes=[]
-            )
-        if processed_query.is_prompt_injection:
-            return Chat(
-                response=processed_query.query,
-                is_outdomain=True,
-                retrieved_nodes=[]
-            )
-        if processed_query.is_outdomain:
-            history_chat = await self.history_chat_config(
-                room_id=room_id
-            )
-            conversation_tracking = await self._chat.conversation_tracking(
-                history=history_chat,
-                query=processed_query.query
-            )
-            if isinstance(conversation_tracking, dict):
-                if conversation_tracking["is_answer"]:
-                    return Chat(
-                        response=conversation_tracking["query"],
-                        is_outdomain=True,
-                        retrieved_nodes=[]
-                    )
-            answer = await self._semantic.get_relevant_answer(
-                query=conversation_tracking["query"]
-            )
-            if answer:
-                return Chat(
-                    response=answer,
-                    is_outdomain=True,
-                    retrieved_nodes=[]
-                )
-            result = await self._chat.funny_chat(
-                query=processed_query.query
-            )
-            return Chat(
-                response=result,
-                is_outdomain=True,
-                retrieved_nodes=[]
-            )
-        return await self.retrieve_chat(
-            query=processed_query.query,
-            room_id=room_id
-        )
+        return self._llm
+
+    @property
+    def embed_model(self) -> OpenAIEmbedding:
+        """
+        Retrieves the embedding model instance.
+
+        Returns:
+            OpenAIEmbedding: The initialized embedding model object.
+        """
+        return self._embed_model
+
+    @property
+    def retriever(self) -> HybridRetriever:
+        """
+        Retrieves the HybridRetriever instance.
+
+        Returns:
+            HybridRetriever: The initialized HybridRetriever object.
+        """
+        return self._retriever
+
+    @property
+    def chat_engine(self) -> ChatEngine:
+        """
+        Retrieves the ChatEngine instance.
+
+        Returns:
+            ChatEngine: The initialized ChatEngine object.
+        """
+        return self._chat_engine
+
+    @property
+    def retrieve_chat_engine(self) -> RetrieveChat:
+        """
+        Retrieves the RetrieveChat instance.
+
+        Returns:
+            RetrieveChat: The initialized RetrieveChat object.
+        """
+        return self._retrieve_chat_engine
+
+    @property
+    def chat_repository(self) -> ChatRepository:
+        """
+        Retrieves the ChatRepository instance.
+
+        Returns:
+            ChatRepository: The initialized ChatRepository object.
+        """
+        return self._chat_repository
+
+    @property
+    def file_repository(self) -> FileRepository:
+        """
+        Retrieves the FileRepository instance.
+
+        Returns:
+            FileRepository: The initialized FileRepository object.
+        """
+        return self._file_repository
+
+    @property
+    def general_loader(self) -> GeneralLoader:
+        """
+        Provides access to the GeneralLoader instance.
+        """
+        return self._general_loader
+
+    @property
+    def file_management(self) -> FileManagement:
+        """
+        Provides access to the FileManagement instance.
+        """
+        return self._file_management
+
+    @property
+    def suggestion_repository(self) -> SuggestionRepository:
+        """
+        Provides access to the SuggestionRepository instance.
+        """
+        return self._suggestion_repository
+
+    @property
+    def preprocess_engine(self) -> PreprocessQuestion:
+        """
+        Provides access to the PreprocessQuestion instance.
+        """
+        return self._preprocess_engine
+
+    @property
+    def semantic_engine(self) -> SemanticSearch:
+        """
+        Provides access to the SemanticEngine instance.
+        """
+        return self._semantic_engine
