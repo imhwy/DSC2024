@@ -47,7 +47,7 @@ class RetrieveChat:
         for idx, chat in enumerate(reversed(lastest_chats)):
             record = f"question {idx + 1}: {chat['query']}\nanswer {idx + 1}: {chat['answer']}"
             tokens = len(self._retriever.token_counter.encode(record))
-            if tokens + sum_token > self._max_chat_token:
+            if tokens + sum_token >= self._max_chat_token:
                 break
             combine_history_chat = combine_history_chat + record + "\n"
             sum_token += tokens
@@ -64,7 +64,6 @@ class RetrieveChat:
             query=query
         )
         query_lower = query.lower()
-        # Kiểm tra từng token
         flag = 0
         for token in CALCULATION_TOKENS:
             if token.lower() in query_lower:
@@ -77,6 +76,7 @@ class RetrieveChat:
                 print("reasoning")
                 break
         if not flag:
+            print("no reasoning")
             response = await self._chat.generate_response(
                 user_query=query,
                 relevant_information=combined_retrieved_nodes,

@@ -327,6 +327,7 @@ RESPONSE_DICT = {
     "xin chào bạn": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
     "xin chào UIT": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
     "xin chào UIT chatbot": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
+    "chào bạn": "Chào mừng bạn đến với hệ thống chatbot tư vấn tuyển sinh của Trường Đại học Công nghệ Thông tin (UIT). Hãy đặt câu hỏi về chương trình đào tạo, thông tin tuyển sinh, và các vấn đề liên quan để được giải đáp nhanh chóng và chính xác!",
 
     # Hỏi thăm sức khỏe
     "bạn khỏe không": "Cảm ơn bạn đã hỏi thăm! Mình luôn hoạt động hết công suất và cảm thấy 'tuyệt vời' khi có thể giúp đỡ bạn. Có gì mình có thể hỗ trợ bạn về tuyển sinh của UIT không nhỉ?",
@@ -424,14 +425,14 @@ CALCULATION_TOKENS = [
     "Điểm Địa", "Điểm GDCD", "Điểm tổng", "Điểm xét tuyển", "Điểm trung bình", "Điểm ưu tiên",
     "Ngưỡng điểm", "Điểm cộng", "Điểm chuẩn", "Khối A", "Khối B", "Khối C", "Khối D",
     "Tổ hợp môn", "Điểm sàn", "Điểm chuẩn ngành", "toán", "văn", "anh", "Lý", "Hóa",
-    "Sinh", "Sử", "Địa", "GDCD", "đánh giá năng lực", "năng lực", "chứng chỉ", "SAT", "điểm đgnl",
+    "Sinh", "Sử", "Địa", "GDCD", "chứng chỉ", "SAT", "điểm đgnl",
 
     # Các biến thể không dấu, viết thường
     "diem toan", "diem van", "diem anh", "diem ly", "diem hoa", "diem sinh",
     "diem su", "diem dia", "diem gdcd", "diem tong", "diem xet tuyen", "diem trung binh",
     "diem uu tien", "nguong diem", "diem cong", "diem chuan", "khoi a", "khoi b", "khoi c",
     "khoi d", "to hop mon", "diem san", "diem chuan nganh", "toan", "van", "anh", "ly",
-    "hoa", "sinh", "su", "dia", "gdcd", "diem danh gia nang luc", "nang luc", "chung chi",
+    "hoa", "sinh", "su", "dia", "gdcd", "chung chi",
     "sat", "diem dgnl",
 
     # Từ đồng nghĩa và biến thể khác

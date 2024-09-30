@@ -23,6 +23,7 @@ class ChatEngine:
         self,
         prompt_template: str = PROMPT,
         language_model: OpenAI = None,
+        complex_model: OpenAI = None,
         weaviate_db: WeaviateDB = None,
         suggestion_repository: SuggestionRepository = None
     ):
@@ -36,6 +37,7 @@ class ChatEngine:
         """
         self._prompt_template = prompt_template
         self._language_model = language_model
+        self._complex_model = complex_model
         self._weaviate_dbs = weaviate_db
         self._suggestion_repository = suggestion_repository
 
@@ -102,8 +104,7 @@ class ChatEngine:
             history=history,
             query=query
         )
-        print(prompt)
-        response = await self._language_model.acomplete(prompt)
+        response = await self._complex_model.acomplete(prompt)
         try:
             string_processed = re.sub(r"```json|```", "", response.text)
             print(string_processed)
@@ -126,5 +127,5 @@ class ChatEngine:
             context=context,
             history=history
         )
-        response = await self._language_model.acomplete(prompt)
+        response = await self._complex_model.acomplete(prompt)
         return response.text

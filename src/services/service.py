@@ -27,14 +27,16 @@ from src.repositories.file_repository import FileRepository
 from src.data_loader.general_loader import GeneralLoader
 from src.services.file_management import FileManagement
 from src.repositories.suggestion_repository import SuggestionRepository
-from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
 from src.engines.preprocess_engine import PreprocessQuestion
 from src.engines.semantic_engine import SemanticSearch
+from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
 
 load_dotenv()
 
 OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
 OPENAI_MODEL = convert_value(os.getenv('OPENAI_MODEL'))
+OPENAI_MODEL_COMPLEX_TASK = convert_value(
+    os.getenv('OPENAI_MODEL_COMPLEX_TASK'))
 OPENAI_EMBED_MODEL = convert_value(os.getenv('OPENAI_EMBED_MODEL'))
 TEMPERATURE_MODEL = convert_value(os.getenv('TEMPERATURE_MODEL'))
 GEMINI_API_KEY = convert_value(os.getenv('GEMINI_API_KEY'))
@@ -93,6 +95,11 @@ class Service:
             model=OPENAI_MODEL,
             temperature=TEMPERATURE_MODEL
         )
+        self._complex_llm = OpenAI(
+            api_key=OPENAI_API_KEY,
+            model=OPENAI_MODEL_COMPLEX_TASK,
+            temperature=TEMPERATURE_MODEL
+        )
         # self._embed_model = OpenAIEmbedding(
         #     api_key=OPENAI_API_KEY,
         #     model=OPENAI_EMBED_MODEL
@@ -116,6 +123,7 @@ class Service:
         self._suggestion_repository = SuggestionRepository()
         self._chat_engine = ChatEngine(
             language_model=self._llm,
+            complex_model=self._complex_llm,
             weaviate_db=self._vector_database,
             suggestion_repository=self._suggestion_repository
         )
