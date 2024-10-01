@@ -276,7 +276,7 @@ TERMS_DICT = {
 
 SHORT_CHAT = [
     # short_chat term
-    " ", "  ", "  ",
+    "chào bạn", "chào bạn", "chaofo bạn", "chao ban", "hello", "hi", "xin chào", "xin chao", "hihi", "haha", "hoho", "hehe", "lol", "kk",
     "xin chào", "chào", "hello", "hi",
     "bạn khỏe không", "ban khoe khong", "khỏe không", "khoe khong",
     "dạ vâng", "da vang", "vâng", "vang",
