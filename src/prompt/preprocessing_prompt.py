@@ -294,7 +294,7 @@ FILLTER_WORDS = [
     "ạ", "a", "dạ vâng", "da vang", "dạ ạ", "da a", "vâng", "vang", "dạ", "da",
     "ừ", "u", "ờ", "o", "ờm", "om", "ờ ờ", "o o", "ok", "okay",
     "ồ", "o", "à", "a", "ừm", "um", "vậy à", "vay a", "thế à", "the a",
-    "nhỉ", "nhi", "cơ", "co", "mà", "ma", "hả", "ha", "hử", "hu",
+    "nhỉ", "nhi", "co", "mà", "ma", "hả", "ha", "hử", "hu",
     "à ừ", "a u", "được thôi", "duoc thoi", "chắc vậy", "chac vay", "đúng rồi", "dung roi",
     "nha", "ne", "nhé", "ne", "nè", "ne", "mà thôi", "ma thoi"
 ]
