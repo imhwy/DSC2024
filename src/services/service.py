@@ -12,6 +12,7 @@ import torch
 from huggingface_hub import hf_hub_download
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import Settings
 from transformers import (AutoTokenizer,
                           AutoModelForTokenClassification)
@@ -26,14 +27,16 @@ from src.repositories.file_repository import FileRepository
 from src.data_loader.general_loader import GeneralLoader
 from src.services.file_management import FileManagement
 from src.repositories.suggestion_repository import SuggestionRepository
-from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
 from src.engines.preprocess_engine import PreprocessQuestion
 from src.engines.semantic_engine import SemanticSearch
+from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
 
 load_dotenv()
 
 OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
 OPENAI_MODEL = convert_value(os.getenv('OPENAI_MODEL'))
+OPENAI_MODEL_COMPLEX_TASK = convert_value(
+    os.getenv('OPENAI_MODEL_COMPLEX_TASK'))
 OPENAI_EMBED_MODEL = convert_value(os.getenv('OPENAI_EMBED_MODEL'))
 TEMPERATURE_MODEL = convert_value(os.getenv('TEMPERATURE_MODEL'))
 GEMINI_API_KEY = convert_value(os.getenv('GEMINI_API_KEY'))
@@ -43,12 +46,10 @@ TOP_P = convert_value(os.getenv('TOP_P'))
 TOP_K = convert_value(os.getenv('TOP_K'))
 MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
 DOMAIN_CLF_MODEL = convert_value(os.getenv('DOMAIN_CLF_MODEL'))
-DOMAIN_CLF_VECTORIZER = convert_value(os.getenv('DOMAIN_CLF_VECTORIZER'))
 PROMPT_INJECTION_MODEL = convert_value(os.getenv('PROMPT_INJECTION_MODEL'))
-PROMPT_INJECTION_VECTORIZER = convert_value(
-    os.getenv('PROMPT_INJECTION_VECTORIZER'))
 TONE_MODEL = convert_value(os.getenv('TONE_MODEL'))
 URL = convert_value(os.getenv('LABEL_LIST'))
+MAX_HISTORY_TOKENS = convert_value(os.getenv('MAX_HISTORY_TOKENS'))
 
 
 class Service:
@@ -68,19 +69,14 @@ class Service:
         self._domain_clf_model = joblib.load(
             filename=DOMAIN_CLF_MODEL
         )
-        self._domain_clf_vectorizer = joblib.load(
-            filename=DOMAIN_CLF_VECTORIZER
-        )
         self._prompt_injection_model = joblib.load(
             filename=PROMPT_INJECTION_MODEL
-        )
-        self._prompt_injection_vectorizer = joblib.load(
-            filename=PROMPT_INJECTION_VECTORIZER
         )
         self._tone_tokenizer = AutoTokenizer.from_pretrained(
             TONE_MODEL, add_prefix_space=True)
         self._tone_model = AutoModelForTokenClassification.from_pretrained(
-            TONE_MODEL).to(self._device)
+            TONE_MODEL
+        ).to(self._device)
         self._generation_config = {
             "temperature": TEMPERATURE,
             "top_p": TOP_P,
@@ -99,9 +95,19 @@ class Service:
             model=OPENAI_MODEL,
             temperature=TEMPERATURE_MODEL
         )
-        self._embed_model = OpenAIEmbedding(
+        self._complex_llm = OpenAI(
             api_key=OPENAI_API_KEY,
-            model=OPENAI_EMBED_MODEL
+            model=OPENAI_MODEL_COMPLEX_TASK,
+            temperature=TEMPERATURE_MODEL
+        )
+        # self._embed_model = OpenAIEmbedding(
+        #     api_key=OPENAI_API_KEY,
+        #     model=OPENAI_EMBED_MODEL
+        # )
+        self._embed_model = HuggingFaceEmbedding(
+            model_name="hiieu/halong_embedding",
+            truncate_dim=768,
+            trust_remote_code=True
         )
         self._gemini = genai.GenerativeModel(
             model_name=GEMINI_LLM_MODEL,
@@ -117,30 +123,31 @@ class Service:
         self._suggestion_repository = SuggestionRepository()
         self._chat_engine = ChatEngine(
             language_model=self._llm,
+            complex_model=self._complex_llm,
             weaviate_db=self._vector_database,
             suggestion_repository=self._suggestion_repository
         )
         self._preprocess_engine = PreprocessQuestion(
             domain_clf_model=self._domain_clf_model,
-            domain_clf_vectorizer=self._domain_clf_vectorizer,
             lang_detect_model=self._lang_detector,
             tonemark_model=self._tone_model,
             tonemark_tokenizer=self._tone_tokenizer,
             prompt_injection_model=self._prompt_injection_model,
-            prompt_injection_vectorizer=self._prompt_injection_vectorizer,
             device_type=self._device,
             label_list=self._label_list
         )
         self._semantic_engine = SemanticSearch(
             index=self._vector_database._suggestion_index
         )
+        self._chat_repository = ChatRepository()
         self._retrieve_chat_engine = RetrieveChat(
             retriever=self._retriever,
             chat=self._chat_engine,
             preprocess=self._preprocess_engine,
-            semantic=self._semantic_engine
+            semantic=self._semantic_engine,
+            chat_history_tracker=self._chat_repository,
+            max_chat_token=MAX_OUTPUT_TOKENS
         )
-        self._chat_repository = ChatRepository()
         self._file_repository = FileRepository()
         self._general_loader = GeneralLoader()
         self._file_management = FileManagement(

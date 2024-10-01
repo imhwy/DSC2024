@@ -41,7 +41,7 @@ async def get_all_suggestion(
         HTTPException: If an internal server error occurs, a 500 status code is returned.
     """
     try:
-        suggestion_records = service.suggestion_repository.load_all_data()
+        suggestion_records = service.suggestion_repository.load_data()
         if not suggestion_records:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
@@ -123,9 +123,16 @@ async def upload_suggestion(
         response = await service.chat_engine.funny_chat(
             query=question
         )
+        node = await service.vector_database.suggestion_config(
+            question=question,
+            answer=response
+        )
+        await service.vector_database.insert_suggestion_nodes(
+            nodes=node
+        )
         service.suggestion_repository.add_suggestion(
             question=question,
-            answer=response.response
+            answer=response
         )
         return Response(
             status_code=status.HTTP_201_CREATED,

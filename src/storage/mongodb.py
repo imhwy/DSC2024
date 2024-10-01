@@ -108,3 +108,41 @@ class CRUDDocuments():
             Optional[dict]: A dictionary representing the found document
         """
         return self.collection.find_one(filter=obj)
+
+    async def find_with_filter(
+        self,
+        filter_obj,
+        sort_by=None,
+        limit=5
+    ):
+        """
+        Finds documents in the collection based on a specified filter, with optional sorting and limiting.
+
+        Args:
+            filter_obj (dict): A dictionary specifying the filter.
+            sort_by (tuple): Optional. A tuple specifying the field to sort by and the sort order (1 for ascending, -1 for descending).
+            limit (int): Optional. The maximum number of documents to return.
+
+        Returns:
+            pymongo.cursor.Cursor: A cursor to iterate over the matching documents.
+        """
+        cursor = self.collection.find(filter=filter_obj)
+        if sort_by:
+            cursor = cursor.sort(sort_by[0], sort_by[1])
+        else:
+            # Mặc định sắp xếp theo 'time' giảm dần
+            cursor = cursor.sort('time', -1)
+
+        if limit > 0:
+            cursor = cursor.limit(limit)
+        return cursor
+
+    async def find_many_doc(self, obj):
+        """
+        """
+        return self.collection.find(filter=obj)
+
+    async def delete_many_doc(self, obj):
+        """
+        """
+        return self.collection.delete_many(filter=obj)

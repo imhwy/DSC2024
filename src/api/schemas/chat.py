@@ -10,6 +10,7 @@ class RequestChat(BaseModel):
     """
     A model for representing a chat request.
     """
+    room_id: str
     query: str
 
 

@@ -31,12 +31,10 @@ class PreprocessQuestion:
     def __init__(
         self,
         domain_clf_model,
-        domain_clf_vectorizer,
         lang_detect_model,
         tonemark_model,
         tonemark_tokenizer,
         prompt_injection_model,
-        prompt_injection_vectorizer,
         device_type,
         label_list
     ) -> None:
@@ -58,12 +56,10 @@ class PreprocessQuestion:
             None
         """
         self.domain_clf_model = domain_clf_model
-        self.domain_clf_vectorizer = domain_clf_vectorizer
         self.lang_detect_model = lang_detect_model
         self.tonemark_model = tonemark_model
         self.tonemark_tokenizer = tonemark_tokenizer
         self.prompt_injection_model = prompt_injection_model
-        self.prompt_injection_vectorizer = prompt_injection_vectorizer
         self.device_type = device_type
         self.label_list = label_list
 
@@ -274,9 +270,9 @@ class PreprocessQuestion:
                 return True
         for pattern in POTENTIAL_PROMPT_INJECTION_PATTERNS:
             if re.search(pattern, text, re.IGNORECASE):
-                if self.prompt_injection_model.predict(
-                    self.prompt_injection_vectorizer.transform([text])
-                )[0]:
+                if self.prompt_injection_model.predict_proba(
+                    [text]
+                )[0][0] >= 0.5:
                     return True
         return False
 
@@ -460,10 +456,16 @@ class PreprocessQuestion:
             str: The predicted domain for the input text.
         """
         # Preprocess the text
+        if len(text) <= 30:
+            return 1
         processed_text = self.tokenize_text(text)
-        text_tfidf = self.domain_clf_vectorizer.transform([processed_text])
-        prediction = self.domain_clf_model.predict(text_tfidf)
-        return prediction[0]
+        score_prediction = self.domain_clf_model.predict_proba(
+            [processed_text]
+        )[0][1]
+        print(f"score domain: {score_prediction}")
+        if score_prediction >= 0.5:
+            return 1
+        return 0
 
     async def preprocess_text(self, text_input):
         """

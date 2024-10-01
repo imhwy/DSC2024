@@ -52,6 +52,7 @@ class ChatRepository:
 
     async def add_chat_domains(
         self,
+        room_id: str,
         query: str,
         answer: str,
         retrieved_nodes: List[str],
@@ -75,6 +76,7 @@ class ChatRepository:
         timestamp = get_datetime()
         chat_instance = ChatDomain(
             Id=chat_domain_id,
+            room_id=room_id,
             query=query,
             answer=answer,
             retrieved_nodes=retrieved_nodes,
@@ -82,3 +84,43 @@ class ChatRepository:
             is_outdomain=is_out_of_domain
         )
         await self.add_one_record(chat=chat_instance)
+
+    async def get_last_chat(
+        self,
+        room_id: str
+    ) -> ChatDomain:
+        """
+        """
+        filter_obj = {"room_id": room_id}
+        latest_chats = await self.collection.find_with_filter(
+            filter_obj=filter_obj,
+            sort_by=("time", -1),
+            limit=10
+        )
+        return latest_chats
+
+    async def get_room_chat(
+        self,
+        room_id: str
+    ):
+        """
+        """
+        filter_obj = {"room_id": room_id}
+        records = self.collection.find_one_doc(
+            obj=filter_obj
+        )
+        return records
+
+    async def delete_room_chat(
+        self,
+        room_id: str
+    ):
+        """
+        """
+        filter_obj = {"room_id": room_id}
+        records = await self.collection.delete_many_doc(
+            obj=filter_obj
+        )
+        if records.deleted_count > 0:
+            return True
+        return False

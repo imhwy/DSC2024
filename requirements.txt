@@ -39,6 +39,6 @@ openpyxl==3.1.5
 xlrd==2.0.1
 scrapegraphai==1.10.4
 # burr==0.22.1
-fasttext==0.9.3
+fasttext-wheel==0.9.2
 torch==2.4.0
 transformers==4.44.0

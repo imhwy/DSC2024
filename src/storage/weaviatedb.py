@@ -202,19 +202,11 @@ class WeaviateDB:
         if question and answer:
             document = [
                 Document(
-                    text=question,
+                    text=answer,
                     metadata={
                         "question": question,
                         "answer": answer
-                    },
-                    excluded_embed_metadata_keys=[
-                        "question",
-                        "answer"
-                    ],
-                    excluded_llm_metadata_keys=[
-                        "question",
-                        "answer"
-                    ]
+                    }
                 )
             ]
             return self.documents_to_nodes(documents=document)
@@ -265,7 +257,7 @@ class WeaviateDB:
         graph_config = {
             "llm": {
                 "model": OPENAI_MODEL,
-                "temperature": 0.1,
+                "temperature": 0,
             },
             # "embeddings": {
             #     "model": OPENAI_EMBED_MODEL,
@@ -467,13 +459,8 @@ class WeaviateDB:
             nodes = self.documents_to_nodes_by_sessions(
                 documents=processed_documents)
             # print(nodes)
-            try:
-                print("Sucess!")
-                self.insert_nodes(nodes=nodes)
-                self.insert_docstore(nodes=nodes)
-            except ConnectionError as e:
-                print("Error!")
-                print(e)
+            self.insert_nodes(nodes=nodes)
+            self.insert_docstore(nodes=nodes)
 
     def delete_knowlegde(
         self,
