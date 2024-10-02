@@ -5,6 +5,7 @@ from src.engines.chat_engine import ChatEngine
 from src.engines.retriever_engine import HybridRetriever
 from src.engines.semantic_engine import SemanticSearch
 from src.engines.preprocess_engine import PreprocessQuestion
+from src.engines.enhance_chat_engine import EnhanceChatEngine
 from src.repositories.chat_repository import ChatRepository
 from src.models.chat import Chat
 from src.prompt.postprocessing_prompt import FAIL_CASES, RESPONSE_FAIL_CASE
@@ -23,7 +24,8 @@ class RetrieveChat:
         preprocess: PreprocessQuestion = None,
         semantic: SemanticSearch = None,
         chat_history_tracker: ChatRepository = None,
-        max_chat_token: float = 2000
+        max_chat_token: float = 2000,
+        enhance_chat_engine: EnhanceChatEngine = None
     ):
         self._retriever = retriever
         self._chat = chat
@@ -31,6 +33,7 @@ class RetrieveChat:
         self._semantic = semantic
         self._chat_history_tracker = chat_history_tracker
         self._max_chat_token = max_chat_token
+        self._enhance_chat_engine = enhance_chat_engine
 
     async def history_chat_config(
         self,
@@ -53,89 +56,21 @@ class RetrieveChat:
             sum_token += tokens
         return combine_history_chat
 
-    async def retriever_config(
-        self,
-        query: str,
-        history: str
-    ):
-        """
-        """
-        combined_retrieved_nodes, retrieved_nodes = await self._retriever.retrieve_nodes(
-            query=query
-        )
-        query_lower = query.lower()
-        flag = 0
-        for token in CALCULATION_TOKENS:
-            if token.lower() in query_lower:
-                response = await self._chat.reasoning_query(
-                    query=query,
-                    context=combined_retrieved_nodes,
-                    history=history
-                )
-                flag = 1
-                print("reasoning")
-                break
-        if not flag:
-            print("no reasoning")
-            response = await self._chat.generate_response(
-                user_query=query,
-                relevant_information=combined_retrieved_nodes,
-                history=history
-            )
-        if response in FAIL_CASES:
-            return Chat(
-                response=RESPONSE_FAIL_CASE,
-                is_outdomain=False,
-                retrieved_nodes=[]
-            )
-        list_nodes = []
-        for retrieved_node in retrieved_nodes:
-            list_nodes.append(retrieved_node.text)
-        return Chat(
-            response=response,
-            is_outdomain=False,
-            retrieved_nodes=list_nodes
-        )
-
     async def retrieve_chat(
         self,
         query: str,
         room_id: str
     ) -> Chat:
         """
-        Processes a user"s query by retrieving relevant information and generating a chat response.
-
-        Parameters:
-            query(str): The user"s input query.
-
-        Returns:
-            response (str): The chat response generated for the query.
-            is_outdomain (bool): True if the query is outside the domain scope, otherwise False.
         """
-        history_chat = await self.history_chat_config(
-            room_id=room_id
-        )
-        conversation_tracking = await self._chat.conversation_tracking(
-            history=history_chat,
+        answer = await self._enhance_chat_engine.enhance_chat(
+            room_id=room_id,
             query=query
         )
-        print(conversation_tracking)
-        if isinstance(conversation_tracking, dict):
-            if conversation_tracking["is_answer"]:
-                return Chat(
-                    response=conversation_tracking["query"],
-                    is_outdomain=False,
-                    retrieved_nodes=[]
-                )
-            else:
-                result = await self.retriever_config(
-                    query=conversation_tracking["query"],
-                    history=history_chat
-                )
-                return result
-        return await self.retriever_config(
-            query=query,
-            history=history_chat
+        return Chat(
+            response=answer,
+            is_outdomain=False,
+            retrieved_nodes=[]
         )
 
     async def preprocess_query(
@@ -176,34 +111,12 @@ class RetrieveChat:
                 retrieved_nodes=[]
             )
         if processed_query.is_outdomain:
-            history_chat = await self.history_chat_config(
-                room_id=room_id
-            )
-            conversation_tracking = await self._chat.conversation_tracking(
-                history=history_chat,
-                query=processed_query.query
-            )
-            if isinstance(conversation_tracking, dict):
-                if conversation_tracking["is_answer"]:
-                    return Chat(
-                        response=conversation_tracking["query"],
-                        is_outdomain=True,
-                        retrieved_nodes=[]
-                    )
-            answer = await self._semantic.get_relevant_answer(
-                query=conversation_tracking["query"]
-            )
-            if answer:
-                return Chat(
-                    response=answer,
-                    is_outdomain=True,
-                    retrieved_nodes=[]
-                )
-            result = await self._chat.funny_chat(
+            answer = await self._enhance_chat_engine.enhance_funny_chat(
+                room_id=room_id,
                 query=processed_query.query
             )
             return Chat(
-                response=result,
+                response=answer,
                 is_outdomain=True,
                 retrieved_nodes=[]
             )

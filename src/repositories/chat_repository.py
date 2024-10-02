@@ -95,7 +95,7 @@ class ChatRepository:
         latest_chats = await self.collection.find_with_filter(
             filter_obj=filter_obj,
             sort_by=("time", -1),
-            limit=10
+            limit=5
         )
         return latest_chats
 

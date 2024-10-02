@@ -20,6 +20,7 @@ from transformers import (AutoTokenizer,
 from src.storage.weaviatedb import WeaviateDB
 from src.engines.retriever_engine import HybridRetriever
 from src.engines.chat_engine import ChatEngine
+from src.engines.enhance_chat_engine import EnhanceChatEngine
 from src.services.retrieve_chat import RetrieveChat
 from src.utils.utility import convert_value
 from src.repositories.chat_repository import ChatRepository
@@ -140,13 +141,20 @@ class Service:
             index=self._vector_database._suggestion_index
         )
         self._chat_repository = ChatRepository()
+        self._enhance_chat_engine = EnhanceChatEngine(
+            llm=self._llm,
+            retriever=self._retriever._retriever,
+            chat_memory_tracker=self._chat_repository,
+            token_limit=MAX_HISTORY_TOKENS
+        )
         self._retrieve_chat_engine = RetrieveChat(
             retriever=self._retriever,
             chat=self._chat_engine,
             preprocess=self._preprocess_engine,
             semantic=self._semantic_engine,
             chat_history_tracker=self._chat_repository,
-            max_chat_token=MAX_OUTPUT_TOKENS
+            max_chat_token=MAX_OUTPUT_TOKENS,
+            enhance_chat_engine=self._enhance_chat_engine
         )
         self._file_repository = FileRepository()
         self._general_loader = GeneralLoader()
@@ -270,3 +278,10 @@ class Service:
         Provides access to the SemanticEngine instance.
         """
         return self._semantic_engine
+
+    @property
+    def enhance_chat_engine(self) -> EnhanceChatEngine:
+        """
+        Provides access to the EnhanceChatEngine instance.
+        """
+        return self._enhance_chat_engine
