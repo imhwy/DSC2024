@@ -467,6 +467,31 @@ class PreprocessQuestion:
             return 1
         return 0
 
+    async def detect_icon(
+        self,
+        text: str
+    ) -> bool:
+        """
+        """
+        emoji_pattern = re.compile(
+            "["
+            u"\U0001F600-\U0001F64F"
+            u"\U0001F300-\U0001F5FF"
+            u"\U0001F680-\U0001F6FF"
+            u"\U0001F700-\U0001F77F"
+            u"\U0001F780-\U0001F7FF"
+            u"\U0001F800-\U0001F8FF"
+            u"\U0001F900-\U0001F9FF"
+            u"\U0001FA00-\U0001FA6F"
+            u"\U0001FA70-\U0001FAFF"
+            u"\U00002702-\U000027B0"
+            u"\U000024C2-\U0001F251"
+            "]+",
+            flags=re.UNICODE
+        )
+        emoticon_pattern = re.compile(r"(:|=|;)(\)+|\(+|D+|P+)")
+        return bool(emoji_pattern.fullmatch(text) or emoticon_pattern.fullmatch(text))
+
     async def preprocess_text(self, text_input):
         """
         Preprocesses the input text to classify it and detect various conditions
@@ -488,18 +513,33 @@ class PreprocessQuestion:
         outdomain = False
         short_chat = False
 
+        if await self.detect_icon(text_input):
+            return ProcessedData(
+                query=text_input,
+                language=True,
+                is_prompt_injection=False,
+                is_outdomain=False,
+                is_short_chat=False,
+                is_only_icon=True
+            )
+
         clean_text_input = self.clean_text(text_input, TERMS_DICT)
         is_short_chat = self.detect_short_chat(clean_text_input)
 
         if is_short_chat:
             query = self.get_response(
-                clean_text_input, SHORT_CHAT, RESPONSE_DICT, threshold=0.9)
+                clean_text_input,
+                SHORT_CHAT,
+                RESPONSE_DICT,
+                threshold=0.9
+            )
             return ProcessedData(
                 query=query,
                 language=language,
                 is_prompt_injection=prompt_injection,
                 is_outdomain=outdomain,
-                is_short_chat=is_short_chat
+                is_short_chat=is_short_chat,
+                is_only_icon=False
             )
 
         if short_chat is False:
@@ -514,7 +554,8 @@ class PreprocessQuestion:
                     language=language,
                     is_prompt_injection=prompt_injection,
                     is_outdomain=outdomain,
-                    is_short_chat=short_chat
+                    is_short_chat=short_chat,
+                    is_only_icon=False
                 )
             if language:
                 if self.is_prompt_injection(corrected_text):
@@ -524,7 +565,8 @@ class PreprocessQuestion:
                         language=language,
                         is_prompt_injection=prompt_injection,
                         is_outdomain=outdomain,
-                        is_short_chat=short_chat
+                        is_short_chat=short_chat,
+                        is_only_icon=False
                     )
                 domain = self.classify_domain(corrected_text)
                 if domain == 0:
@@ -540,5 +582,6 @@ class PreprocessQuestion:
             language=language,
             is_prompt_injection=prompt_injection,
             is_outdomain=outdomain,
-            is_short_chat=short_chat
+            is_short_chat=short_chat,
+            is_only_icon=False
         )

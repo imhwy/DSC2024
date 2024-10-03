@@ -92,6 +92,15 @@ class RetrieveChat:
             text_input=query
         )
         print(processed_query)
+        if processed_query.is_only_icon:
+            answer = await self._chat.chat(
+                text=query
+            )
+            return Chat(
+                response=answer,
+                is_outdomain=True,
+                retrieved_nodes=[]
+            )
         if processed_query.is_short_chat:
             return Chat(
                 response=processed_query.query,

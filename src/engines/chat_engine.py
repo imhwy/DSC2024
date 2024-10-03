@@ -9,7 +9,8 @@ from llama_index.llms.openai import OpenAI
 from src.prompt.instruction_prompt import (PROMPT,
                                            CONVERSATION_TRACKING,
                                            REASONING_PROMPT)
-from src.prompt.funny_chat_prompt import PROMPT_FUNNY_FLOW
+from src.prompt.funny_chat_prompt import (PROMPT_FUNNY_FLOW,
+                                          EMOJI_PROMPT)
 from src.storage.weaviatedb import WeaviateDB
 from src.repositories.suggestion_repository import SuggestionRepository
 
@@ -128,4 +129,14 @@ class ChatEngine:
             history=history
         )
         response = await self._complex_model.acomplete(prompt)
+        return response.text
+
+    async def chat(
+        self,
+        text: str
+    ) -> str:
+        """
+        """
+        answer = EMOJI_PROMPT.format(emoji=text)
+        response = await self._language_model.acomplete(answer)
         return response.text

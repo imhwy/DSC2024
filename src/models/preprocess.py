@@ -20,6 +20,7 @@ class ProcessedData(BaseModel):
     is_prompt_injection: bool
     is_outdomain: bool
     is_short_chat: bool
+    is_only_icon: bool
 
 
 class ShortChat(BaseModel):
