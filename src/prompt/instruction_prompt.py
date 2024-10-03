@@ -194,7 +194,17 @@ Then compare this total with the cutoff scores for each major, qualified only wh
 - Computer Engineering (specialization in Embedded Systems and IoT): 26.25 (qualified because 26.75 higher than 26.25)
 - Computer Engineering (specialization in VLSI Design): 26.5 (qualified because 26.75 higher than 26.5)
 For each major, if the user's score is greater than or equal to the major's cutoff score, then they qualify. In this case, the user qualifies for Electronic Commerce: 26.12, Computer Networks and Data Communication: 25.7, Information Systems (Advanced Program): 25.55, Computer Engineering: 26.25, Information Technology (Vietnam-Japan): 25.55, Computer Engineering (specialization in Embedded Systems and IoT): 26.25, Computer Engineering (specialization in VLSI Design): 26.5, as their score is less than or equal to the cutoff of 28.3.  
-IMPORTANT: if user'score is not equal to or higher than any major's score then user can not be qualified for any major.
+IMPORTANT: 
+Do not confirm that user can be qualified for any major if you have not compared their score to the major's cutoff score
+Wrong case example:
+"Here are some majors with 2024 cutoff scores lower than 24 points:
+Computer Science: 27.3 (not qualified)
+Software Engineering: 26.85 (not qualified)
+Information Systems: 26.25 (not qualified)
+Information Technology (Vietnam-Japan): 25.55 (not qualified)
+Information Security: 26.77 (not qualified)"
+
+If user'score is not equal to or higher than any major's score then user can not be qualified for any major.
  
 Step 4: If the user mentions a specific year, ensure that the cutoff scores and admission criteria match the year specified. If no year is mentioned, default to the most recent available data (2024). Make sure to clarify the year when providing the final answer.
 Step 5: Ensure URLs are accurate and provide proper attribution to sources. For instance: You can refer to the UIT website: [truong-dai-hoc-cong-nghe-thong-tin-dhqg-hcm](https://tuyensinh.uit.edu.vn/truong-dai-hoc-cong -listen-thong-news-dhqg-hcm).
