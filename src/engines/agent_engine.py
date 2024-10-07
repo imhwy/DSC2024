@@ -63,12 +63,12 @@ class AgentEngine:
         )
         self._get_uit_competency_assessment_score_2024_tool = FunctionTool.from_defaults(
             fn=get_uit_competency_assessment_scores_2024,
-            name="get uit competency assessment score 2024",
+            name="get_uit_competency_assessment_scores_2024",
             description="This tool is used to get UIT competency assessment score for 2024"
         )
         self._get_uit_national_high_school_graduation_scores_2024 = FunctionTool.from_defaults(
             fn=get_uit_national_high_school_graduation_scores_2024,
-            name="get uit national high school graduation scores 2024",
+            name="get_uit_national_high_school_graduation_scores_2024",
             description="This tool is used to get UIT national high school graduation scores for 2024"
         )
         self._tools = [
