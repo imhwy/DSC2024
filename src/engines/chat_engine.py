@@ -5,10 +5,12 @@ import re
 import json
 from typing import List
 from llama_index.llms.openai import OpenAI
+from llama_index.core.base.llms.types import ChatMessage
 
 from src.prompt.instruction_prompt import (PROMPT,
                                            CONVERSATION_TRACKING,
-                                           REASONING_PROMPT)
+                                           REASONING_PROMPT,
+                                           DIRECTION_PROMPT)
 from src.prompt.funny_chat_prompt import (PROMPT_FUNNY_FLOW,
                                           EMOJI_PROMPT)
 from src.storage.weaviatedb import WeaviateDB
@@ -138,5 +140,19 @@ class ChatEngine:
         """
         """
         answer = EMOJI_PROMPT.format(emoji=text)
+        response = await self._language_model.acomplete(answer)
+        return response.text
+
+    async def direct_entry(
+        self,
+        history: List[ChatMessage],
+        query: str
+    ) -> str:
+        """
+        """
+        answer = DIRECTION_PROMPT.format(
+            history=history,
+            query=query
+        )
         response = await self._language_model.acomplete(answer)
         return response.text

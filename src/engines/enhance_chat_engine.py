@@ -68,7 +68,7 @@ class EnhanceChatEngine:
         )
         lastest_chats = list(lastest_chats)
         for idx, chat in enumerate(reversed(lastest_chats)):
-            record = f"user question: {idx + 1}: {chat['query']}\nsystem resoponse: {idx + 1}: {chat['answer']}"
+            record = f"user question: {idx + 1}: {chat['query']}\nsystem response: {idx + 1}: {chat['answer']}"
             conversation_history.append(
                 ChatMessage(
                     role="user",
@@ -79,12 +79,9 @@ class EnhanceChatEngine:
 
     async def enhance_chat(
         self,
-        room_id: str,
-        query: str
+        query: str,
+        chat_history: List[ChatMessage]
     ) -> str:
-        chat_history = await self.history_config(
-            room_id=room_id
-        )
         response = self._chat_engine.chat(
             message=query,
             chat_history=chat_history

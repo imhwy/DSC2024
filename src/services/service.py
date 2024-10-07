@@ -21,6 +21,7 @@ from src.storage.weaviatedb import WeaviateDB
 from src.engines.retriever_engine import HybridRetriever
 from src.engines.chat_engine import ChatEngine
 from src.engines.enhance_chat_engine import EnhanceChatEngine
+from src.engines.agent_engine import AgentEngine
 from src.services.retrieve_chat import RetrieveChat
 from src.utils.utility import convert_value
 from src.repositories.chat_repository import ChatRepository
@@ -146,6 +147,11 @@ class Service:
             retriever=self._retriever._retriever,
             chat_memory_tracker=self._chat_repository,
             token_limit=MAX_HISTORY_TOKENS
+        )
+        self._agent_engine = AgentEngine(
+            retriever=self._retriever._retriever,
+            index=self._vector_database.index,
+            llm=self._complex_llm
         )
         self._retrieve_chat_engine = RetrieveChat(
             retriever=self._retriever,
@@ -285,3 +291,10 @@ class Service:
         Provides access to the EnhanceChatEngine instance.
         """
         return self._enhance_chat_engine
+
+    @property
+    def agent_engine(self) -> AgentEngine:
+        """
+        Provides access to the AgentEngine instance.
+        """
+        return self._agent_engine

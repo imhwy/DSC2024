@@ -1,11 +1,16 @@
 """
 this service provides retrieve and chat module for chatbot
 """
+import re
+import json
+from llama_index.core.base.llms.types import ChatMessage
+
 from src.engines.chat_engine import ChatEngine
 from src.engines.retriever_engine import HybridRetriever
 from src.engines.semantic_engine import SemanticSearch
 from src.engines.preprocess_engine import PreprocessQuestion
 from src.engines.enhance_chat_engine import EnhanceChatEngine
+from src.engines.agent_engine import AgentEngine
 from src.repositories.chat_repository import ChatRepository
 from src.models.chat import Chat
 from src.prompt.postprocessing_prompt import FAIL_CASES, RESPONSE_FAIL_CASE
@@ -25,7 +30,8 @@ class RetrieveChat:
         semantic: SemanticSearch = None,
         chat_history_tracker: ChatRepository = None,
         max_chat_token: float = 2000,
-        enhance_chat_engine: EnhanceChatEngine = None
+        enhance_chat_engine: EnhanceChatEngine = None,
+        agent: AgentEngine = None
     ):
         self._retriever = retriever
         self._chat = chat
@@ -34,6 +40,7 @@ class RetrieveChat:
         self._chat_history_tracker = chat_history_tracker
         self._max_chat_token = max_chat_token
         self._enhance_chat_engine = enhance_chat_engine
+        self._agent = agent
 
     async def history_chat_config(
         self,
@@ -63,10 +70,26 @@ class RetrieveChat:
     ) -> Chat:
         """
         """
-        answer = await self._enhance_chat_engine.enhance_chat(
-            room_id=room_id,
+        chat_history = await self._enhance_chat_engine.history_config(
+            room_id=room_id
+        )
+        direction = await self._chat.direct_entry(
+            history=chat_history,
             query=query
         )
+        string_processed = re.sub(r"```json|```", "", direction)
+        print(string_processed)
+        query_processed = json.loads(string_processed)
+        if query_processed:
+            answer = await self._enhance_chat_engine.enhance_chat(
+                query=query,
+                chat_history=chat_history
+            )
+        else:
+            answer = await self._agent.reasoning_agent(
+                chat=query,
+                chat_history=chat_history
+            )
         return Chat(
             response=answer,
             is_outdomain=False,
