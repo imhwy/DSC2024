@@ -80,12 +80,15 @@ class RetrieveChat:
         string_processed = re.sub(r"```json|```", "", direction)
         print(string_processed)
         query_processed = json.loads(string_processed)
-        if query_processed:
+        print(query_processed)
+        if query_processed["conclusion"]:
+            print("base pipeline")
             answer = await self._enhance_chat_engine.enhance_chat(
                 query=query,
                 chat_history=chat_history
             )
         else:
+            print("reasoning pipeline")
             answer = await self._agent.reasoning_agent(
                 chat=query,
                 chat_history=chat_history

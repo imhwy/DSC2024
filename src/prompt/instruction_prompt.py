@@ -244,20 +244,20 @@ If both the current query and conversation history are unclear and cannot be cla
 ## RESPONSE FORMAT
 Your response must be in JSON format with one key:
 {{
-   "conclusion": "true/false",
+   "conclusion": true/false,
 }}
 
 ## EXAMPLE
 query: "UIT bachelor's training program"
 Your response:
 {{
-   "conclusion": "true",
+   "conclusion": true,
 }}
 
 query: "What is the cutoff score for Computer Science in 2024?"
 Your response:
 {{
-   "conclusion": "false",
+   "conclusion": false,
 }}
 ----------------------------
 ## history conversation

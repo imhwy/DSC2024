@@ -160,7 +160,8 @@ class Service:
             semantic=self._semantic_engine,
             chat_history_tracker=self._chat_repository,
             max_chat_token=MAX_OUTPUT_TOKENS,
-            enhance_chat_engine=self._enhance_chat_engine
+            enhance_chat_engine=self._enhance_chat_engine,
+            agent=self._agent_engine
         )
         self._file_repository = FileRepository()
         self._general_loader = GeneralLoader()
