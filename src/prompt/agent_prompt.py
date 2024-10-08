@@ -26,14 +26,12 @@ When dealing with queries involving admission scores, follow these steps:
 ### 1. If the user provides subject-wise scores:
    - Assume the year is 2024 if no year is specified in the query.
    - Use the sum_subjects tool to calculate the total score from the individual subject scores provided by the user.
-   - Pass the total score to the get_uit_national_high_school_graduation_scores_2024 tool.
-   - Then, use the compare_tool to compare the user’s score with UIT admission criteria for 2024.
+   - Pass the total score to the compare_uit_national_high_school_graduation_scores tool tocompare the user’s score with UIT admission criteria.
 
 ### 2. If the user provides a total score:
    - Assume the year is 2024 if no year is mentioned.
-   - If the total score is above 30, use the get_uit_competency_assessment_scores_2024 tool.
-   - If the total score is 30 or below, use the get_uit_national_high_school_graduation_scores_2024 tool.
-   - Then, use the compare_tool to evaluate the user’s eligibility based on the retrieved admission data.
+   - If the total score is above 30, use the compare_uit_competency_assessment_scores tool.
+   - If the total score is 30 or below, use compare_uit_national_high_school_graduation_scores tool.
 
 ### 3. Final Decision:
    - If the compare_tool identifies any major for which the user’s score meets the requirements, confirm that the user is eligible for admission to that major.

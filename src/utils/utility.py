@@ -139,12 +139,28 @@ def sum_subjects(
     return subject_a + subject_b + subject_c
 
 
-def compare_score(
-    user_score: float,
-    all_major_info: List[Dict]
+def compare_uit_national_high_school_graduation_scores_2024(
+    user_score: float
 ) -> List[Dict]:
     """
     """
+    all_major_info = get_uit_national_high_school_graduation_scores_2024()
+    result = []
+    for major_info in all_major_info:
+        is_pass = user_score >= major_info['score']
+        result.append({
+            "major": major_info['major'],
+            "is_pass": is_pass
+        })
+    return result
+
+
+def compare_uit_competency_assessment_scores_2024(
+    user_score: float
+) -> List[Dict]:
+    """
+    """
+    all_major_info = get_uit_competency_assessment_scores_2024()
     result = []
     for major_info in all_major_info:
         is_pass = user_score >= major_info['score']

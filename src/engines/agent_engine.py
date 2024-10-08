@@ -16,9 +16,8 @@ from llama_index.core.tools import (ToolMetadata,
 from src.prompt.agent_prompt import AGENT_INSTRUCTION_PROMPT
 from src.utils.utility import (convert_value,
                                sum_subjects,
-                               compare_score,
-                               get_uit_national_high_school_graduation_scores_2024,
-                               get_uit_competency_assessment_scores_2024)
+                               compare_uit_national_high_school_graduation_scores_2024,
+                               compare_uit_competency_assessment_scores_2024)
 
 load_dotenv()
 
@@ -56,27 +55,21 @@ class AgentEngine:
             name="sum_subjects",
             description="This tool is used to sum all user's subjects"
         )
-        self._compare_tool = FunctionTool.from_defaults(
-            fn=compare_score,
-            name="compare_score",
-            description="This tool is used to compare user's total score to all the major's cutoff score"
+        self._compare_uit_competency_assessment_scores_2024_tool = FunctionTool.from_defaults(
+            fn=compare_uit_competency_assessment_scores_2024,
+            name="compare_uit_competency_assessment_scores_2024",
+            description="This tool is used to compare UIT competency assessment score for 2024"
         )
-        self._get_uit_competency_assessment_score_2024_tool = FunctionTool.from_defaults(
-            fn=get_uit_competency_assessment_scores_2024,
-            name="get_uit_competency_assessment_scores_2024",
-            description="This tool is used to get UIT competency assessment score for 2024"
-        )
-        self._get_uit_national_high_school_graduation_scores_2024 = FunctionTool.from_defaults(
-            fn=get_uit_national_high_school_graduation_scores_2024,
-            name="get_uit_national_high_school_graduation_scores_2024",
-            description="This tool is used to get UIT national high school graduation scores for 2024"
+        self._compare_uit_national_high_school_graduation_scores_2024_tool = FunctionTool.from_defaults(
+            fn=compare_uit_national_high_school_graduation_scores_2024,
+            name="compare_uit_national_high_school_graduation_scores_2024",
+            description="This tool is used to compare UIT national high school graduation scores for 2024"
         )
         self._tools = [
             self._retriever_tool,
             self._sum_tool,
-            self._compare_tool,
-            self._get_uit_competency_assessment_score_2024_tool,
-            self._get_uit_national_high_school_graduation_scores_2024
+            self._compare_uit_competency_assessment_scores_2024_tool,
+            self._compare_uit_national_high_school_graduation_scores_2024_tool
         ]
         self._obj_index = ObjectIndex.from_objects(
             self._tools,

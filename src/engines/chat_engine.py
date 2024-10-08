@@ -154,5 +154,5 @@ class ChatEngine:
             history=history,
             query=query
         )
-        response = await self._language_model.acomplete(answer)
+        response = await self._complex_model.acomplete(answer)
         return response.text

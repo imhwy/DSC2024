@@ -78,7 +78,6 @@ class RetrieveChat:
             query=query
         )
         string_processed = re.sub(r"```json|```", "", direction)
-        print(string_processed)
         query_processed = json.loads(string_processed)
         print(query_processed)
         if query_processed["conclusion"]:
