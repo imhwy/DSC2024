@@ -16,8 +16,8 @@ from llama_index.core.tools import (ToolMetadata,
 from src.prompt.agent_prompt import AGENT_INSTRUCTION_PROMPT
 from src.utils.utility import (convert_value,
                                sum_subjects,
-                               compare_uit_national_high_school_graduation_scores_2024,
-                               compare_uit_competency_assessment_scores_2024)
+                               compare_uit_national_high_school_graduation_scores,
+                               compare_uit_competency_assessment_scores)
 
 load_dotenv()
 
@@ -55,21 +55,21 @@ class AgentEngine:
             name="sum_subjects",
             description="This tool is used to sum all user's subjects"
         )
-        self._compare_uit_competency_assessment_scores_2024_tool = FunctionTool.from_defaults(
-            fn=compare_uit_competency_assessment_scores_2024,
+        self._compare_uit_competency_assessment_scores_tool = FunctionTool.from_defaults(
+            fn=compare_uit_competency_assessment_scores,
             name="compare_uit_competency_assessment_scores_2024",
-            description="This tool is used to compare UIT competency assessment score for 2024"
+            description="This tool is used to compare UIT competency assessment score"
         )
-        self._compare_uit_national_high_school_graduation_scores_2024_tool = FunctionTool.from_defaults(
-            fn=compare_uit_national_high_school_graduation_scores_2024,
+        self._compare_uit_national_high_school_graduation_scores_tool = FunctionTool.from_defaults(
+            fn=compare_uit_national_high_school_graduation_scores,
             name="compare_uit_national_high_school_graduation_scores_2024",
-            description="This tool is used to compare UIT national high school graduation scores for 2024"
+            description="This tool is used to compare UIT national high school graduation scores"
         )
         self._tools = [
             self._retriever_tool,
             self._sum_tool,
-            self._compare_uit_competency_assessment_scores_2024_tool,
-            self._compare_uit_national_high_school_graduation_scores_2024_tool
+            self._compare_uit_competency_assessment_scores_tool,
+            self._compare_uit_national_high_school_graduation_scores_tool
         ]
         self._obj_index = ObjectIndex.from_objects(
             self._tools,

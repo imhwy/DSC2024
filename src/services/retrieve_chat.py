@@ -77,7 +77,6 @@ class RetrieveChat:
             query=query,
             chat_history=chat_history
         )
-        print(response)
         string_processed = re.sub(r"```json|```", "", response)
         query_processed = json.loads(string_processed)
         print(query_processed)
