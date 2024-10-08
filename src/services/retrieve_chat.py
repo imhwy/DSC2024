@@ -73,19 +73,17 @@ class RetrieveChat:
         chat_history = await self._enhance_chat_engine.history_config(
             room_id=room_id
         )
-        direction = await self._chat.direct_entry(
-            history=chat_history,
-            query=query
+        response = await self._enhance_chat_engine.enhance_chat(
+            query=query,
+            chat_history=chat_history
         )
-        string_processed = re.sub(r"```json|```", "", direction)
+        print(response)
+        string_processed = re.sub(r"```json|```", "", response)
         query_processed = json.loads(string_processed)
         print(query_processed)
         if query_processed["conclusion"]:
             print("base pipeline")
-            answer = await self._enhance_chat_engine.enhance_chat(
-                query=query,
-                chat_history=chat_history
-            )
+            answer = query_processed['text']
         else:
             print("reasoning pipeline")
             answer = await self._agent.reasoning_agent(
