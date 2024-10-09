@@ -57,16 +57,15 @@ class AgentEngine:
         )
         self._compare_uit_competency_assessment_scores_tool = FunctionTool.from_defaults(
             fn=compare_uit_competency_assessment_scores,
-            name="compare_uit_competency_assessment_scores_2024",
+            name="compare_uit_competency_assessment_scores",
             description="This tool is used to compare UIT competency assessment score"
         )
         self._compare_uit_national_high_school_graduation_scores_tool = FunctionTool.from_defaults(
             fn=compare_uit_national_high_school_graduation_scores,
-            name="compare_uit_national_high_school_graduation_scores_2024",
+            name="compare_uit_national_high_school_graduation_scores",
             description="This tool is used to compare UIT national high school graduation scores"
         )
         self._tools = [
-            self._retriever_tool,
             self._sum_tool,
             self._compare_uit_competency_assessment_scores_tool,
             self._compare_uit_national_high_school_graduation_scores_tool

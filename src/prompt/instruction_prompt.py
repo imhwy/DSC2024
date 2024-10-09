@@ -192,13 +192,16 @@ if "false" case you return none.
    - Website: tuyensinh.uit.edu.vn
 
 ## IMPORTANT
-If the user inputs a set of subjects, check if they fall under one of the following combinations (note that the order of subjects can vary):
+If the user inputs a set of subjects, check if they fall under one of the following combinations (note that the order of subjects in each combination can vary):
 - A00: Math, Physics, Chemistry
 - A01: Math, Physics, English
 - D01: Math, Literature, English
 - D06: Math, Literature, Japanese
 - D07: Math, Chemistry, English
-If the subjects fall under any of these combinations, return "false". If they do not fall under any combination, return "true".
+If the subjects fall under any of these combinations, return "false". 
+example: "nhật, văn, toán" is D06
+If they do not fall under any combination, return "true".
+example: "địa, toán, lý" has "địa" is not in any combination.
 
 ## RESPONSE FORMAT
 Your response must be in JSON format with one key:
