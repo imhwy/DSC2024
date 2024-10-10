@@ -7,4 +7,4 @@ from .url_loader import URLLoader
 from .pdf_loader import PDFLoader
 from .excel_loader import ExcelLoader
 
-__all__ = ['GeneralLoader', 'PDFLoader', 'URLLoader', 'ExcelLoader']
+__all__ = ["GeneralLoader", "PDFLoader", "URLLoader", "ExcelLoader", "ImageLoader"]
