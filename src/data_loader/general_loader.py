@@ -77,6 +77,8 @@ class GeneralLoader(BaseLoader):
                 return "pdf"
             elif path.suffix in self.excel_ext:
                 return "excel"
+            elif path.suffix in self.image_ext:
+                return "image"
         elif self.is_valid_url(file_path):
             return "url"
         else:

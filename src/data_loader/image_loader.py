@@ -20,7 +20,7 @@ specific_prompt = """
 
 
 class ImageLoader(BaseLoader):
-    def __init__(self, api_key):
+    def __init__(self):
         self.genai = genai
         # self.genai.configure(api_key=api_key)
 
