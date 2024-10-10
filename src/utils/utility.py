@@ -145,7 +145,9 @@ def compare_uit_national_high_school_graduation_scores(
 ) -> List[Dict]:
     """
     """
-    if year == 2024:
+    if year > 2024:
+        all_major_info = get_uit_national_high_school_graduation_score2024()
+    elif year == 2024:
         all_major_info = get_uit_national_high_school_graduation_scores_2024()
     elif year == 2023:
         all_major_info = get_uit_national_high_school_graduation_scores_2023()
@@ -169,7 +171,9 @@ def compare_uit_competency_assessment_scores(
 ) -> List[Dict]:
     """
     """
-    if year == 2024:
+    if year > 2024:
+        all_major_info = get_uit_competency_assessment_scores_2024()
+    elif year == 2024:
         all_major_info = get_uit_competency_assessment_scores_2024()
     elif year == 2023:
         all_major_info = get_uit_competency_assessment_scores_2023()

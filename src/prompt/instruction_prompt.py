@@ -170,8 +170,8 @@ Your answer must be concise and short.
 
 ## TASK:
 Your task is to classify the user's query into one of two categories and then answer if it is in "true" case:
-   - "true" if the query seeks factual information or retrieval from context (e.g., programs offered, admission procedures, or general university details).
-   - "false" if the query seeks for score, requires reasoning, calculations, or involves admission criteria such as cutoff scores, score comparisons, or eligibility assessments.
+   - "true" if the query seeks factual information or retrieval from context (e.g., programs offered, admission procedures, or general university details), then you return final answer.
+   - "false" if the query seeks for requires reasoning, calculations, or involves admission criteria such as cutoff scores, score comparisons, or eligibility assessments.
 if "true" case you return answer relate to user's query that you extract information from context you retrieved before.
 if "false" case you return none.
 
@@ -198,8 +198,11 @@ If the user inputs a set of subjects, check if they fall under one of the follow
 - D01: Math, Literature, English
 - D06: Math, Literature, Japanese
 - D07: Math, Chemistry, English
+If among the three subjects there are 2 or 3 subjects repeated, return "true".
+example: "toán, văn, văn" has "văn" repeated twice so you return not supported.
 If the subjects fall under any of these combinations, return "false". 
 example: "nhật, văn, toán" is D06
+example: "toán, hóa, anh" is D07
 If they do not fall under any combination, return "true".
 example: "địa, toán, lý" has "địa" is not in any combination.
 
@@ -229,6 +232,13 @@ Your response:
             Sinh viên được định hướng để phát huy năng lực sở trường; tăng cường hỗ trợ về hoạt đông học thuật, nghiên cứu khoa học và công nghệ.
             
             Để biết thêm thông tin chi tiết vui lòng truy cập UIT website: [truong-dai-hoc-cong-nghe-thong-tin-dhqg-hcm](https://tuyensinh.uit.edu.vn/truong-dai-hoc-cong-nghe-thong-tin-dhqg-hcm)"
+}
+
+query: "điểm chuẩn khoa học máy tính?"
+Your response:
+{
+   "conclusion": true,
+   "text": "Điểm chuẩn ngành khoa học máy tính 2024 là 27.3 đối với điểm chuẩn TNTHPTQG và 925 điểm đối với đánh giá năng lực."
 }
 
 query: "What is the cutoff score for Computer Science in 2024?"
