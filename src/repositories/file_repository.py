@@ -104,8 +104,8 @@ class FileRepository:
             if data.file_type == "pdf":
                 file_extension = data.file_name + ".pdf"
 
-            elif data.file_type == "excel":
-                file_extension = data.file_name + ".csv"
+            elif data.file_type == "xlsx" or data.file_type == "xls":
+                file_extension = data.file_name + ".xlsx"
 
             elif data.file_type == "image":
                 file_extension = data.file_name + ".jpg"
