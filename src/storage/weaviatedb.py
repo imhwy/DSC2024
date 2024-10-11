@@ -270,7 +270,7 @@ class WeaviateDB:
             splitter = self.get_sessions_splitter(doc.text)
             # splitted_text_list = [{'title': 'Title A', 'content': 'content A'}]
             splitted_text_list = splitter.run()
-            print(splitted_text_list)
+            # print(splitted_text_list)
             splitted_text_list = splitted_text_list["sessions"]
 
             # Add each TextNode to list nodes
