@@ -19,16 +19,13 @@ class FileManagement:
         self,
         file_repository: FileRepository = None,
         general_loader: GeneralLoader = None,
-        vector_database: WeaviateDB = None
+        vector_database: WeaviateDB = None,
     ):
         self._file_repository = file_repository
         self._general_loader = general_loader
         self._vector_database = vector_database
 
-    def add_file(
-        self,
-        data_list: List[FileUpload]
-    ) -> None:
+    async def add_file(self, data_list: List[FileUpload]) -> None:
         """
         Adds files to the system by transferring them, loading their data,
         and storing them in a vector database.
@@ -40,19 +37,18 @@ class FileManagement:
             None
         """
         for data in data_list:
-            file_path = self._file_repository.file_transfer(
-                data=data
-            )
-            documents = self._general_loader.load_data(sources=[file_path])
+            file_path = await self._file_repository.file_transfer(data=data)
+            documents = await self._general_loader.aload_data(sources=[file_path])
+            print([doc.id_ for doc in documents])
             try:
-                self._vector_database.add_knowledge(
+                await self._vector_database.add_knowledge(
                     url=data.url,
                     file_type=data.file_type,
                     public_id=data.public_id,
                     file_name=data.file_name,
                     documents=documents,
                 )
-                self._file_repository.add_file(
+                await self._file_repository.add_file(
                     public_id=data.public_id,
                     url=data.url,
                     file_name=data.file_name,
@@ -62,10 +58,7 @@ class FileManagement:
             except ValueError as e:
                 print(f"Failed to process file {data.file_name}: {str(e)}")
 
-    def delete_file(
-        self,
-        public_id: str = None
-    ) -> None:
+    def delete_file(self, public_id: str = None) -> None:
         """
         Deletes a file and its associated knowledge from the vector database.
 
@@ -75,9 +68,5 @@ class FileManagement:
         Returns:
             None
         """
-        self._file_repository.delete_specific_file(
-            public_id=public_id
-        )
-        self._vector_database.delete_knowlegde(
-            public_id=public_id
-        )
+        self._file_repository.delete_specific_file(public_id=public_id)
+        self._vector_database.delete_knowlegde(public_id=public_id)

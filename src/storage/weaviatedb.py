@@ -48,7 +48,7 @@ class WeaviateDB:
         suggestion_name: str = SUGGESTION_NAME,
         mongodb_url: str = MONGODB_URL,
         mongodb_name: str = MONGODB_NAME,
-        documents: List[Document] = None
+        documents: List[Document] = None,
     ):
         """
         Initializes the WeaviateDB class with the specified host, port
@@ -62,24 +62,18 @@ class WeaviateDB:
         self._documents = documents
         self._mongodb_url = mongodb_url
         self._mongodb_name = mongodb_name
-        self._client = weaviate.connect_to_local(
-            host=self._host,
-            port=self._port
-        )
+        self._client = weaviate.connect_to_local(host=self._host, port=self._port)
         self._vector_store = WeaviateVectorStore(
-            weaviate_client=self._client,
-            index_name=self._index_name
+            weaviate_client=self._client, index_name=self._index_name
         )
         self._suggestion_vector_store = WeaviateVectorStore(
-            weaviate_client=self._client,
-            index_name=self._suggestion_name
+            weaviate_client=self._client, index_name=self._suggestion_name
         )
         self._storage_context = StorageContext.from_defaults(
             docstore=MongoDocumentStore.from_uri(
-                uri=self._mongodb_url,
-                db_name=self._mongodb_name
+                uri=self._mongodb_url, db_name=self._mongodb_name
             ),
-            vector_store=self._vector_store
+            vector_store=self._vector_store,
         )
         self._suggestion_storage_context = StorageContext.from_defaults(
             vector_store=self._suggestion_vector_store
@@ -87,8 +81,7 @@ class WeaviateDB:
         self.parser = SentenceSplitter()
         if self._documents:
             self._index = VectorStoreIndex.from_documents(
-                documents=self._documents,
-                storage_context=self._storage_context
+                documents=self._documents, storage_context=self._storage_context
             )
         else:
             self._index = VectorStoreIndex.from_vector_store(
@@ -185,9 +178,7 @@ class WeaviateDB:
         return documents
 
     async def suggestion_config(
-        self,
-        question: str = None,
-        answer: str = None
+        self, question: str = None, answer: str = None
     ) -> List[Document]:
         """
         Creates a list of Document objects based on the provided question and answer.
@@ -201,21 +192,12 @@ class WeaviateDB:
         """
         if question and answer:
             document = [
-                Document(
-                    text=answer,
-                    metadata={
-                        "question": question,
-                        "answer": answer
-                    }
-                )
+                Document(text=answer, metadata={"question": question, "answer": answer})
             ]
             return self.documents_to_nodes(documents=document)
         return None
 
-    async def insert_suggestion_nodes(
-        self,
-        nodes: List[TextNode]
-    ) -> None:
+    async def insert_suggestion_nodes(self, nodes: List[TextNode]) -> None:
         """
         Inserts a list of TextNode objects into the suggestion index.
 
@@ -225,10 +207,7 @@ class WeaviateDB:
         if nodes:
             self._suggestion_index.insert_nodes(nodes=nodes)
 
-    def documents_to_nodes(
-        self,
-        documents: List[Document]
-    ) -> List[TextNode]:
+    def documents_to_nodes(self, documents: List[Document]) -> List[TextNode]:
         """
         Converts a list of Document objects into a list of TextNode objects.
 
@@ -239,9 +218,7 @@ class WeaviateDB:
         Returns:
             List[TextNode]: A list of TextNode objects derived from the given documents.
         """
-        nodes = self.parser.get_nodes_from_documents(
-            documents=documents
-        )
+        nodes = self.parser.get_nodes_from_documents(documents=documents)
         return nodes
 
     def get_sessions_splitter(self, text):
@@ -276,7 +253,7 @@ class WeaviateDB:
         self, documents: List[Document]
     ) -> List[TextNode]:
         """
-        Converts a list of Document objects into a list of TextNode 
+        Converts a list of Document objects into a list of TextNode
         objects splitted by sessions using ScrapeGraph:
         https://github.com/ScrapeGraphAI/Scrapegraph-ai.
 
@@ -293,7 +270,7 @@ class WeaviateDB:
             splitter = self.get_sessions_splitter(doc.text)
             # splitted_text_list = [{'title': 'Title A', 'content': 'content A'}]
             splitted_text_list = splitter.run()
-            # print(splitted_text_list)
+            print(splitted_text_list)
             splitted_text_list = splitted_text_list["sessions"]
 
             # Add each TextNode to list nodes
@@ -356,10 +333,7 @@ class WeaviateDB:
 
         return nodes_of_docs
 
-    def insert_nodes(
-        self,
-        nodes: List[TextNode]
-    ) -> str:
+    def insert_nodes(self, nodes: List[TextNode]) -> str:
         """
         Adds a list of nodes into the vector store.
 
@@ -372,10 +346,7 @@ class WeaviateDB:
         if nodes:
             self._index.insert_nodes(nodes=nodes)
 
-    def delete_nodes(
-        self,
-        ref_doc_id: str = None
-    ) -> None:
+    def delete_nodes(self, ref_doc_id: str = None) -> None:
         """
         Deletes a document from the vector store using the reference document ID.
 
@@ -386,49 +357,37 @@ class WeaviateDB:
             ref_doc_id (str, optional): The reference document ID of the document to be deleted.
         """
         if ref_doc_id:
-            self._index.delete_ref_doc(
-                ref_doc_id=ref_doc_id
-            )
+            self._index.delete_ref_doc(ref_doc_id=ref_doc_id)
 
-    def insert_docstore(
-        self,
-        nodes: List[TextNode]
-    ) -> None:
+    def insert_docstore(self, nodes: List[TextNode]) -> None:
         """
         Inserts a list of TextNode objects into the document store.
 
         Args:
-        nodes (List[TextNode]): A list of TextNode objects to be inserted 
+        nodes (List[TextNode]): A list of TextNode objects to be inserted
                                 into the document store.
 
         Returns:
             None
         """
         if nodes:
-            self._storage_context.docstore.add_documents(
-                nodes
-            )
+            self._storage_context.docstore.add_documents(nodes)
 
-    def delete_docstore(
-        self,
-        ref_doc_id: str = None
-    ) -> None:
+    def delete_docstore(self, ref_doc_id: str = None) -> None:
         """
         Deletes a document from the document store using its reference document ID.
 
         Args:
-        ref_doc_id (str, optional): The reference document ID of the document to be deleted. 
+        ref_doc_id (str, optional): The reference document ID of the document to be deleted.
                                     If None, no action is taken.
 
         Returns:
             None
         """
         if ref_doc_id:
-            self._storage_context.docstore.delete_ref_doc(
-                ref_doc_id=ref_doc_id
-            )
+            self._storage_context.docstore.delete_ref_doc(ref_doc_id=ref_doc_id)
 
-    def add_knowledge(
+    async def add_knowledge(
         self,
         url: str = None,
         file_type: str = None,
@@ -456,16 +415,12 @@ class WeaviateDB:
                 documents=documents,
             )
             # nodes = self.documents_to_nodes(documents=processed_documents)
-            nodes = self.documents_to_nodes_by_sessions(
-                documents=processed_documents)
+            nodes = self.documents_to_nodes_by_sessions(documents=processed_documents)
             # print(nodes)
             self.insert_nodes(nodes=nodes)
             self.insert_docstore(nodes=nodes)
 
-    def delete_knowlegde(
-        self,
-        public_id: str = None
-    ) -> None:
+    def delete_knowlegde(self, public_id: str = None) -> None:
         """
         Deletes documents from the knowledge base by file name.
 
@@ -480,28 +435,22 @@ class WeaviateDB:
                 and node.ref_doc_id not in ref_doc_ids
             ):
                 self.delete_nodes(ref_doc_id=node.ref_doc_id)
-                print(
-                    f"delete node with ref_doc_id {node.ref_doc_id} successfully ")
+                print(f"delete node with ref_doc_id {node.ref_doc_id} successfully ")
                 self.delete_docstore(ref_doc_id=node.ref_doc_id)
                 print(
                     f"delete doc from docstore with ref_doc_id {node.ref_doc_id} successfully "
                 )
                 ref_doc_ids.append(node.ref_doc_id)
 
-    def delete_collection(
-        self,
-        collection_name: str = None
-    ) -> None:
+    def delete_collection(self, collection_name: str = None) -> None:
         """
         Deletes a collection from the document storage by name.
 
         Args:
-            collection_name (str, optional): The name of the collection to be deleted. 
+            collection_name (str, optional): The name of the collection to be deleted.
                                              If None, no action is taken.
 
         Returns:
             None
         """
-        self._client.collections.delete(
-            name=collection_name
-        )
+        self._client.collections.delete(name=collection_name)

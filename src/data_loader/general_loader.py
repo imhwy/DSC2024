@@ -109,3 +109,29 @@ class GeneralLoader(BaseLoader):
             else:
                 print("Source type is not supported:", source_type)
         return documents
+
+    async def aload_data(self, sources: List[str]) -> List[Document]:
+        """
+        Load data from a list of sources, which may include PDF files, Excel files, and URLs.
+
+        Args:
+            sources (List[str]): A list of file paths or URLs to load data from.
+
+        Returns:
+            List[Document]: A list of Document objects containing the loaded data.
+        """
+        documents = []
+        for source in tqdm(sources):
+            source_type = self.check_extension(source)
+
+            if source_type == "pdf":
+                documents.extend(await self.pdf_loader.aload_data([source]))
+            elif source_type == "excel":
+                documents.extend(await self.pdf_loader.aload_data([source]))
+            elif source_type == "url":
+                documents.extend(await self.url_loader.aload_data([source]))
+            elif source_type == "image":
+                documents.extend(await self.image_loader.aload_data([source]))
+            else:
+                print("Source type is not supported:", source_type)
+        return documents

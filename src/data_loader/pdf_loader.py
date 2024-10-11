@@ -3,7 +3,6 @@ This module provides a class for loading and processing data from pdf files.
 """
 
 import os
-import multiprocessing
 from typing import List
 from dotenv import load_dotenv
 from llama_parse import LlamaParse
@@ -13,6 +12,9 @@ from llama_index.core.schema import Document
 
 from src.data_loader.base_loader import BaseLoader
 from src.utils.utility import convert_value
+import nest_asyncio
+
+nest_asyncio.apply()
 
 load_dotenv()
 
@@ -33,7 +35,7 @@ class PDFLoader(BaseLoader):
         self,
         result_type: ResultType = ResultType.MD,
         language: Language = Language.VIETNAMESE,
-        parsing_instruction: str = PARSING_INSTRUCTION
+        parsing_instruction: str = PARSING_INSTRUCTION,
     ):
         """
         Initialize the PDFLoader with the specified parsing options.
@@ -43,29 +45,36 @@ class PDFLoader(BaseLoader):
                                                 Defaults to ResultType.MD.
             language (Language, optional): The language of the documents to be processed.
                                            Defaults to Language.VIETNAMESE.
-            parsing_instruction (str, optional): Instructions for parsing the PDF content. 
+            parsing_instruction (str, optional): Instructions for parsing the PDF content.
                                                  Defaults to 'Parse and structure the information
                                                  from the file provided. Write in Vietnamese'.
         """
-        self.num_workers = multiprocessing.cpu_count()
+        self.num_workers = 4  # the more the faster but crash the server
         self.parser = LlamaParse(
             result_type=result_type,
             language=language,
             parsing_instruction=parsing_instruction,
-            num_workers=9,
-            invalidate_cache=True
+            num_workers=self.num_workers,
+            # invalidate_cache=False,
+            max_timeout=3600,
         )
         self.extensions = [
-            ".xls", ".xlsx", ".csv", ".tsv",
-            ".jpg", ".jpeg", ".png", ".svg", ".tiff", ".webp", ".bmp",
-            ".pdf"
+            ".xls",
+            ".xlsx",
+            ".csv",
+            ".tsv",
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".svg",
+            ".tiff",
+            ".webp",
+            ".bmp",
+            ".pdf",
         ]
         self.file_extractor = {ext: self.parser for ext in self.extensions}
 
-    def load_data(
-        self,
-        sources: List[str]
-    ) -> List[Document]:
+    def load_data(self, sources: List[str]) -> List[Document]:
         """
         Load data from a list of PDF files and return a list of Document objects.
 
@@ -77,14 +86,35 @@ class PDFLoader(BaseLoader):
         """
         try:
             documents = SimpleDirectoryReader(
-                input_files=sources,
-                file_extractor=self.file_extractor
-            ).load_data(num_workers=self.num_workers)
+                input_files=sources, file_extractor=self.file_extractor
+            ).load_data()
         except ValueError as e:
-            print('Use default PDF, return text instead of markdown:', str(e))
-            del self.file_extractor['.pdf']
+            print("Use default PDF, return text instead of markdown:", str(e))
+            del self.file_extractor[".pdf"]
             documents = SimpleDirectoryReader(
-                input_files=sources,
-                file_extractor=self.file_extractor
-            ).load_data(num_workers=self.num_workers)
+                input_files=sources, file_extractor=self.file_extractor
+            ).load_data()
+        return documents
+
+    async def aload_data(self, sources: List[str]) -> List[Document]:
+        """
+        Load data from a list of PDF files and return a list of Document objects.
+
+        Args:
+            files_list (List[str]): A list of paths to PDF files.
+
+        Returns:
+            List[Document]: A list of Document objects containing the loaded data.
+        """
+        try:
+            documents = await SimpleDirectoryReader(
+                input_files=sources, file_extractor=self.file_extractor
+            ).aload_data()
+        except ValueError as e:
+            print("Use default PDF, return text instead of markdown:", str(e))
+            del self.file_extractor[".pdf"]
+            documents = await SimpleDirectoryReader(
+                input_files=sources, file_extractor=self.file_extractor
+            ).aload_data()
+        # print(documents)
         return documents
