@@ -100,6 +100,7 @@ class FileRepository:
                  itself if the file type is "link".
         """
         file_path = None
+        file_extension = "image"
         if not data.file_type == "link":
             if data.file_type == "pdf":
                 file_extension = data.file_name + ".pdf"

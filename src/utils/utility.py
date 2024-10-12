@@ -130,13 +130,54 @@ def format_document(
 
 
 def sum_subjects(
-    subject_a: float,
-    subject_b: float,
-    subject_c: float
+    subject_a_name: str,
+    subject_b_name: str,
+    subject_c_name: str,
+    subject_a_point: float,
+    subject_b_point: float,
+    subject_c_point: float
 ) -> float:
     """
     """
-    return subject_a + subject_b + subject_c
+    subject_aliases = {
+        "Toán": ["Toán", "Toán học", "Toán cao cấp", "toan", "toán"],
+        "Vật lý": ["vật lý", "Vật lý học", "Lý", "lý", "lí", "li", "ly"],
+        "Hóa học": ["Hóa", "Hóa học", "hoa", "hoa hoc", "hóa"],
+        "Tiếng Anh": ["Tiếng Anh", "Anh văn", "Anh ngữ", "anh", "Anh"],
+        "Ngữ văn": ["Ngữ văn", "Văn học", "van", "văn", "Văn"],
+        "Tiếng Nhật": ["Tiếng Nhật", "Nhật ngữ", "nhat", "nhật", "Nhật"]
+    }
+    valid_combinations = {
+        "A00": ["Toán", "Vật lý", "Hóa học"],
+        "A01": ["Toán", "Vật lý", "Tiếng Anh"],
+        "D01": ["Toán", "Ngữ văn", "Tiếng Anh"],
+        "D06": ["Toán", "Ngữ văn", "Tiếng Nhật"],
+        "D07": ["Toán", "Hóa học", "Tiếng Anh"]
+    }
+
+    def normalize_subject(subject_name: str) -> str:
+        for official_name, aliases in subject_aliases.items():
+            if subject_name in aliases:
+                return official_name
+        return None
+
+    # Chuẩn hóa các môn học đầu vào
+    subject_a_normalized = normalize_subject(subject_a_name)
+    subject_b_normalized = normalize_subject(subject_b_name)
+    subject_c_normalized = normalize_subject(subject_c_name)
+
+    if None in [subject_a_normalized, subject_b_normalized, subject_c_normalized]:
+        raise ValueError("Có môn học không hợp lệ.")
+
+    # Tạo một danh sách các môn và sắp xếp chúng để so sánh với các tổ hợp hợp lệ
+    entered_subjects = sorted(
+        [subject_a_normalized, subject_b_normalized, subject_c_normalized])
+
+    # Kiểm tra xem các môn nhập vào có thuộc một tổ hợp hợp lệ không
+    for combination in valid_combinations.values():
+        if sorted(combination) == entered_subjects:
+            return subject_a_point + subject_b_point + subject_c_point
+    raise ValueError("Tổ hợp môn học không hợp lệ.")
 
 
 def compare_uit_national_high_school_graduation_scores(
@@ -146,7 +187,7 @@ def compare_uit_national_high_school_graduation_scores(
     """
     """
     if year > 2024:
-        all_major_info = get_uit_national_high_school_graduation_score2024()
+        all_major_info = get_uit_national_high_school_graduation_scores_2024()
     elif year == 2024:
         all_major_info = get_uit_national_high_school_graduation_scores_2024()
     elif year == 2023:

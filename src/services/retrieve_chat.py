@@ -3,7 +3,8 @@ this service provides retrieve and chat module for chatbot
 """
 import re
 import json
-from llama_index.core.base.llms.types import ChatMessage
+from typing import Any
+from underthesea import word_tokenize
 
 from src.engines.chat_engine import ChatEngine
 from src.engines.retriever_engine import HybridRetriever
@@ -13,8 +14,6 @@ from src.engines.enhance_chat_engine import EnhanceChatEngine
 from src.engines.agent_engine import AgentEngine
 from src.repositories.chat_repository import ChatRepository
 from src.models.chat import Chat
-from src.prompt.postprocessing_prompt import FAIL_CASES, RESPONSE_FAIL_CASE
-from src.prompt.preprocessing_prompt import CALCULATION_TOKENS
 
 
 class RetrieveChat:
@@ -31,8 +30,9 @@ class RetrieveChat:
         chat_history_tracker: ChatRepository = None,
         max_chat_token: float = 2000,
         enhance_chat_engine: EnhanceChatEngine = None,
-        agent: AgentEngine = None
-    ):
+        agent: AgentEngine = None,
+        rag_classifier: Any = None
+    ) -> None:
         self._retriever = retriever
         self._chat = chat
         self._preprocess = preprocess
@@ -41,6 +41,7 @@ class RetrieveChat:
         self._max_chat_token = max_chat_token
         self._enhance_chat_engine = enhance_chat_engine
         self._agent = agent
+        self._rag_classifier = rag_classifier
 
     async def history_chat_config(
         self,
@@ -73,24 +74,30 @@ class RetrieveChat:
         chat_history = await self._enhance_chat_engine.history_config(
             room_id=room_id
         )
-        response = await self._enhance_chat_engine.enhance_chat(
-            query=query,
-            chat_history=chat_history
-        )
-        string_processed = re.sub(r"```json|```", "", response)
-        query_processed = json.loads(string_processed)
-        print(query_processed)
-        if query_processed["conclusion"]:
-            print("base pipeline")
-            answer = query_processed['text']
-        else:
-            print("reasoning pipeline")
-            answer = await self._agent.reasoning_agent(
-                chat=query,
+
+        print("point")
+        tokens = word_tokenize(query, format='text')
+        score = self._rag_classifier.predict_proba([tokens])[0][1]
+        print(f"domain score: {score}")
+
+        if score <= 0.5:
+            print("Base RAG pipeline")
+            response = await self._enhance_chat_engine.enhance_chat(
+                query=query,
                 chat_history=chat_history
             )
+            return Chat(
+                response=response,
+                is_outdomain=False,
+                retrieved_nodes=[]
+            )
+        print("AGENT AI RAG pipeline")
+        response = await self._agent.reasoning_agent(
+            chat=query,
+            chat_history=chat_history
+        )
         return Chat(
-            response=answer,
+            response=response,
             is_outdomain=False,
             retrieved_nodes=[]
         )

@@ -22,7 +22,6 @@ from src.engines.retriever_engine import HybridRetriever
 from src.engines.chat_engine import ChatEngine
 from src.engines.enhance_chat_engine import EnhanceChatEngine
 from src.engines.agent_engine import AgentEngine
-from src.services.retrieve_chat import RetrieveChat
 from src.utils.utility import convert_value
 from src.repositories.chat_repository import ChatRepository
 from src.repositories.file_repository import FileRepository
@@ -32,13 +31,13 @@ from src.repositories.suggestion_repository import SuggestionRepository
 from src.engines.preprocess_engine import PreprocessQuestion
 from src.engines.semantic_engine import SemanticSearch
 from src.prompt.preprocessing_prompt import SAFETY_SETTINGS
+from src.services.retrieve_chat import RetrieveChat
 
 load_dotenv()
 
 OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
 OPENAI_MODEL = convert_value(os.getenv('OPENAI_MODEL'))
-OPENAI_MODEL_COMPLEX_TASK = convert_value(
-    os.getenv('OPENAI_MODEL_COMPLEX_TASK'))
+OPENAI_MODEL_COMPLEX_TASK = convert_value(os.getenv('OPENAI_MODEL_COMPLEX_TASK'))
 OPENAI_EMBED_MODEL = convert_value(os.getenv('OPENAI_EMBED_MODEL'))
 TEMPERATURE_MODEL = convert_value(os.getenv('TEMPERATURE_MODEL'))
 GEMINI_API_KEY = convert_value(os.getenv('GEMINI_API_KEY'))
@@ -49,6 +48,7 @@ TOP_K = convert_value(os.getenv('TOP_K'))
 MAX_OUTPUT_TOKENS = convert_value(os.getenv('MAX_OUTPUT_TOKENS'))
 DOMAIN_CLF_MODEL = convert_value(os.getenv('DOMAIN_CLF_MODEL'))
 PROMPT_INJECTION_MODEL = convert_value(os.getenv('PROMPT_INJECTION_MODEL'))
+RAG_CLASSIFIER_MODEL = convert_value(os.getenv('RAG_CLASSIFIER_MODEL'))
 TONE_MODEL = convert_value(os.getenv('TONE_MODEL'))
 URL = convert_value(os.getenv('LABEL_LIST'))
 MAX_HISTORY_TOKENS = convert_value(os.getenv('MAX_HISTORY_TOKENS'))
@@ -73,6 +73,9 @@ class Service:
         )
         self._prompt_injection_model = joblib.load(
             filename=PROMPT_INJECTION_MODEL
+        )
+        self._rag_classifier_model = joblib.load(
+            filename=RAG_CLASSIFIER_MODEL
         )
         self._tone_tokenizer = AutoTokenizer.from_pretrained(
             TONE_MODEL, add_prefix_space=True)
@@ -161,7 +164,8 @@ class Service:
             chat_history_tracker=self._chat_repository,
             max_chat_token=MAX_OUTPUT_TOKENS,
             enhance_chat_engine=self._enhance_chat_engine,
-            agent=self._agent_engine
+            agent=self._agent_engine,
+            rag_classifier=self._rag_classifier_model
         )
         self._file_repository = FileRepository()
         self._general_loader = GeneralLoader()
