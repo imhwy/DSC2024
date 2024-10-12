@@ -106,7 +106,7 @@ class FileRepository:
             if data.file_type == "pdf":
                 file_extension = data.file_name + ".pdf"
 
-            elif data.file_type == "xlsx" or data.file_type == "xls":
+            elif data.file_type == "excel":
                 file_extension = data.file_name + ".xlsx"
 
             elif data.file_type == "image":
@@ -140,7 +140,8 @@ class FileRepository:
         try:
             result = self.collection.delete_one_doc({"public_id": public_id})
             if result.deleted_count > 0:
-                print(f"Document with public_id = {public_id} deleted successfully.")
+                print(
+                    f"Document with public_id = {public_id} deleted successfully.")
             else:
                 print(f"No document with public_id = {public_id} found.")
         except Exception as e:
