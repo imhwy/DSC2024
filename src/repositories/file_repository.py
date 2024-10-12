@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 
 from src.storage.file_crud import CRUDFileCollection
 from src.models.file import File, FileUpload
-from src.utils.utility import get_datetime, convert_value
+from src.utils.utility import (get_datetime,
+                               convert_value)
 
 load_dotenv()
 

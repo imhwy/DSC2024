@@ -136,7 +136,7 @@ def sum_subjects(
     subject_a_point: float,
     subject_b_point: float,
     subject_c_point: float
-) -> float:
+) -> tuple:
     """
     """
     subject_aliases = {
@@ -174,18 +174,21 @@ def sum_subjects(
         [subject_a_normalized, subject_b_normalized, subject_c_normalized])
 
     # Kiểm tra xem các môn nhập vào có thuộc một tổ hợp hợp lệ không
-    for combination in valid_combinations.values():
+    for combination_name, combination in valid_combinations.items():
         if sorted(combination) == entered_subjects:
-            return subject_a_point + subject_b_point + subject_c_point
+            return subject_a_point + subject_b_point + subject_c_point, combination_name
     raise ValueError("Tổ hợp môn học không hợp lệ.")
 
 
 def compare_uit_national_high_school_graduation_scores(
     user_score: float,
+    user_combination: str,
     year: int = 2024
 ) -> List[Dict]:
     """
+    Compare user's score and combination with UIT majors.
     """
+    # Get the graduation scores for the specified year
     if year > 2024:
         all_major_info = get_uit_national_high_school_graduation_scores_2024()
     elif year == 2024:
@@ -196,13 +199,26 @@ def compare_uit_national_high_school_graduation_scores(
         all_major_info = get_uit_national_high_school_graduation_scores_2022()
     else:
         return []
+
     result = []
     for major_info in all_major_info:
-        is_pass = user_score >= major_info['score']
+        # Check if the user's score is greater than or equal to the major's required score
+        is_score_pass = user_score >= major_info['score']
+
+        # Check if the user's subject combination matches any valid combination for the major
+        is_combination_valid = user_combination in major_info['combination']
+
+        # The user passes if both the score and combination are valid
+        is_pass = is_score_pass and is_combination_valid
+
+        # Append the result for each major
         result.append({
             "major": major_info['major'],
-            "is_pass": is_pass
+            "is_pass": is_pass,
+            "required_score": major_info['score'],
+            "valid_combinations": major_info['combination']
         })
+
     return result
 
 
@@ -239,67 +255,80 @@ def get_uit_national_high_school_graduation_scores_2024() -> List[Dict[str, Any]
         {
             "major": "THƯƠNG MẠI ĐIỆN TỬ",
             "major_code": "7340122",
-            "score": 26.12
+            "score": 26.12,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "KHOA HỌC DỮ LIỆU",
             "major_code": "7460108",
-            "score": 27.5
+            "score": 27.5,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "KHOA HỌC MÁY TÍNH",
             "major_code": "7480101",
-            "score": 27.3
+            "score": 27.3,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "TRÍ TUỆ NHÂN TẠO",
             "major_code": "7480107",
-            "score": 28.3
+            "score": 28.3,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "MẠNG MÁY TÍNH VÀ TRUYỀN THÔNG DỮ LIỆU",
             "major_code": "7480102",
-            "score": 25.7
+            "score": 25.7,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "KỸ THUẬT PHẦN MỀM",
             "major_code": "7480103",
-            "score": 26.85
+            "score": 26.85,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "HỆ THỐNG THÔNG TIN",
             "major_code": "7480104",
-            "score": 26.25
+            "score": 26.25,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "HỆ THỐNG THÔNG TIN (CT TIÊN TIẾN)",
             "major_code": "7480104_TT",
-            "score": 25.55
+            "score": 25.55,
+            "combination": ["A01", "D01", "D07"]
         },
         {
             "major": "KỸ THUẬT MÁY TÍNH",
             "major_code": "7480106",
-            "score": 26.25
+            "score": 26.25,
+            "combination": ["A00", "A01"]
         },
         {
             "major": "CÔNG NGHỆ THÔNG TIN",
             "major_code": "7480201",
-            "score": 27.1
+            "score": 27.1,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "CÔNG NGHỆ THÔNG TIN (VIỆT NHẬT)",
             "major_code": "7480201_N",
-            "score": 25.55
+            "score": 25.55,
+            "combination": ["A00", "A01", "D01", "D06", "D07"]
         },
         {
             "major": "AN TOÀN THÔNG TIN",
             "major_code": "7480202",
-            "score": 26.77
+            "score": 26.77,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "THIẾT KẾ VI MẠCH",
             "major_code": "75202a1",
-            "score": 26.5
+            "score": 26.5,
+            "combination": ["A00", "A01"]
         },
     ]
 

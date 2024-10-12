@@ -62,7 +62,8 @@ class WeaviateDB:
         self._documents = documents
         self._mongodb_url = mongodb_url
         self._mongodb_name = mongodb_name
-        self._client = weaviate.connect_to_local(host=self._host, port=self._port)
+        self._client = weaviate.connect_to_local(
+            host=self._host, port=self._port)
         self._vector_store = WeaviateVectorStore(
             weaviate_client=self._client, index_name=self._index_name
         )
@@ -192,7 +193,8 @@ class WeaviateDB:
         """
         if question and answer:
             document = [
-                Document(text=answer, metadata={"question": question, "answer": answer})
+                Document(text=answer, metadata={
+                         "question": question, "answer": answer})
             ]
             return self.documents_to_nodes(documents=document)
         return None
@@ -278,8 +280,9 @@ class WeaviateDB:
             for text_dict in splitted_text_list:
                 title = text_dict["title"]
                 content = text_dict["content"]
-                node = TextNode(text=title + "\n" + content)
-                nodes.append(node)
+                document = [Document(text=title + "\n" + content)]
+                node = self.parser.get_nodes_from_documents(document)
+                nodes.append(node[0])
 
             # Add relationship throughout TextNodes
             for i, node in enumerate(nodes):
@@ -385,7 +388,8 @@ class WeaviateDB:
             None
         """
         if ref_doc_id:
-            self._storage_context.docstore.delete_ref_doc(ref_doc_id=ref_doc_id)
+            self._storage_context.docstore.delete_ref_doc(
+                ref_doc_id=ref_doc_id)
 
     async def add_knowledge(
         self,
@@ -415,7 +419,8 @@ class WeaviateDB:
                 documents=documents,
             )
             # nodes = self.documents_to_nodes(documents=processed_documents)
-            nodes = self.documents_to_nodes_by_sessions(documents=processed_documents)
+            nodes = self.documents_to_nodes_by_sessions(
+                documents=processed_documents)
             # print(nodes)
             self.insert_nodes(nodes=nodes)
             self.insert_docstore(nodes=nodes)
@@ -435,7 +440,8 @@ class WeaviateDB:
                 and node.ref_doc_id not in ref_doc_ids
             ):
                 self.delete_nodes(ref_doc_id=node.ref_doc_id)
-                print(f"delete node with ref_doc_id {node.ref_doc_id} successfully ")
+                print(
+                    f"delete node with ref_doc_id {node.ref_doc_id} successfully ")
                 self.delete_docstore(ref_doc_id=node.ref_doc_id)
                 print(
                     f"delete doc from docstore with ref_doc_id {node.ref_doc_id} successfully "
