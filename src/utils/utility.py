@@ -385,12 +385,12 @@ def get_uit_competency_assessment_scores_2024() -> List[Dict[str, Any]]:
             "score": 980
         },
         {
-            "major": "Cơ sở dữ liệu",
+            "major": "Công nghệ thông tin",
             "major_code": "7480201",
             "score": 915
         },
         {
-            "major": "Cơ sở dữ liệu (Việt Nhật)",
+            "major": "Công nghệ thông tin (Việt Nhật)",
             "major_code": "7480201_N",
             "score": 850
         },
@@ -413,25 +413,75 @@ def get_uit_national_high_school_graduation_scores_2023() -> List[Dict[str, floa
     for each major in UIT in 2023.
     """
     return [
-        {"major": "Computer Science", "major_code": "7480101", "score": 26.9},
-        {"major": "Artificial Intelligence", "major_code": "7480107", "score": 27.8},
-        {"major": "Network and Data Communications",
-            "major_code": "7480102", "score": 25.4},
-        {"major": "Software Engineering", "major_code": "7480103", "score": 26.9},
-        {"major": "Information Systems", "major_code": "7480104", "score": 26.1},
-        {"major": "Information Systems (Advanced)",
-         "major_code": "7480104_TT", "score": 25.4},
-        {"major": "E-Commerce", "major_code": "7340122", "score": 25.8},
-        {"major": "Information Technology", "major_code": "7480201", "score": 26.9},
-        {"major": "Information Technology (Vietnam-Japan)",
-         "major_code": "7480201_N", "score": 25.9},
-        {"major": "Data Science", "major_code": "7480108", "score": 27.1},
-        {"major": "Information Security", "major_code": "7480202", "score": 26.3},
-        {"major": "Computer Engineering", "major_code": "7480106", "score": 25.6},
-        {"major": "Computer Engineering (IoT and Embedded Systems)",
-         "major_code": "7480106_IOT", "score": 25.6},
-        {"major": "Computer Engineering (Microelectronics)",
-         "major_code": "7480106_TKVM", "score": 25.4}
+        {
+            "major": "Computer Science",
+            "major_code": "7480101",
+            "score": 26.9
+        },
+        {
+            "major": "Artificial Intelligence",
+            "major_code": "7480107",
+            "score": 27.8
+        },
+        {
+            "major": "Network and Data Communications",
+            "major_code": "7480102",
+            "score": 25.4
+        },
+        {
+            "major": "Software Engineering",
+            "major_code": "7480103",
+            "score": 26.9
+        },
+        {
+            "major": "Information Systems",
+            "major_code": "7480104",
+            "score": 26.1
+        },
+        {
+            "major": "Information Systems (Advanced)",
+            "major_code": "7480104_TT",
+            "score": 25.4
+        },
+        {
+            "major": "E-Commerce",
+            "major_code": "7340122",
+            "score": 25.8},
+        {
+            "major": "Information Technology",
+            "major_code": "7480201",
+            "score": 26.9
+        },
+        {
+            "major": "Information Technology (Vietnam-Japan)",
+            "major_code": "7480201_N",
+            "score": 25.9
+        },
+        {
+            "major": "Data Science",
+            "major_code": "7480108",
+            "score": 27.1
+        },
+        {
+            "major": "Information Security",
+            "major_code": "7480202",
+            "score": 26.3
+        },
+        {
+            "major": "Computer Engineering",
+            "major_code": "7480106",
+            "score": 25.6
+        },
+        {
+            "major": "Computer Engineering (IoT and Embedded Systems)",
+            "major_code": "7480106_IOT",
+            "score": 25.6
+        },
+        {
+            "major": "Computer Engineering (Microelectronics)",
+            "major_code": "7480106_TKVM",
+            "score": 25.4
+        }
     ]
 
 
@@ -441,25 +491,75 @@ def get_uit_competency_assessment_scores_2023() -> List[Dict[str, Any]]:
     for each major in UIT in 2023.
     """
     return [
-        {"major": "KHOA HỌC MÁY TÍNH", "major_code": "7480101", "score": 915},
-        {"major": "TRÍ TUỆ NHÂN TẠO", "major_code": "7480107", "score": 970},
-        {"major": "MẠNG MÁY TÍNH VÀ TRUYỀN THÔNG DỮ LIỆU",
-            "major_code": "7480102", "score": 845},
-        {"major": "KỸ THUẬT PHẦN MỀM", "major_code": "7480103", "score": 925},
-        {"major": "HỆ THỐNG THÔNG TIN", "major_code": "7480104", "score": 855},
-        {"major": "HỆ THỐNG THÔNG TIN (TIÊN TIẾN)",
-         "major_code": "7480104_TT", "score": 825},
-        {"major": "THƯƠNG MẠI ĐIỆN TỬ", "major_code": "7340122", "score": 860},
-        {"major": "CÔNG NGHỆ THÔNG TIN", "major_code": "7480201", "score": 920},
-        {"major": "CÔNG NGHỆ THÔNG TIN (VIỆT - NHẬT)",
-         "major_code": "7480201_N", "score": 845},
-        {"major": "KHOA HỌC DỮ LIỆU", "major_code": "7480108", "score": 915},
-        {"major": "AN TOÀN THÔNG TIN", "major_code": "7480202", "score": 890},
-        {"major": "KỸ THUẬT MÁY TÍNH", "major_code": "7480106", "score": 870},
-        {"major": "KỸ THUẬT MÁY TÍNH (HỆ THỐNG NHÚNG VÀ IOT)",
-         "major_code": "7480106_IOT", "score": 870},
-        {"major": "KỸ THUẬT MÁY TÍNH (THIẾT KẾ VI MẠCH)",
-         "major_code": "7480106_TKVM", "score": 810}
+        {
+            "major": "KHOA HỌC MÁY TÍNH",
+            "major_code": "7480101",
+            "score": 915
+        },
+        {
+            "major": "TRÍ TUỆ NHÂN TẠO",
+            "major_code": "7480107",
+            "score": 970
+        },
+        {
+            "major": "MẠNG MÁY TÍNH VÀ TRUYỀN THÔNG DỮ LIỆU",
+            "major_code": "7480102",
+            "score": 845
+        },
+        {
+            "major": "KỸ THUẬT PHẦN MỀM",
+            "major_code": "7480103",
+            "score": 925
+        },
+        {
+            "major": "HỆ THỐNG THÔNG TIN",
+            "major_code": "7480104",
+            "score": 855
+        },
+        {
+            "major": "HỆ THỐNG THÔNG TIN (TIÊN TIẾN)",
+            "major_code": "7480104_TT",
+            "score": 825
+        },
+        {
+            "major": "THƯƠNG MẠI ĐIỆN TỬ",
+            "major_code": "7340122",
+            "score": 860},
+        {
+            "major": "CÔNG NGHỆ THÔNG TIN",
+            "major_code": "7480201",
+            "score": 920
+        },
+        {
+            "major": "CÔNG NGHỆ THÔNG TIN (VIỆT - NHẬT)",
+            "major_code": "7480201_N",
+            "score": 845
+        },
+        {
+            "major": "KHOA HỌC DỮ LIỆU",
+            "major_code": "7480108",
+            "score": 915
+        },
+        {
+            "major": "AN TOÀN THÔNG TIN",
+            "major_code": "7480202",
+            "score": 890
+        },
+        {
+            "major": "KỸ THUẬT MÁY TÍNH",
+            "major_code": "7480106",
+            "score": 870
+        },
+        {
+            "major": "KỸ THUẬT MÁY TÍNH (HỆ THỐNG NHÚNG VÀ IOT)",
+            "major_code": "7480106_IOT",
+            "score": 870
+        },
+        {
+            "major": "KỸ THUẬT MÁY TÍNH (THIẾT KẾ VI MẠCH)",
+            "major_code": "7480106_TKVM",
+            "score": 810
+        }
     ]
 
 
@@ -469,23 +569,62 @@ def get_uit_national_high_school_graduation_scores_2022() -> List[Dict[str, Any]
     for each major in UIT in 2023.
     """
     return [
-        {"major": "Khoa học máy tính", "major_code": "7480101", "score": 27.1},
-        {"major": "Trí tuệ nhân tạo", "major_code": "7480107", "score": 28},
-        {"major": "Mạng máy tính và truyền thông dữ liệu",
-            "major_code": "7480102", "score": 26.3},
-        {"major": "Kỹ thuật phần mềm", "major_code": "7480103", "score": 28.05},
-        {"major": "Hệ thống thông tin", "major_code": "7480104", "score": 26.7},
-        {"major": "Hệ thống thông tin (CT tiên tiến)",
-         "major_code": "7480104_TT", "score": 26.2},
-        {"major": "Thương mại điện tử", "major_code": "7340122", "score": 27.05},
-        {"major": "Công nghệ thông tin", "major_code": "7480201", "score": 27.9},
-        {"major": "Công nghệ thông tin (Việt - Nhật)",
-         "major_code": "7480201_N", "score": 26.3},
-        {"major": "Khoa học dữ liệu", "major_code": "7480109", "score": 27.05},
-        {"major": "An toàn thông tin", "major_code": "7480202", "score": 26.95},
-        {"major": "Kỹ thuật máy tính", "major_code": "7480106", "score": 26.55},
-        {"major": "Kỹ thuật máy tính (Hướng hệ thống nhúng và IoT)",
-         "major_code": "7480106_IOT", "score": 26.5},
+        {
+            "major": "Khoa học máy tính",
+            "major_code": "7480101",
+            "score": 27.1},
+        {
+            "major": "Trí tuệ nhân tạo",
+            "major_code": "7480107",
+            "score": 28
+        },
+        {
+            "major": "Mạng máy tính và truyền thông dữ liệu",
+            "major_code": "7480102",
+            "score": 26.3
+        },
+        {
+            "major": "Kỹ thuật phần mềm",
+            "major_code": "7480103",
+            "score": 28.05
+        },
+        {
+            "major": "Hệ thống thông tin",
+            "major_code": "7480104",
+            "score": 26.7},
+        {
+            "major": "Hệ thống thông tin (CT tiên tiến)",
+            "major_code": "7480104_TT",
+            "score": 26.2},
+        {
+            "major": "Thương mại điện tử",
+            "major_code": "7340122",
+            "score": 27.05},
+        {
+            "major": "Công nghệ thông tin",
+            "major_code": "7480201",
+            "score": 27.9},
+        {
+            "major": "Công nghệ thông tin (Việt - Nhật)",
+            "major_code": "7480201_N",
+            "score": 26.3},
+        {
+            "major": "Khoa học dữ liệu",
+            "major_code": "7480109",
+            "score": 27.05},
+        {
+            "major": "An toàn thông tin",
+            "major_code": "7480202",
+            "score": 26.95},
+        {
+            "major": "Kỹ thuật máy tính",
+            "major_code": "7480106",
+            "score": 26.55},
+        {
+            "major": "Kỹ thuật máy tính (Hướng hệ thống nhúng và IoT)",
+            "major_code": "7480106_IOT",
+            "score": 26.5
+        },
     ]
 
 
