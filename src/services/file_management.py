@@ -48,6 +48,7 @@ class FileManagement:
                     file_name=data.file_name,
                     documents=documents,
                 )
+                print("Indexing successfully!!!")
                 await self._file_repository.add_file(
                     public_id=data.public_id,
                     url=data.url,
@@ -55,6 +56,7 @@ class FileManagement:
                     file_type=data.file_type,
                     file_path=file_path,
                 )
+                print("add data successfully!!!")
             except ValueError as e:
                 print(f"Failed to process file {data.file_name}: {str(e)}")
 
