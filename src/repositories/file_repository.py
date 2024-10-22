@@ -1,75 +1,171 @@
 """
-This service represents the file management functionality of the application.
+This module provides a `FileRepository` class to manage file records in a data storage system.
 """
 
+import os
 from typing import List
+import requests
+from dotenv import load_dotenv
 
-from src.data_loader.general_loader import GeneralLoader
-from src.repositories.file_repository import FileRepository
-from src.storage.weaviatedb import WeaviateDB
-from src.models.file import FileUpload
+from src.storage.file_crud import CRUDFileCollection
+from src.models.file import (File,
+                             FileUpload)
+from src.utils.utility import (get_datetime,
+                               convert_value)
+
+load_dotenv()
+
+TIME_OUT = convert_value(os.getenv('TIME_OUT'))
+DIRECTORY = convert_value(os.getenv('DIRECTORY'))
 
 
-class FileManagement:
+class FileRepository:
     """
-    The FileManagement class provides functionalities to manage files
+    A repository class for managing file records in a data storage system.
     """
 
     def __init__(
         self,
-        file_repository: FileRepository = None,
-        general_loader: GeneralLoader = None,
-        vector_database: WeaviateDB = None,
+        time_out: int = TIME_OUT,
+        directory: str = DIRECTORY
     ):
-        self._file_repository = file_repository
-        self._general_loader = general_loader
-        self._vector_database = vector_database
-
-    async def add_file(self, data_list: List[FileUpload]) -> None:
         """
-        Adds files to the system by transferring them, loading their data,
-        and storing them in a vector database.
+        Initializes the FileRepository instance.
+        """
+        self.time_out = time_out
+        self.directory = directory
+        self.collection = CRUDFileCollection()
+        self.data = self.load_all_data()
+
+    def load_all_data(self):
+        """
+        Load all documents from the collection.
+        Args:
+            None
+        Returns:
+            list: A list of documents with '_id' field as a string.
+        """
+        self.data = list(self.collection.find_all_doc())
+        for doc in self.data:
+            doc["_id"] = str(doc["_id"])
+        return self.data
+
+    def add_one_record(
+        self,
+        file: File = None
+    ) -> None:
+        """
+        Insert a single file record into the collection.
 
         Args:
-            data_list (List[FileUpload]): A list of FileUpload objects containing file metadata.
-
-        Returns:
-            None
+            file (File): A `File` instance containing the data to be inserted.
         """
-        for data in data_list:
-            file_path = await self._file_repository.file_transfer(data=data)
-            documents = await self._general_loader.aload_data(sources=[file_path])
-            print([doc.id_ for doc in documents])
-            try:
-                print(f"document: {documents}")
-                print("pass")
-                await self._vector_database.add_knowledge(
-                    url=data.url,
-                    file_type=data.file_type,
-                    public_id=data.public_id,
-                    file_name=data.file_name,
-                    documents=documents,
-                )
-                print("pass")
-                await self._file_repository.add_file(
-                    public_id=data.public_id,
-                    url=data.url,
-                    file_name=data.file_name,
-                    file_type=data.file_type,
-                    file_path=file_path,
-                )
-            except ValueError as e:
-                print(f"Failed to process file {data.file_name}: {str(e)}")
+        self.collection.insert_one_doc(file.__dict__)
 
-    def delete_file(self, public_id: str = None) -> None:
+    def add_file(
+        self,
+        public_id: str = None,
+        url: str = None,
+        file_name: str = None,
+        file_type: str = None,
+        file_path: str = None
+    ) -> None:
         """
-        Deletes a file and its associated knowledge from the vector database.
+        Create and add a new file record to the collection.
 
         Args:
-            file_name (str): The name of the file to be deleted.
-
-        Returns:
-            None
+            url (str, optional): The URL associated with the file.
+            name (str, optional): The name of the file.
+            file_type (str, optional): The type or format of the file (e.g., "pdf", "txt").
         """
-        self._file_repository.delete_specific_file(public_id=public_id)
-        self._vector_database.delete_knowlegde(public_id=public_id)
+        timestamp = get_datetime()
+        file_instance = File(
+            public_id=public_id,
+            url=url,
+            file_name=file_name,
+            file_type=file_type,
+            file_path=file_path,
+            time=timestamp
+        )
+        self.add_one_record(
+            file=file_instance
+        )
+
+    def file_transfer(
+        self,
+        data: FileUpload
+    ) -> str:
+        """
+        Transfers a file from a given URL to a local directory.
+        Args:
+            data (FileUpload): An object containing the file"s URL, type, and name.
+        Returns:
+            str: The local file path where the file is saved or the URL 
+                 itself if the file type is "link".
+        """
+        file_path = None
+        if not data.file_type == "link":
+            os.makedirs(
+                self.directory,
+                exist_ok=True
+            )
+            file_path = os.path.join(
+                self.directory,
+                data.file_name
+            )
+            response = requests.get(
+                data.url,
+                timeout=self.time_out
+            )
+            response.raise_for_status()
+            with open(file_path, "wb") as file:
+                file.write(response.content)
+            return file_path
+        file_path = data.url
+        return file_path
+
+    def delete_specific_file(
+        self,
+        public_id: str = None
+    ) -> None:
+        """
+        Deletes a document with the specified file name from the collection.
+        Args:
+            file_name (str, optional): The name of the file to be deleted.
+                If None, no document will be deleted.
+        Raises:
+            Exception: If an error occurs during the deletion process.
+        Returns:
+            None: This method returns nothing, but prints a message indicating
+            the result of the deletion operation.
+        """
+        try:
+            result = self.collection.delete_one_doc({"public_id": public_id})
+            if result.deleted_count > 0:
+                print(
+                    f"Document with public_id = {public_id} deleted successfully.")
+            else:
+                print(f"No document with public_id = {public_id} found.")
+        except Exception as e:
+            print(f"Error deleting document with public_id = {public_id}: {e}")
+            raise
+
+    def get_specific_file(
+        self,
+        public_id: str = None
+    ) -> List:
+        """
+        Retrieves a document from the collection based on the specified file name.
+        Args:
+            file_name (str, optional): The name of the file to retrieve.
+        Returns:
+            Optional[dict]: A dictionary representing the document
+        """
+        document = self.collection.find_one_doc(
+            {
+                "public_id": public_id
+            }
+        )
+        if document:
+            document["_id"] = str(document["_id"])
+        return document
