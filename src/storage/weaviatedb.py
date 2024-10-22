@@ -276,7 +276,6 @@ class WeaviateDB:
 
             # Add each TextNode to list nodes
             nodes = []
-            print("pass 123")
             for text_dict in splitted_text_list:
                 title = text_dict["title"]
                 content = text_dict["content"]
@@ -284,7 +283,6 @@ class WeaviateDB:
                 document = [Document(text=title + "\n" + content)]
                 node = self.parser.get_nodes_from_documents(document)
                 nodes.append(node[0])
-            print("pass")
             # Add relationship throughout TextNodes
             for i, node in enumerate(nodes):
                 # Add source relationship
@@ -419,11 +417,9 @@ class WeaviateDB:
                 public_id=public_id,
                 documents=documents,
             )
-            print("pass document")
             # nodes = self.documents_to_nodes(documents=processed_documents)
             nodes = self.documents_to_nodes_by_sessions(
                 documents=processed_documents)
-            print("pass nodes")
             self.insert_nodes(nodes=nodes)
             self.insert_docstore(nodes=nodes)
 
