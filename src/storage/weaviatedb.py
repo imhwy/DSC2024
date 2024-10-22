@@ -279,10 +279,8 @@ class WeaviateDB:
             for text_dict in splitted_text_list:
                 title = text_dict["title"]
                 content = text_dict["content"]
-                print(content)
-                document = [Document(text=title + "\n" + content)]
-                node = self.parser.get_nodes_from_documents(document)
-                nodes.append(node[0])
+                node = TextNode(text=title + "\n" + content)
+                nodes.append(node)
             # Add relationship throughout TextNodes
             for i, node in enumerate(nodes):
                 # Add source relationship
