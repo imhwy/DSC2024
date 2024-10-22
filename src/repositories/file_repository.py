@@ -50,7 +50,7 @@ class FileRepository:
             doc["_id"] = str(doc["_id"])
         return self.data
 
-    def add_one_record(
+    async def add_one_record(
         self,
         file: File = None
     ) -> None:
@@ -62,7 +62,7 @@ class FileRepository:
         """
         self.collection.insert_one_doc(file.__dict__)
 
-    def add_file(
+    async def add_file(
         self,
         public_id: str = None,
         url: str = None,
@@ -87,7 +87,7 @@ class FileRepository:
             file_path=file_path,
             time=timestamp
         )
-        self.add_one_record(
+        await self.add_one_record(
             file=file_instance
         )
 
