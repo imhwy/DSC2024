@@ -91,7 +91,7 @@ class FileRepository:
             file=file_instance
         )
 
-    def file_transfer(
+    async def file_transfer(
         self,
         data: FileUpload
     ) -> str:
