@@ -196,7 +196,8 @@ UITAdminBot
 """
 
 TERMS_DICT = {
-    "THPT": ["trung học phổ thông", "TH PT", "trung học PT", "TH phổ thông", "th-pt", "high school", "secondary education"],
+    "Trường đại học công nghệ thông tin": ["UIT", "uit"],
+    "trung học phổ thông": ["trung học phổ thông", "TH PT", "trung học PT", "TH phổ thông", "th-pt", "high school", "secondary education"],
     "đánh giá năng lực": ["dgnl", "đgnl", "đg nl", "kỳ thi ĐHQG TPHCM", "kỳ thi ĐHQG", "đánh giá NL", "competency assessment", "aptitude test"],
     "Bộ GD&ĐT": ["bộ giáo dục và đào tạo", "bộ giáo dục & đào tạo", "GDDT", "GD ĐT", "bộ GD-ĐT", "gdđt", "Ministry of Education and Training"],
     "kỹ thuật máy tính": ["ktmt", "kt mt", "kỹ thuật mt", "computer engineering", "computer tech", "ce"],
@@ -212,10 +213,10 @@ TERMS_DICT = {
     "học kỳ": ["hk1", "học kỳ 1", "học kì 1", "hoc ki 1", "hk", "semester", "term"],
     "khoa học dữ liệu": ["khdl", "data science", "ds", "kh dl", "khoa học dl", "kh dữ liệu", "data science", "ds"],
     "đại học quốc gia": ["đhqg", "đh qg", "dhqg", "dh qg", "national university", "national university system"],
-    "tphcm": ["tp hcm", "tp hồ chí minh", "tp hồ chí minh", "Ho Chi Minh City", "HCMC"],
+    "thành phố Hồ Chí Minh": ["tp hcm", "tp hồ chí minh", "tp hồ chí minh", "Ho Chi Minh City", "HCMC"],
     "ký túc xá": ["ktx", "kí túc xá", "k t x", "kí túc", "chỗ ở sinh viên", "chỗ ở sv", "dormitory", "student accommodation"],
     "sinh viên": ["sv", "student"],
-    "bus": ["být", "buýt", "bus"],
+    "xe buýt": ["být", "buýt", "bus"],
     "học sinh giỏi": ["hsg", "excellent student", "honor student"],
     "học sinh": ["hs", "student"],
     "khu du lịch": ["kdl", "tourist area", "resort"],

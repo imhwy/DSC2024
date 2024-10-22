@@ -1,13 +1,15 @@
 """
 """
-from typing import List
+import re
+import json
+from typing import List, Any
 from llama_index.llms.openai import OpenAI
 from llama_index.core.retrievers import BaseRetriever
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.base.llms.types import ChatMessage
 from llama_index.core.chat_engine.context import ContextChatEngine
 
-from src.prompt.instruction_prompt import MERGE_PROMPT
+from src.prompt.instruction_prompt import MERGE_PROMPT, CHECK_PROMPT
 from src.prompt.funny_chat_prompt import PROMPT_ENHANCE_FUNNY_FLOW
 from src.repositories.chat_repository import ChatRepository
 
@@ -92,14 +94,26 @@ class EnhanceChatEngine:
         self,
         room_id: str,
         query: str
-    ) -> str:
+    ) -> Any:
         """
         """
         chat_history = await self.history_config(
             room_id=room_id
         )
+        result = await self.classify_query(text=query, history_tracking=chat_history)
+        if result['conclusion']:
+            return True
         response = self._funny_chat_engine.chat(
             message=query,
             chat_history=chat_history
         )
         return response.response
+
+    async def classify_query(self, text, history_tracking):
+        """
+        """
+        prompt = CHECK_PROMPT.format(query=text, history_chat=history_tracking)
+        response = await self._llm.acomplete(prompt)
+        string_processed = re.sub(r"```json|```", "", response.text)
+        query_processed = json.loads(string_processed)
+        return query_processed

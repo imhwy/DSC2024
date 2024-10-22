@@ -75,7 +75,6 @@ class RetrieveChat:
             room_id=room_id
         )
 
-        print("point")
         tokens = word_tokenize(query, format='text')
         score = self._rag_classifier.predict_proba([tokens])[0][1]
         print(f"domain score: {score}")
@@ -153,6 +152,12 @@ class RetrieveChat:
                 room_id=room_id,
                 query=processed_query.query
             )
+            if str(answer) == "True":
+                print("classify again")
+                return await self.retrieve_chat(
+                    query=processed_query.query,
+                    room_id=room_id
+                )
             return Chat(
                 response=answer,
                 is_outdomain=True,

@@ -31,7 +31,7 @@ WEAVIATE_NAME = convert_value(os.getenv("WEAVIATE_NAME"))
 SUGGESTION_NAME = convert_value(os.getenv("SUGGESTION_NAME"))
 MONGODB_URL = convert_value(os.getenv("MONGODB_URL"))
 MONGODB_NAME = convert_value(os.getenv("MONGODB_NAME"))
-OPENAI_MODEL = convert_value(os.getenv("OPENAI_MODEL"))
+OPENAI_MODEL_GRAPH = convert_value(os.getenv("OPENAI_MODEL_GRAPH"))
 OPENAI_EMBED_MODEL = convert_value(os.getenv("OPENAI_EMBED_MODEL"))
 
 
@@ -235,7 +235,7 @@ class WeaviateDB:
         """
         graph_config = {
             "llm": {
-                "model": OPENAI_MODEL,
+                "model": OPENAI_MODEL_GRAPH,
                 "temperature": 0,
             },
             # "embeddings": {
@@ -244,7 +244,6 @@ class WeaviateDB:
             # },
             # "verbose": True,
         }
-
         return SmartScraperGraph(
             prompt=URL_SPLITER_PROMPT,
             source=text,
@@ -277,13 +276,15 @@ class WeaviateDB:
 
             # Add each TextNode to list nodes
             nodes = []
+            print("pass 123")
             for text_dict in splitted_text_list:
                 title = text_dict["title"]
                 content = text_dict["content"]
+                print(content)
                 document = [Document(text=title + "\n" + content)]
                 node = self.parser.get_nodes_from_documents(document)
                 nodes.append(node[0])
-
+            print("pass")
             # Add relationship throughout TextNodes
             for i, node in enumerate(nodes):
                 # Add source relationship
@@ -418,10 +419,11 @@ class WeaviateDB:
                 public_id=public_id,
                 documents=documents,
             )
+            print("pass document")
             # nodes = self.documents_to_nodes(documents=processed_documents)
             nodes = self.documents_to_nodes_by_sessions(
                 documents=processed_documents)
-            # print(nodes)
+            print("pass nodes")
             self.insert_nodes(nodes=nodes)
             self.insert_docstore(nodes=nodes)
 

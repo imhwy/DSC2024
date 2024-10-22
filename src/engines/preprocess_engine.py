@@ -463,7 +463,7 @@ class PreprocessQuestion:
             [processed_text]
         )[0][1]
         print(f"score domain: {score_prediction}")
-        if score_prediction >= 0.5:
+        if score_prediction >= 0.6:
             return 1
         return 0
 
@@ -569,7 +569,7 @@ class PreprocessQuestion:
                         is_only_icon=False
                     )
                 domain = self.classify_domain(corrected_text)
-                if domain == 0:
+                if domain == 1:
                     outdomain = True
                 if language and not outdomain:
                     query = corrected_text

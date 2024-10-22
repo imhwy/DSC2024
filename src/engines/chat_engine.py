@@ -10,7 +10,8 @@ from llama_index.core.base.llms.types import ChatMessage
 from src.prompt.instruction_prompt import (PROMPT,
                                            CONVERSATION_TRACKING,
                                            REASONING_PROMPT,
-                                           DIRECTION_PROMPT)
+                                           DIRECTION_PROMPT,
+                                           CHECK_PROMPT)
 from src.prompt.funny_chat_prompt import (PROMPT_FUNNY_FLOW,
                                           EMOJI_PROMPT)
 from src.storage.weaviatedb import WeaviateDB
@@ -156,3 +157,12 @@ class ChatEngine:
         )
         response = await self._complex_model.acomplete(answer)
         return response.text
+
+    async def classify_query(self, text, history_tracking):
+        """
+        """
+        prompt = CHECK_PROMPT.format(query=text, history_chat=history_tracking)
+        response = await self._language_model.acomplete(prompt)
+        string_processed = re.sub(r"```json|```", "", response.text)
+        query_processed = json.loads(string_processed)
+        return query_processed
