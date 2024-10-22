@@ -196,7 +196,7 @@ UITAdminBot
 """
 
 TERMS_DICT = {
-    "Trường đại học công nghệ thông tin": ["UIT", "uit"],
+    "Trường đại học công nghệ thông tin": ["UIT", "uit", "Uit", "uIt", "uiT"],
     "trung học phổ thông": ["trung học phổ thông", "TH PT", "trung học PT", "TH phổ thông", "th-pt", "high school", "secondary education"],
     "đánh giá năng lực": ["dgnl", "đgnl", "đg nl", "kỳ thi ĐHQG TPHCM", "kỳ thi ĐHQG", "đánh giá NL", "competency assessment", "aptitude test"],
     "Bộ GD&ĐT": ["bộ giáo dục và đào tạo", "bộ giáo dục & đào tạo", "GDDT", "GD ĐT", "bộ GD-ĐT", "gdđt", "Ministry of Education and Training"],
