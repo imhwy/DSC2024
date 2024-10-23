@@ -267,13 +267,13 @@ class WeaviateDB:
             derived from the given documents.
         """
         nodes_of_docs = []
+        print("Start")
         for doc in documents:
             splitter = self.get_sessions_splitter(doc.text)
             # splitted_text_list = [{'title': 'Title A', 'content': 'content A'}]
             splitted_text_list = splitter.run()
             # print(splitted_text_list)
             splitted_text_list = splitted_text_list["sessions"]
-
             # Add each TextNode to list nodes
             nodes = []
             for text_dict in splitted_text_list:
@@ -292,7 +292,7 @@ class WeaviateDB:
                 )
 
                 if len(nodes) == 1:  # If there is only 1 nodes --> pass
-                    pass
+                    continue
 
                 if i == 0:  # If it is Start node, add next node relationship
                     node.relationships[NodeRelationship.NEXT] = RelatedNodeInfo(
@@ -321,7 +321,6 @@ class WeaviateDB:
                         node_type=ObjectType.TEXT,
                         hash=nodes[i + 1].hash,
                     )
-
                 # Add metadata
                 node.metadata = doc.metadata
                 # doc.metadata.update({"tiêu đề": title})
@@ -330,7 +329,6 @@ class WeaviateDB:
 
             # Extend the nodes_of_docs list including nodes from multiple documents
             nodes_of_docs.extend(nodes)
-
         return nodes_of_docs
 
     def insert_nodes(self, nodes: List[TextNode]) -> str:

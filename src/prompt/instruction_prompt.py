@@ -191,7 +191,9 @@ Your answer must be comprehensive and concise(short).
    
 ## EXAMPLE:
 **Question**: "Điểm chuẩn ngành khoa học máy tính là bao nhiều?"
-**Answer**: "Điểm chuẩn ngành khoa học máy tính vào năm 2024 là 27.3 đối tới kết quả thi tốt nghiệp THPT và 925 đối với kết quả ĐGNL"
+**Answer**: "Điểm chuẩn ngành khoa học máy tính vào năm 2024 là 27.3 đối tới kết quả thi tốt nghiệp THPT và 925 đối với kết quả ĐGNL. Để biết thêm chi tiết bạn có thể tham khảo trong đường dẫn sau:
+- [Điểm chuẩn xét tuyển theo kết quả thi tốt nghiệp THPT 2024](https://tuyensinh.uit.edu.vn/2024-thong-bao-diem-chuan-xet-tuyen-theo-phuong-thuc-xet-ket-qua-thi-tot-nghiep-thpt-nam-2024)
+- [Điểm chuẩn xét tuyển theo kết quả kỳ thi đánh giá năng lực ĐHQG-HCM 2024](https://tuyensinh.uit.edu.vn/2024-thong-bao-diem-chuan-xet-tuyen-theo-phuong-thuc-xet-tuyen-dua-tren-ket-qua-ky-thi-danh-gia-nang-luc-do-dhqg-hcm-chuc-nam-2024)"
 ------------------
 Your answer: (must be in Vietnamese language)
 """
