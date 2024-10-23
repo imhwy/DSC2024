@@ -63,26 +63,52 @@ class PreprocessQuestion:
         self.device_type = device_type
         self.label_list = label_list
 
+    # @staticmethod
+    # def normalize_elonge_word(text):
+    #     """
+    #     Normalizes elongated words in a given text by removing consecutive duplicate characters.
+
+    #     Args:
+    #         text (str): The input text containing potentially elongated words.
+
+    #     Returns:
+    #         str: A normalized version of the text with elongated words shortened by removing
+    #             consecutive duplicate characters.
+    #     """
+    #     s_new = ''
+    #     for word in text.split(' '):
+    #         word_new = ' '
+    #         for char in word.strip():
+    #             if char != word_new[-1]:
+    #                 word_new += char
+    #         s_new += word_new.strip() + ' '
+    #     return s_new.strip()
+
     @staticmethod
     def normalize_elonge_word(text):
         """
-        Normalizes elongated words in a given text by removing consecutive duplicate characters.
+        Normalizes elongated words in a given text by removing consecutive duplicate characters,
+        while preserving numeric characters and punctuation.
 
         Args:
             text (str): The input text containing potentially elongated words.
 
         Returns:
             str: A normalized version of the text with elongated words shortened by removing
-                consecutive duplicate characters.
+                consecutive duplicate characters, while preserving all numeric characters.
         """
-        s_new = ''
+        s_new = []
+
         for word in text.split(' '):
-            word_new = ' '
-            for char in word.strip():
-                if char != word_new[-1]:
+            word_new = ''
+            prev_char = ''
+            for char in word:
+                if char.isdigit() or char != prev_char:
                     word_new += char
-            s_new += word_new.strip() + ' '
-        return s_new.strip()
+                    prev_char = char
+            s_new.append(word_new)
+
+        return ' '.join(s_new)
 
     @staticmethod
     def replace_symbols(text):
