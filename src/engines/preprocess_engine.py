@@ -600,7 +600,7 @@ class PreprocessQuestion:
                 if language and not outdomain:
                     query = corrected_text
                 else:
-                    query = text_input
+                    query = corrected_text
             else:
                 query = text_input
         return ProcessedData(
