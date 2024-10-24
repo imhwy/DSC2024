@@ -75,8 +75,7 @@ class RetrieveChat:
             room_id=room_id
         )
 
-        tokens = word_tokenize(query, format='text')
-        score = self._rag_classifier.predict_proba([tokens])[0][1]
+        score = self._rag_classifier.predict_proba([query])[0][1]
         print(f"domain score: {score}")
 
         if score <= 0.5:
