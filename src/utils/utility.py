@@ -167,13 +167,12 @@ def sum_subjects(
     subject_c_normalized = normalize_subject(subject_c_name)
 
     if None in [subject_a_normalized, subject_b_normalized, subject_c_normalized]:
-        raise ValueError("Có môn học không hợp lệ.")
+        return f"Có vẻ người dùng đang nhập vào tổ hợp không hợp lệ, hãy nhập vòa tổ hợp thuộc {valid_combinations}"
 
-    # Tạo một danh sách các môn và sắp xếp chúng để so sánh với các tổ hợp hợp lệ
     entered_subjects = sorted(
-        [subject_a_normalized, subject_b_normalized, subject_c_normalized])
+        [subject_a_normalized, subject_b_normalized, subject_c_normalized]
+    )
 
-    # Kiểm tra xem các môn nhập vào có thuộc một tổ hợp hợp lệ không
     for combination_name, combination in valid_combinations.items():
         if sorted(combination) == entered_subjects:
             return subject_a_point + subject_b_point + subject_c_point, combination_name
@@ -188,9 +187,13 @@ def compare_uit_national_high_school_graduation_scores(
     """
     Compare user's score and combination with UIT majors.
     """
-    # Get the graduation scores for the specified year
+    conclusion_string = ""
+
     if year > 2024:
-        all_major_info = get_uit_national_high_school_graduation_scores_2024()
+        return (f"Hiện tại chưa có dữ liệu cho năm {year}. "
+                f"Tuy nhiên, bạn có thể tham khảo dữ liệu của năm {2024}.",
+                get_uit_national_high_school_graduation_scores_2024(),
+                f"dựa theo kết quả trên thì có thể hoặc không thể đậu")
     elif year == 2024:
         all_major_info = get_uit_national_high_school_graduation_scores_2024()
     elif year == 2023:
@@ -198,9 +201,13 @@ def compare_uit_national_high_school_graduation_scores(
     elif year == 2022:
         all_major_info = get_uit_national_high_school_graduation_scores_2022()
     else:
-        return []
+        return (f"Hiện tại chưa có dữ liệu cho năm {year}. "
+                f"Tuy nhiên, bạn có thể tham khảo dữ liệu cũ nhất mà hệ thống còn hỗ trợ là của năm {2022}.",
+                get_uit_national_high_school_graduation_scores_2022(),
+                f"dựa theo kết quả trên thì có thể hoặc không thể đậu")
 
     result = []
+
     for major_info in all_major_info:
         # Check if the user's score is greater than or equal to the major's required score
         is_score_pass = user_score >= major_info['score']
@@ -229,7 +236,10 @@ def compare_uit_competency_assessment_scores(
     """
     """
     if year > 2024:
-        all_major_info = get_uit_competency_assessment_scores_2024()
+        return (f"Hiện tại chưa có dữ liệu cho năm {year}. "
+                f"Tuy nhiên, bạn có thể tham khảo điểm của năm {2024}.",
+                get_uit_competency_assessment_scores_2024(),
+                f"dựa theo kết quả trên thì có thể hoặc không thể đậu")
     elif year == 2024:
         all_major_info = get_uit_competency_assessment_scores_2024()
     elif year == 2023:
@@ -237,7 +247,10 @@ def compare_uit_competency_assessment_scores(
     elif year == 2022:
         all_major_info = get_uit_competency_assessment_scores_2022()
     else:
-        return []
+        return (f"Hiện tại chưa có dữ liệu cho năm {year}. "
+                f"Tuy nhiên, bạn có thể tham khảo điểm cũ nhất mà hệ thống còn hỗ trợ là của năm {2022}.",
+                get_uit_competency_assessment_scores_2022(),
+                f"dựa theo kết quả trên thì có thể hoặc không thể đậu")
     result = []
     for major_info in all_major_info:
         is_pass = user_score >= major_info['score']
@@ -416,71 +429,86 @@ def get_uit_national_high_school_graduation_scores_2023() -> List[Dict[str, floa
         {
             "major": "Computer Science",
             "major_code": "7480101",
-            "score": 26.9
+            "score": 26.9,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Artificial Intelligence",
             "major_code": "7480107",
-            "score": 27.8
+            "score": 27.8,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Network and Data Communications",
             "major_code": "7480102",
-            "score": 25.4
+            "score": 25.4,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Software Engineering",
             "major_code": "7480103",
-            "score": 26.9
+            "score": 26.9,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Information Systems",
             "major_code": "7480104",
-            "score": 26.1
+            "score": 26.1,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Information Systems (Advanced)",
             "major_code": "7480104_TT",
-            "score": 25.4
+            "score": 25.4,
+            "combination": ["A01", "D01", "D07"]
         },
         {
             "major": "E-Commerce",
             "major_code": "7340122",
-            "score": 25.8},
+            "score": 25.8,
+            "combination": ["A00", "A01", "D01", "D07"]
+        },
         {
             "major": "Information Technology",
             "major_code": "7480201",
-            "score": 26.9
+            "score": 26.9,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Information Technology (Vietnam-Japan)",
             "major_code": "7480201_N",
-            "score": 25.9
+            "score": 25.9,
+            "combination": ["A00", "A01", "D01", "D06", "D07"]
         },
         {
             "major": "Data Science",
             "major_code": "7480108",
-            "score": 27.1
+            "score": 27.1,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Information Security",
             "major_code": "7480202",
-            "score": 26.3
+            "score": 26.3,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Computer Engineering",
             "major_code": "7480106",
-            "score": 25.6
+            "score": 25.6,
+            "combination": ["A00", "A01"]
         },
         {
             "major": "Computer Engineering (IoT and Embedded Systems)",
             "major_code": "7480106_IOT",
-            "score": 25.6
+            "score": 25.6,
+            "combination": ["A00", "A01"]
         },
         {
             "major": "Computer Engineering (Microelectronics)",
             "major_code": "7480106_TKVM",
-            "score": 25.4
+            "score": 25.4,
+            "combination": ["A00", "A01"]
         }
     ]
 
@@ -572,58 +600,81 @@ def get_uit_national_high_school_graduation_scores_2022() -> List[Dict[str, Any]
         {
             "major": "Khoa học máy tính",
             "major_code": "7480101",
-            "score": 27.1},
+            "score": 27.1,
+            "combination": ["A00", "A01", "D01", "D07"]
+
+        },
         {
             "major": "Trí tuệ nhân tạo",
             "major_code": "7480107",
-            "score": 28
+            "score": 28,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Mạng máy tính và truyền thông dữ liệu",
             "major_code": "7480102",
-            "score": 26.3
+            "score": 26.3,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Kỹ thuật phần mềm",
             "major_code": "7480103",
-            "score": 28.05
+            "score": 28.05,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
         {
             "major": "Hệ thống thông tin",
             "major_code": "7480104",
-            "score": 26.7},
+            "score": 26.7,
+            "combination": ["A00", "A01", "D01", "D07"]
+        },
         {
             "major": "Hệ thống thông tin (CT tiên tiến)",
             "major_code": "7480104_TT",
-            "score": 26.2},
+            "score": 26.2,
+            "combination": ["A01", "D01", "D07"]
+        },
         {
             "major": "Thương mại điện tử",
             "major_code": "7340122",
-            "score": 27.05},
+            "score": 27.05,
+            "combination": ["A00", "A01", "D01", "D07"]
+        },
         {
             "major": "Công nghệ thông tin",
             "major_code": "7480201",
-            "score": 27.9},
+            "score": 27.9,
+            "combination": ["A00", "A01", "D01", "D07"]
+        },
         {
             "major": "Công nghệ thông tin (Việt - Nhật)",
             "major_code": "7480201_N",
-            "score": 26.3},
+            "score": 26.3,
+            "combination": ["A00", "A01", "D01", "D06", "D07"]
+        },
         {
             "major": "Khoa học dữ liệu",
             "major_code": "7480109",
-            "score": 27.05},
+            "score": 27.05,
+            "combination": ["A00", "A01", "D01", "D07"]
+        },
         {
             "major": "An toàn thông tin",
             "major_code": "7480202",
-            "score": 26.95},
+            "score": 26.95,
+            "combination": ["A00", "A01", "D01", "D07"]
+        },
         {
             "major": "Kỹ thuật máy tính",
             "major_code": "7480106",
-            "score": 26.55},
+            "score": 26.55,
+            "combination": ["A00", "A01", "D01", "D07"]
+        },
         {
             "major": "Kỹ thuật máy tính (Hướng hệ thống nhúng và IoT)",
             "major_code": "7480106_IOT",
-            "score": 26.5
+            "score": 26.5,
+            "combination": ["A00", "A01", "D01", "D07"]
         },
     ]
 

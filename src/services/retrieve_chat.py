@@ -79,6 +79,23 @@ class RetrieveChat:
         print(f"domain score: {score}")
 
         if score <= 0.5:
+            previous_query = await self._chat_history_tracker.get_lastest_chat(room_id=room_id)
+            if previous_query:
+                print("re classify domain")
+                temp_query = previous_query[0]["query"] + " " + query
+                score_phrase_2 = self._rag_classifier.predict_proba([temp_query])[
+                    0][1]
+                if score_phrase_2 >= 0.5:
+                    print("agent pipeline")
+                    response = await self._agent.reasoning_agent(
+                        chat=query,
+                        chat_history=chat_history
+                    )
+                    return Chat(
+                        response=response,
+                        is_outdomain=False,
+                        retrieved_nodes=[]
+                    )
             print("Base RAG pipeline")
             response = await self._enhance_chat_engine.enhance_chat(
                 query=query,

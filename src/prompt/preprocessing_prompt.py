@@ -288,6 +288,7 @@ SHORT_CHAT = [
     "thế à", "the a", "thật à", "that a",
     "ồ", "o", "wow", "woww", "wowww",
     "ừ", "u", "ừm", "um", "dạ", "da",
+    "chao"
     # emojies_
 ]
 

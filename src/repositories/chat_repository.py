@@ -124,3 +124,17 @@ class ChatRepository:
         if records.deleted_count > 0:
             return True
         return False
+
+    async def get_lastest_chat(
+        self,
+        room_id: str
+    ) -> List[ChatDomain]:
+        """
+        """
+        filter_obj = {"room_id": room_id}
+        latest_chats = await self.collection.find_with_filter(
+            filter_obj=filter_obj,
+            sort_by=("time", -1),
+            limit=1
+        )
+        return list(latest_chats)

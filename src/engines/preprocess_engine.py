@@ -483,7 +483,7 @@ class PreprocessQuestion:
         """
         # Preprocess the text
         if len(text) <= 30:
-            return 1
+            return 0
         processed_text = self.tokenize_text(text)
         score_prediction = self.domain_clf_model.predict_proba(
             [processed_text]
@@ -570,10 +570,8 @@ class PreprocessQuestion:
 
         if short_chat is False:
             lang, _ = self.lang_detect_2(clean_text_input)
-            corrected_text = clean_text_input
-            if lang == "vie_Latn":
-                corrected_text = self.correct_vietnamese_text(clean_text_input)
-            else:
+            corrected_text = clean_text_input 
+            if lang != "vie_Latn":
                 language = False
                 return ProcessedData(
                     query=RESPONSE_UNSUPPORTED_LANGUAGE,
