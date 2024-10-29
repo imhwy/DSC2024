@@ -182,43 +182,37 @@ def sum_subjects(
 def compare_uit_national_high_school_graduation_scores(
     user_score: float,
     user_combination: str,
-    year: int = 2024
+    year: int
 ) -> List[Dict]:
     """
     Compare user's score and combination with UIT majors.
     """
-    conclusion_string = ""
-
     if year > 2024:
-        return (f"Hiện tại chưa có dữ liệu cho năm {year}. "
+        return (f"Hiện tại chưa có điểm cho năm {year}. "
                 f"Tuy nhiên, bạn có thể tham khảo dữ liệu của năm {2024}.",
                 get_uit_national_high_school_graduation_scores_2024(),
-                f"dựa theo kết quả trên thì có thể hoặc không thể đậu")
+                f"dựa theo kết quả trên thì hãy xem xét người dùng có thể hoặc không thể đậu")
     elif year == 2024:
         all_major_info = get_uit_national_high_school_graduation_scores_2024()
+        source = "https://tuyensinh.uit.edu.vn/2024-thong-bao-diem-chuan-xet-tuyen-theo-phuong-thuc-xet-ket-qua-thi-tot-nghiep-thpt-nam-2024"
     elif year == 2023:
         all_major_info = get_uit_national_high_school_graduation_scores_2023()
+        source = "https://tuyensinh.uit.edu.vn/2023-thong-bao-diem-chuan-xet-tuyen-theo-phuong-thuc-xet-ket-qua-thi-tot-nghiep-thpt-nam-2023"
     elif year == 2022:
         all_major_info = get_uit_national_high_school_graduation_scores_2022()
+        source = "https://vietnamnet.vn/diem-chuan-truong-dai-hoc-cong-nghe-thong-tin-tp-hcm-2022-2059040.html"
     else:
-        return (f"Hiện tại chưa có dữ liệu cho năm {year}. "
+        return (f"Hiện tại chưa có điểm cho năm {year}. "
                 f"Tuy nhiên, bạn có thể tham khảo dữ liệu cũ nhất mà hệ thống còn hỗ trợ là của năm {2022}.",
                 get_uit_national_high_school_graduation_scores_2022(),
-                f"dựa theo kết quả trên thì có thể hoặc không thể đậu")
+                f"dựa theo kết quả trên thì hãy xem xét người dùng có thể hoặc không thể đậu")
 
     result = []
 
     for major_info in all_major_info:
-        # Check if the user's score is greater than or equal to the major's required score
         is_score_pass = user_score >= major_info['score']
-
-        # Check if the user's subject combination matches any valid combination for the major
         is_combination_valid = user_combination in major_info['combination']
-
-        # The user passes if both the score and combination are valid
         is_pass = is_score_pass and is_combination_valid
-
-        # Append the result for each major
         result.append({
             "major": major_info['major'],
             "is_pass": is_pass,
@@ -226,31 +220,35 @@ def compare_uit_national_high_school_graduation_scores(
             "valid_combinations": major_info['combination']
         })
 
-    return result
+    return result, source
 
 
 def compare_uit_competency_assessment_scores(
     user_score: float,
-    year: int = 2024
+    year: int
 ) -> List[Dict]:
     """
     """
+    source = ""
     if year > 2024:
-        return (f"Hiện tại chưa có dữ liệu cho năm {year}. "
+        return (f"Hiện tại chưa có điểm cho năm {year}. "
                 f"Tuy nhiên, bạn có thể tham khảo điểm của năm {2024}.",
                 get_uit_competency_assessment_scores_2024(),
-                f"dựa theo kết quả trên thì có thể hoặc không thể đậu")
+                f"dựa theo kết quả trên thì hãy xem xét người dùng có thể hoặc không thể đậu")
     elif year == 2024:
         all_major_info = get_uit_competency_assessment_scores_2024()
+        source = "https://tuyensinh.uit.edu.vn/2024-thong-bao-diem-chuan-xet-tuyen-theo-phuong-thuc-xet-tuyen-dua-tren-ket-qua-ky-thi-danh-gia-nang-luc-do-dhqg-hcm-chuc-nam-2024"
     elif year == 2023:
         all_major_info = get_uit_competency_assessment_scores_2023()
+        source = "https://tuyensinh.uit.edu.vn/2023-thong-bao-diem-chuan-xet-tuyen-theo-phuong-thuc-xet-tuyen-dua-tren-ket-qua-ky-thi-danh-gia-nang-luc-do-dhqg-hcm-chuc-nam-2023"
     elif year == 2022:
         all_major_info = get_uit_competency_assessment_scores_2022()
+        source = "https://tuyensinh.uit.edu.vn/2022-thong-bao-ket-qua-xet-tuyen-dua-tren-ket-qua-ky-thi-dgnl-dhqg-hcm"
     else:
         return (f"Hiện tại chưa có dữ liệu cho năm {year}. "
                 f"Tuy nhiên, bạn có thể tham khảo điểm cũ nhất mà hệ thống còn hỗ trợ là của năm {2022}.",
                 get_uit_competency_assessment_scores_2022(),
-                f"dựa theo kết quả trên thì có thể hoặc không thể đậu")
+                f"dựa theo kết quả trên thì hãy xem xét người dùng có thể hoặc không thể đậu")
     result = []
     for major_info in all_major_info:
         is_pass = user_score >= major_info['score']
@@ -258,7 +256,7 @@ def compare_uit_competency_assessment_scores(
             "major": major_info['major'],
             "is_pass": is_pass
         })
-    return result
+    return result, source
 
 
 def get_uit_national_high_school_graduation_scores_2024() -> List[Dict[str, Any]]:
