@@ -22,7 +22,7 @@ from scrapegraphai.graphs import SmartScraperGraph
 
 from src.utils.utility import convert_value
 from src.prompt.loader_prompt import URL_SPLITER_PROMPT
-from utils.openai_call import get_major_name_from_link
+from src.utils.openai_call import get_major_name_from_link
 
 load_dotenv()
 
