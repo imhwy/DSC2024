@@ -22,7 +22,7 @@ from scrapegraphai.graphs import SmartScraperGraph
 
 from src.utils.utility import convert_value
 from src.prompt.loader_prompt import URL_SPLITER_PROMPT
-
+from utils.openai_call import get_major_name_from_link
 
 load_dotenv()
 
@@ -34,6 +34,7 @@ MONGODB_URL = convert_value(os.getenv("MONGODB_URL"))
 MONGODB_NAME = convert_value(os.getenv("MONGODB_NAME"))
 OPENAI_MODEL_GRAPH = convert_value(os.getenv("OPENAI_MODEL_GRAPH"))
 OPENAI_EMBED_MODEL = convert_value(os.getenv("OPENAI_EMBED_MODEL"))
+CHUNK_SIZE = convert_value(os.getenv("CHUNK_SIZE"))
 
 
 class WeaviateDB:
@@ -63,8 +64,7 @@ class WeaviateDB:
         self._documents = documents
         self._mongodb_url = mongodb_url
         self._mongodb_name = mongodb_name
-        self._client = weaviate.connect_to_local(
-            host=self._host, port=self._port)
+        self._client = weaviate.connect_to_local(host=self._host, port=self._port)
         self._vector_store = WeaviateVectorStore(
             weaviate_client=self._client, index_name=self._index_name
         )
@@ -80,7 +80,7 @@ class WeaviateDB:
         self._suggestion_storage_context = StorageContext.from_defaults(
             vector_store=self._suggestion_vector_store
         )
-        self.parser = SentenceSplitter()
+        self.parser = SentenceSplitter(chunk_size=CHUNK_SIZE)
         if self._documents:
             self._index = VectorStoreIndex.from_documents(
                 documents=self._documents, storage_context=self._storage_context
@@ -194,8 +194,7 @@ class WeaviateDB:
         """
         if question and answer:
             document = [
-                Document(text=answer, metadata={
-                         "question": question, "answer": answer})
+                Document(text=answer, metadata={"question": question, "answer": answer})
             ]
             return self.documents_to_nodes(documents=document)
         return None
@@ -384,8 +383,7 @@ class WeaviateDB:
             None
         """
         if ref_doc_id:
-            self._storage_context.docstore.delete_ref_doc(
-                ref_doc_id=ref_doc_id)
+            self._storage_context.docstore.delete_ref_doc(ref_doc_id=ref_doc_id)
 
     async def add_knowledge(
         self,
@@ -415,8 +413,44 @@ class WeaviateDB:
                 documents=documents,
             )
             # nodes = self.documents_to_nodes(documents=processed_documents)
-            nodes = self.documents_to_nodes_by_sessions(
-                documents=processed_documents)
+            nodes = self.documents_to_nodes_by_sessions(documents=processed_documents)
+            self.insert_nodes(nodes=nodes)
+            self.insert_docstore(nodes=nodes)
+
+    async def add_knowledge_by_chunking(
+        self,
+        url: str = None,
+        file_type: str = None,
+        public_id: str = None,
+        file_name: str = None,
+        documents: List[Document] = List[None],
+    ) -> None:
+        """
+        Adds a list of Document objects to the knowledge base.
+
+        Args:
+            file_name (str, optional): The name of the file associated with the documents.
+            documents (List[Document], optional): A list of Document objects to be added.
+                                                  Defaults to an empty list if not provided.
+
+        Returns:
+            None
+        """
+        if documents:
+            processed_documents = self.configure_documents(
+                url=url,
+                file_type=file_type,
+                file_name=file_name,
+                public_id=public_id,
+                documents=documents,
+            )
+            nodes = self.documents_to_nodes(documents=processed_documents)
+            title = os.path.basename(file_name)
+            vietnamese_title = get_major_name_from_link(title)
+            print("Tiêu đề:", vietnamese_title.text)
+            # For each node add vietnamese_title in node.text
+            for node in nodes:
+                node.text = f"Tiêu đề: {vietnamese_title.text}\n{node.text}"
             self.insert_nodes(nodes=nodes)
             self.insert_docstore(nodes=nodes)
 
@@ -435,8 +469,7 @@ class WeaviateDB:
                 and node.ref_doc_id not in ref_doc_ids
             ):
                 self.delete_nodes(ref_doc_id=node.ref_doc_id)
-                print(
-                    f"delete node with ref_doc_id {node.ref_doc_id} successfully ")
+                print(f"delete node with ref_doc_id {node.ref_doc_id} successfully ")
                 self.delete_docstore(ref_doc_id=node.ref_doc_id)
                 print(
                     f"delete doc from docstore with ref_doc_id {node.ref_doc_id} successfully "
