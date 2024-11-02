@@ -37,7 +37,8 @@ load_dotenv()
 
 OPENAI_API_KEY = convert_value(os.getenv('OPENAI_API_KEY'))
 OPENAI_MODEL = convert_value(os.getenv('OPENAI_MODEL'))
-OPENAI_MODEL_COMPLEX_TASK = convert_value(os.getenv('OPENAI_MODEL_COMPLEX_TASK'))
+OPENAI_MODEL_COMPLEX_TASK = convert_value(
+    os.getenv('OPENAI_MODEL_COMPLEX_TASK'))
 OPENAI_EMBED_MODEL = convert_value(os.getenv('OPENAI_EMBED_MODEL'))
 TEMPERATURE_MODEL = convert_value(os.getenv('TEMPERATURE_MODEL'))
 GEMINI_API_KEY = convert_value(os.getenv('GEMINI_API_KEY'))
@@ -147,12 +148,13 @@ class Service:
         self._chat_repository = ChatRepository()
         self._enhance_chat_engine = EnhanceChatEngine(
             llm=self._llm,
-            retriever=self._retriever._retriever,
+            retriever=self._retriever.retriever,
             chat_memory_tracker=self._chat_repository,
-            token_limit=MAX_HISTORY_TOKENS
+            token_limit=MAX_HISTORY_TOKENS,
+            index=self._vector_database.index
         )
         self._agent_engine = AgentEngine(
-            retriever=self._retriever._retriever,
+            retriever=self._retriever.retriever,
             index=self._vector_database.index,
             llm=self._complex_llm
         )

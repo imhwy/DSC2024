@@ -37,10 +37,10 @@ class HybridRetriever:
         """
         self._index = index
         self._encoding = tiktoken.get_encoding("cl100k_base")
-        self._retriever = self._index.as_retriever(
-            vector_store_query_mode=VECTOR_STORE_QUERY_MODE,
-            similarity_top_k=SIMILARITY_TOP_K,
-            alpha=ALPHA
+        self.retriever = self._index.as_retriever(
+            vector_store_query_mode="hybrid",
+            similarity_top_k=10,
+            alpha=0.65
         )
 
     @property
@@ -89,7 +89,7 @@ class HybridRetriever:
             Tuple[str, List[TextNode]]: A tuple containing the combined text
                                          and the list of original TextNode objects.
         """
-        retrieved_nodes = await self._retriever.aretrieve(query)
+        retrieved_nodes = await self.retriever.aretrieve(query)
         combined_retrieved_nodes = await self.combine_retrieved_nodes(
             retrieved_nodes=retrieved_nodes,
         )

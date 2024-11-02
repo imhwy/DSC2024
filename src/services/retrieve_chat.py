@@ -97,14 +97,14 @@ class RetrieveChat:
                         retrieved_nodes=[]
                     )
             print("Base RAG pipeline")
-            response = await self._enhance_chat_engine.enhance_chat(
+            response, retrieved_nodes = await self._enhance_chat_engine.enhance_chat(
                 query=query,
                 chat_history=chat_history
             )
             return Chat(
                 response=response,
                 is_outdomain=False,
-                retrieved_nodes=[]
+                retrieved_nodes=retrieved_nodes
             )
         print("AGENT AI RAG pipeline")
         response = await self._agent.reasoning_agent(
