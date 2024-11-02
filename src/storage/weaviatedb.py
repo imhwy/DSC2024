@@ -446,7 +446,7 @@ class WeaviateDB:
             )
             nodes = self.documents_to_nodes(documents=processed_documents)
             title = os.path.basename(file_name)
-            vietnamese_title = get_major_name_from_link(title)
+            vietnamese_title = await get_major_name_from_link(title)
             print("Tiêu đề:", vietnamese_title.text)
             # For each node add vietnamese_title in node.text
             for node in nodes:

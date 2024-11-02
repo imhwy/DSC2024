@@ -116,7 +116,7 @@ async def file_upload(
             detail="Data is required"
         )
     try:
-        await service.file_management.add_file(
+        await service.file_management.add_file_router(
             data_list=request_file.data
         )
         return Response(

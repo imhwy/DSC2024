@@ -1,7 +1,7 @@
 """
 This service represents the file management functionality of the application.
 """
-
+import re
 from typing import List
 
 from src.data_loader.general_loader import GeneralLoader
@@ -62,7 +62,7 @@ class FileManagement:
             except ValueError as e:
                 print(f"Failed to process file {data.file_name}: {str(e)}")
 
-    async def add_file_by_chunking(self, data_list: List[str]) -> None:
+    async def add_file_by_chunking(self, data_list: List[FileUpload]) -> None:
         """
         Adds files to the system by transferring them, loading their data,
         and storing them in a vector database.
@@ -75,29 +75,49 @@ class FileManagement:
         """
         for data in data_list:
             # file_path = await self._file_repository.file_transfer(data=data)
-            file_path = data
+            file_path = data.url
             documents = await self._general_loader.aload_data(sources=[file_path])
             print([doc.id_ for doc in documents])
             try:
                 await self._vector_database.add_knowledge_by_chunking(
-                    url=data,
+                    url=data.url,
                     file_type="link",
-                    public_id=str(uuid.uuid4()),
-                    file_name=os.path.basename(data),
+                    public_id=data.public_id,
+                    file_name=data.file_name,
                     documents=documents,
                 )
                 print("Indexing successfully!!!")
                 # print(os.path.basename(data))
                 await self._file_repository.add_file(
-                    url=data,
+                    url=data.url,
                     file_type="link",
-                    public_id=str(uuid.uuid4()),
-                    file_name=os.path.basename(data),
+                    public_id=data.public_id,
+                    file_name=data.file_name,
                     file_path=file_path,
                 )
                 print("add data successfully!!!")
             except ValueError as e:
                 print(f"Failed to process file {data.file_name}: {str(e)}")
+
+    async def add_file_router(
+        self,
+        data_list: List[FileUpload],
+    ) -> None:
+        """
+        """
+        pattern = r"https://student\.uit\.edu\.vn/"
+        for data in data_list:
+            temp_list = []
+            temp_list.append(data)
+            match = re.search(pattern, data.url)
+            if match:
+                await self.add_file_by_chunking(
+                    data_list=temp_list
+                )
+            else:
+                await self.add_file(
+                    data_list=temp_list
+                )
 
     def delete_file(self, public_id: str = None) -> None:
         """
