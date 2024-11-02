@@ -1,10 +1,8 @@
 """
 this service provides retrieve and chat module for chatbot
 """
-import re
-import json
+
 from typing import Any
-from underthesea import word_tokenize
 
 from src.engines.chat_engine import ChatEngine
 from src.engines.retriever_engine import HybridRetriever
@@ -48,6 +46,13 @@ class RetrieveChat:
         room_id: str
     ):
         """
+        Retrieve and combine chat history for a specific room, limiting by token count.
+
+        Args:
+            room_id (str): The ID of the chat room.
+
+        Returns:
+            str: Combined chat history formatted as a string.
         """
         lastest_chats = await self._chat_history_tracker.get_last_chat(
             room_id=room_id
@@ -55,6 +60,7 @@ class RetrieveChat:
         lastest_chats = list(lastest_chats)
         combine_history_chat = ""
         sum_token = 0
+
         for idx, chat in enumerate(reversed(lastest_chats)):
             record = f"question {idx + 1}: {chat['query']}\nanswer {idx + 1}: {chat['answer']}"
             tokens = len(self._retriever.token_counter.encode(record))
@@ -62,6 +68,7 @@ class RetrieveChat:
                 break
             combine_history_chat = combine_history_chat + record + "\n"
             sum_token += tokens
+
         return combine_history_chat
 
     async def retrieve_chat(
@@ -70,6 +77,14 @@ class RetrieveChat:
         room_id: str
     ) -> Chat:
         """
+        Process a chat query and retrieve a response, utilizing a domain classifier.
+
+        Args:
+            query (str): The user's chat query.
+            room_id (str): The ID of the chat room.
+
+        Returns:
+            Chat: The response object containing the chat response and metadata.
         """
         chat_history = await self._enhance_chat_engine.history_config(
             room_id=room_id
@@ -83,8 +98,9 @@ class RetrieveChat:
             if previous_query:
                 print("re classify domain")
                 temp_query = previous_query[0]["query"] + " " + query
-                score_phrase_2 = self._rag_classifier.predict_proba([temp_query])[
-                    0][1]
+                score_phrase_2 = self._rag_classifier.predict_proba(
+                    [temp_query]
+                )[0][1]
                 if score_phrase_2 >= 0.5:
                     print("agent pipeline")
                     response = await self._agent.reasoning_agent(
@@ -111,6 +127,7 @@ class RetrieveChat:
             chat=query,
             chat_history=chat_history
         )
+
         return Chat(
             response=response,
             is_outdomain=False,
@@ -136,6 +153,7 @@ class RetrieveChat:
             text_input=query
         )
         print(processed_query)
+
         if processed_query.is_only_icon:
             answer = await self._chat.chat(
                 text=query
@@ -145,24 +163,28 @@ class RetrieveChat:
                 is_outdomain=True,
                 retrieved_nodes=[]
             )
+
         if processed_query.is_short_chat:
             return Chat(
                 response=processed_query.query,
                 is_outdomain=True,
                 retrieved_nodes=[]
             )
+
         if processed_query.language is False:
             return Chat(
                 response=processed_query.query,
                 is_outdomain=True,
                 retrieved_nodes=[]
             )
+
         if processed_query.is_prompt_injection:
             return Chat(
                 response=processed_query.query,
                 is_outdomain=True,
                 retrieved_nodes=[]
             )
+
         if processed_query.is_outdomain:
             answer = await self._enhance_chat_engine.enhance_funny_chat(
                 room_id=room_id,
@@ -179,6 +201,7 @@ class RetrieveChat:
                 is_outdomain=True,
                 retrieved_nodes=[]
             )
+
         return await self.retrieve_chat(
             query=processed_query.query,
             room_id=room_id

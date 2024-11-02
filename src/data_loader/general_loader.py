@@ -39,10 +39,14 @@ class GeneralLoader(BaseLoader):
         self.image_loader = ImageLoader()
         self.pdf_ext = [".pdf"]
         self.excel_ext = [".xls", ".xlsx", ".csv", ".tsv"]
-        self.image_ext = [".jpg", ".jpeg", ".png", ".svg", ".tiff", ".webp", ".bmp"]
+        self.image_ext = [".jpg", ".jpeg", ".png",
+                          ".svg", ".tiff", ".webp", ".bmp"]
 
     @staticmethod
-    def is_valid_url(url: str, qualifying: tuple = ("scheme", "netloc")) -> bool:
+    def is_valid_url(
+        url: str,
+        qualifying: tuple = ("scheme", "netloc")
+    ) -> bool:
         """
         Check if the provided string is a valid URL.
 
@@ -55,7 +59,10 @@ class GeneralLoader(BaseLoader):
             bool: True if the string is a valid URL, False otherwise.
         """
         tokens = urlparse(url)
-        return all(getattr(tokens, qualifying_attr) for qualifying_attr in qualifying)
+
+        return all(getattr(
+            tokens, qualifying_attr
+        ) for qualifying_attr in qualifying)
 
     def check_extension(self, file_path: str) -> str:
         """
@@ -82,7 +89,8 @@ class GeneralLoader(BaseLoader):
         elif self.is_valid_url(file_path):
             return "url"
         else:
-            raise ValueError(f"Unsupported file type or invalid URL: {file_path}")
+            raise ValueError(
+                f"Unsupported file type or invalid URL: {file_path}")
 
     def load_data(self, sources: List[str]) -> List[Document]:
         """
@@ -95,22 +103,34 @@ class GeneralLoader(BaseLoader):
             List[Document]: A list of Document objects containing the loaded data.
         """
         documents = []
+
         for source in tqdm(sources):
             source_type = self.check_extension(source)
-
             if source_type == "pdf":
-                documents.extend(self.pdf_loader.load_data([source]))
+                documents.extend(
+                    self.pdf_loader.load_data([source])
+                )
             elif source_type == "excel":
-                documents.extend(self.pdf_loader.load_data([source]))
+                documents.extend(
+                    self.pdf_loader.load_data([source])
+                )
             elif source_type == "url":
-                documents.extend(self.url_loader.load_data([source]))
+                documents.extend(
+                    self.url_loader.load_data([source])
+                )
             elif source_type == "image":
-                documents.extend(self.image_loader.load_data([source]))
+                documents.extend(
+                    self.image_loader.load_data([source])
+                )
             else:
                 print("Source type is not supported:", source_type)
+
         return documents
 
-    async def aload_data(self, sources: List[str]) -> List[Document]:
+    async def aload_data(
+        self,
+        sources: List[str]
+    ) -> List[Document]:
         """
         Load data from a list of sources, which may include PDF files, Excel files, and URLs.
 
@@ -121,17 +141,26 @@ class GeneralLoader(BaseLoader):
             List[Document]: A list of Document objects containing the loaded data.
         """
         documents = []
+
         for source in tqdm(sources):
             source_type = self.check_extension(source)
-
             if source_type == "pdf":
-                documents.extend(await self.pdf_loader.aload_data([source]))
+                documents.extend(
+                    await self.pdf_loader.aload_data([source])
+                )
             elif source_type == "excel":
-                documents.extend(await self.pdf_loader.aload_data([source]))
+                documents.extend(
+                    await self.pdf_loader.aload_data([source])
+                )
             elif source_type == "url":
-                documents.extend(await self.url_loader.aload_data([source]))
+                documents.extend(
+                    await self.url_loader.aload_data([source])
+                )
             elif source_type == "image":
-                documents.extend(await self.image_loader.aload_data([source]))
+                documents.extend(
+                    await self.image_loader.aload_data([source])
+                )
             else:
                 print("Source type is not supported:", source_type)
+
         return documents

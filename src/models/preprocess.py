@@ -25,6 +25,13 @@ class ProcessedData(BaseModel):
 
 class ShortChat(BaseModel):
     """
+    Represents a short chat interaction.
+
+    Attributes:
+        query (str): The original user query.
+        clean_query (str): The cleaned version of the user query for processing.
+        is_short_chat (bool): Indicates whether the interaction.
+        short_chat_response (str): The response generated for the short chat.
     """
     query: str
     clean_query: str
@@ -34,6 +41,11 @@ class ShortChat(BaseModel):
 
 class UnsupportedLanguage(BaseModel):
     """
+    Model for unsupported language responses.
+
+    Attributes:
+        language (bool): Indicates if the language is unsupported.
+        response (str): Message about unsupported language.
     """
     language: bool
     response: str
@@ -41,6 +53,11 @@ class UnsupportedLanguage(BaseModel):
 
 class PromptInjection(BaseModel):
     """
+    Model for prompt injection detection.
+
+    Attributes:
+        is_prompt_injection (bool): Indicates if prompt injection was detected.
+        response (str): Response for prompt injection case.
     """
     is_prompt_injection: bool
     response: str

@@ -242,7 +242,6 @@ TERMS_DICT = {
     "thực tập": ["internship", "intern", "thực tập", "thực tập sinh", "internship program"],
     "học phí": ["tuition", "tuition fee", "học phí", "phí học tập"],
     "viện đào tạo quốc tế": ["viện quốc tế", "international training institute", "viện đào tạo quốc tế", "đào tạo quốc tế", "vqi"],
-    "ngành học": ["major", "field of study", "ngành học", "ngành", "chuyên ngành"],
     "nghiên cứu khoa học": ["scientific research", "research", "nc khoa học", "nghiên cứu", "research khoa học"],
     "công nghệ mới": ["emerging technology", "new tech", "công nghệ mới", "công nghệ tiên tiến", "công nghệ hiện đại", "advanced technology"],
     "trung tâm đào tạo": ["training center", "center", "trung tâm", "trung tâm đào tạo", "tt đào tạo", "trung tâm học tập"],

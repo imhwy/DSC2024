@@ -180,7 +180,9 @@ class WeaviateDB:
         return documents
 
     async def suggestion_config(
-        self, question: str = None, answer: str = None
+        self,
+        question: str = None,
+        answer: str = None
     ) -> List[Document]:
         """
         Creates a list of Document objects based on the provided question and answer.
@@ -197,9 +199,13 @@ class WeaviateDB:
                 Document(text=answer, metadata={"question": question, "answer": answer})
             ]
             return self.documents_to_nodes(documents=document)
+
         return None
 
-    async def insert_suggestion_nodes(self, nodes: List[TextNode]) -> None:
+    async def insert_suggestion_nodes(
+        self,
+        nodes: List[TextNode]
+    ) -> None:
         """
         Inserts a list of TextNode objects into the suggestion index.
 
@@ -209,7 +215,10 @@ class WeaviateDB:
         if nodes:
             self._suggestion_index.insert_nodes(nodes=nodes)
 
-    def documents_to_nodes(self, documents: List[Document]) -> List[TextNode]:
+    def documents_to_nodes(
+        self,
+        documents: List[Document]
+    ) -> List[TextNode]:
         """
         Converts a list of Document objects into a list of TextNode objects.
 
@@ -221,9 +230,13 @@ class WeaviateDB:
             List[TextNode]: A list of TextNode objects derived from the given documents.
         """
         nodes = self.parser.get_nodes_from_documents(documents=documents)
+
         return nodes
 
-    def get_sessions_splitter(self, text):
+    def get_sessions_splitter(
+        self,
+        text
+    ):
         """Splitter to split text of a document into many nodes containing sessions.
 
         Args:
@@ -244,6 +257,7 @@ class WeaviateDB:
             # },
             # "verbose": True,
         }
+
         return SmartScraperGraph(
             prompt=URL_SPLITER_PROMPT,
             source=text,
@@ -251,7 +265,8 @@ class WeaviateDB:
         )
 
     def documents_to_nodes_by_sessions(
-        self, documents: List[Document]
+        self,
+        documents: List[Document]
     ) -> List[TextNode]:
         """
         Converts a list of Document objects into a list of TextNode
@@ -267,7 +282,7 @@ class WeaviateDB:
             derived from the given documents.
         """
         nodes_of_docs = []
-        print("Start")
+
         for doc in documents:
             splitter = self.get_sessions_splitter(doc.text)
             # splitted_text_list = [{'title': 'Title A', 'content': 'content A'}]
@@ -329,9 +344,13 @@ class WeaviateDB:
 
             # Extend the nodes_of_docs list including nodes from multiple documents
             nodes_of_docs.extend(nodes)
+
         return nodes_of_docs
 
-    def insert_nodes(self, nodes: List[TextNode]) -> str:
+    def insert_nodes(
+        self,
+        nodes: List[TextNode]
+    ) -> str:
         """
         Adds a list of nodes into the vector store.
 
@@ -344,7 +363,10 @@ class WeaviateDB:
         if nodes:
             self._index.insert_nodes(nodes=nodes)
 
-    def delete_nodes(self, ref_doc_id: str = None) -> None:
+    def delete_nodes(
+        self,
+        ref_doc_id: str = None
+    ) -> None:
         """
         Deletes a document from the vector store using the reference document ID.
 
@@ -357,7 +379,10 @@ class WeaviateDB:
         if ref_doc_id:
             self._index.delete_ref_doc(ref_doc_id=ref_doc_id)
 
-    def insert_docstore(self, nodes: List[TextNode]) -> None:
+    def insert_docstore(
+        self,
+        nodes: List[TextNode]
+    ) -> None:
         """
         Inserts a list of TextNode objects into the document store.
 
@@ -371,7 +396,10 @@ class WeaviateDB:
         if nodes:
             self._storage_context.docstore.add_documents(nodes)
 
-    def delete_docstore(self, ref_doc_id: str = None) -> None:
+    def delete_docstore(
+        self,
+        ref_doc_id: str = None
+    ) -> None:
         """
         Deletes a document from the document store using its reference document ID.
 
@@ -414,6 +442,7 @@ class WeaviateDB:
             )
             # nodes = self.documents_to_nodes(documents=processed_documents)
             nodes = self.documents_to_nodes_by_sessions(documents=processed_documents)
+
             self.insert_nodes(nodes=nodes)
             self.insert_docstore(nodes=nodes)
 
@@ -449,12 +478,17 @@ class WeaviateDB:
             vietnamese_title = await get_major_name_from_link(title)
             print("Tiêu đề:", vietnamese_title.text)
             # For each node add vietnamese_title in node.text
+
             for node in nodes:
                 node.text = f"Tiêu đề: {vietnamese_title.text}\n{node.text}"
+
             self.insert_nodes(nodes=nodes)
             self.insert_docstore(nodes=nodes)
 
-    def delete_knowlegde(self, public_id: str = None) -> None:
+    def delete_knowlegde(
+        self,
+        public_id: str = None
+    ) -> None:
         """
         Deletes documents from the knowledge base by file name.
 
@@ -476,7 +510,10 @@ class WeaviateDB:
                 )
                 ref_doc_ids.append(node.ref_doc_id)
 
-    def delete_collection(self, collection_name: str = None) -> None:
+    def delete_collection(
+        self,
+        collection_name: str = None
+    ) -> None:
         """
         Deletes a collection from the document storage by name.
 

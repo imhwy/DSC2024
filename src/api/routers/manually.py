@@ -2,11 +2,13 @@
 This module defines FastAPI endpoints for file.
 """
 from typing import List
-from fastapi import (status,
-                     Depends,
-                     APIRouter,
-                     HTTPException,
-                     Response)
+from fastapi import (
+    status,
+    Depends,
+    APIRouter,
+    HTTPException,
+    Response
+)
 
 from src.services.service import Service
 from src.api.dependencies.dependency import get_service
@@ -44,14 +46,17 @@ async def file_upload(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Data is required"
         )
+
     try:
         await service.file_management.add_file_by_chunking(
             data_list=request_file
         )
+
         return Response(
             status_code=status.HTTP_201_CREATED,
             content="Adding file successfully"
         )
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

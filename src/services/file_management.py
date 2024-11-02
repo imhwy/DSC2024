@@ -8,8 +8,6 @@ from src.data_loader.general_loader import GeneralLoader
 from src.repositories.file_repository import FileRepository
 from src.storage.weaviatedb import WeaviateDB
 from src.models.file import FileUpload
-import os
-import uuid
 
 
 class FileManagement:
@@ -27,7 +25,10 @@ class FileManagement:
         self._general_loader = general_loader
         self._vector_database = vector_database
 
-    async def add_file(self, data_list: List[FileUpload]) -> None:
+    async def add_file(
+        self,
+        data_list: List[FileUpload]
+    ) -> None:
         """
         Adds files to the system by transferring them, loading their data,
         and storing them in a vector database.
@@ -42,6 +43,7 @@ class FileManagement:
             file_path = await self._file_repository.file_transfer(data=data)
             documents = await self._general_loader.aload_data(sources=[file_path])
             print([doc.id_ for doc in documents])
+
             try:
                 await self._vector_database.add_knowledge(
                     url=data.url,
@@ -62,7 +64,10 @@ class FileManagement:
             except ValueError as e:
                 print(f"Failed to process file {data.file_name}: {str(e)}")
 
-    async def add_file_by_chunking(self, data_list: List[FileUpload]) -> None:
+    async def add_file_by_chunking(
+        self,
+        data_list: List[FileUpload]
+    ) -> None:
         """
         Adds files to the system by transferring them, loading their data,
         and storing them in a vector database.
@@ -78,6 +83,7 @@ class FileManagement:
             file_path = data.url
             documents = await self._general_loader.aload_data(sources=[file_path])
             print([doc.id_ for doc in documents])
+
             try:
                 await self._vector_database.add_knowledge_by_chunking(
                     url=data.url,
@@ -104,12 +110,21 @@ class FileManagement:
         data_list: List[FileUpload],
     ) -> None:
         """
+        Process a list of file uploads and add them based on their URL.
+
+        Args:
+            data_list (List[FileUpload]): A list of files to be uploaded.
+
+        Returns:
+            None
         """
         pattern = r"https://student\.uit\.edu\.vn/"
+
         for data in data_list:
             temp_list = []
             temp_list.append(data)
             match = re.search(pattern, data.url)
+
             if match:
                 await self.add_file_by_chunking(
                     data_list=temp_list

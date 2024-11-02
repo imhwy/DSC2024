@@ -4,8 +4,10 @@ This module provides a repository class for managing suggestions
 
 from src.storage.suggestion_crud import CRUDSuggestionCollection
 from src.models.suggestion import Suggestion
-from src.utils.utility import (create_new_id,
-                               get_datetime)
+from src.utils.utility import (
+    create_new_id,
+    get_datetime
+)
 
 
 class SuggestionRepository:
@@ -33,8 +35,10 @@ class SuggestionRepository:
             list: A list of documents with '_id' field as a string.
         """
         self.data = list(self.collection.find_all_doc())
+
         for doc in self.data:
             doc["_id"] = str(doc["_id"])
+
         return self.data
 
     def add_one_record(
@@ -69,12 +73,14 @@ class SuggestionRepository:
         """
         suggestion_id = create_new_id(prefix="suggestion")
         timestamp = get_datetime()
+
         suggestion_instance = Suggestion(
             Id=suggestion_id,
             question=question,
             answer=answer,
             time=timestamp
         )
+
         self.add_one_record(
             suggestion=suggestion_instance
         )
@@ -126,6 +132,8 @@ class SuggestionRepository:
                 "question": suggestion_question
             }
         )
+
         if document:
             document["_id"] = str(document["_id"])
+
         return document

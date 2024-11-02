@@ -8,7 +8,6 @@ from typing import List
 from dotenv import load_dotenv
 import tiktoken
 from llama_index.core import VectorStoreIndex
-from llama_index.core.retrievers import BaseRetriever
 from llama_index.core.schema import TextNode
 
 from src.utils.utility import convert_value
@@ -46,6 +45,10 @@ class HybridRetriever:
     @property
     def token_counter(self):
         """
+        Retrieves the current token encoding used by the model.
+
+        Returns:
+            Any: The encoding object that represents the current token state.
         """
         return self._encoding
 
@@ -64,15 +67,19 @@ class HybridRetriever:
         """
         combined_strings = ""
         current_tokens = 0
+
         for retrieved_node in retrieved_nodes:
             text = retrieved_node.text
             metadata = str(retrieved_node.metadata)
             sub_combine = text + "\nmetadata:\n" + metadata
             tokens = len(self._encoding.encode(sub_combine))
+
             if tokens + current_tokens > max_tokens:
                 break
+
             combined_strings = combined_strings + "\n" + "=" * 20 + "\n" + sub_combine
             current_tokens += tokens
+
         return combined_strings
 
     async def retrieve_nodes(
@@ -93,4 +100,5 @@ class HybridRetriever:
         combined_retrieved_nodes = await self.combine_retrieved_nodes(
             retrieved_nodes=retrieved_nodes,
         )
+
         return combined_retrieved_nodes, retrieved_nodes

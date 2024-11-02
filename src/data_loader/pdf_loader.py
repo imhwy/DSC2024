@@ -5,6 +5,7 @@ This module provides a class for loading and processing data from pdf files.
 import os
 from typing import List
 from dotenv import load_dotenv
+import nest_asyncio
 from llama_parse import LlamaParse
 from llama_parse.utils import Language, ResultType
 from llama_index.core import SimpleDirectoryReader
@@ -12,7 +13,6 @@ from llama_index.core.schema import Document
 
 from src.data_loader.base_loader import BaseLoader
 from src.utils.utility import convert_value
-import nest_asyncio
 
 nest_asyncio.apply()
 
@@ -74,7 +74,10 @@ class PDFLoader(BaseLoader):
         ]
         self.file_extractor = {ext: self.parser for ext in self.extensions}
 
-    def load_data(self, sources: List[str]) -> List[Document]:
+    def load_data(
+        self,
+        sources: List[str]
+    ) -> List[Document]:
         """
         Load data from a list of PDF files and return a list of Document objects.
 
@@ -88,15 +91,20 @@ class PDFLoader(BaseLoader):
             documents = SimpleDirectoryReader(
                 input_files=sources, file_extractor=self.file_extractor
             ).load_data()
+
         except ValueError as e:
             print("Use default PDF, return text instead of markdown:", str(e))
             del self.file_extractor[".pdf"]
             documents = SimpleDirectoryReader(
                 input_files=sources, file_extractor=self.file_extractor
             ).load_data()
+
         return documents
 
-    async def aload_data(self, sources: List[str]) -> List[Document]:
+    async def aload_data(
+        self,
+        sources: List[str]
+    ) -> List[Document]:
         """
         Load data from a list of PDF files and return a list of Document objects.
 
@@ -110,6 +118,7 @@ class PDFLoader(BaseLoader):
             documents = await SimpleDirectoryReader(
                 input_files=sources, file_extractor=self.file_extractor
             ).aload_data()
+
         except ValueError as e:
             print("Use default PDF, return text instead of markdown:", str(e))
             del self.file_extractor[".pdf"]
@@ -117,4 +126,5 @@ class PDFLoader(BaseLoader):
                 input_files=sources, file_extractor=self.file_extractor
             ).aload_data()
         # print(documents)
+
         return documents

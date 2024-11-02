@@ -69,6 +69,7 @@ class SemanticSearch:
             List[TextNode]: A list of retrieved text nodes.
         """
         retrieved_nodes = await self._retriever.aretrieve(query)
+
         return retrieved_nodes
 
     async def get_relevant_answer(
@@ -85,8 +86,10 @@ class SemanticSearch:
             str: The most relevant answer based on the query.
         """
         retrieved_nodes = await self.retrieve_nodes(query=query)
+
         if retrieved_nodes:
             print(f"the score: {retrieved_nodes[0].score}")
             if retrieved_nodes[0].score <= self._threshold:
                 return retrieved_nodes[0].metadata['answer']
+
         return None

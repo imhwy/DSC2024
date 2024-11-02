@@ -2,17 +2,21 @@
 This module defines FastAPI endpoints for suggestion.
 """
 
-from fastapi import (status,
-                     Depends,
-                     APIRouter,
-                     HTTPException,
-                     Response)
+from fastapi import (
+    status,
+    Depends,
+    APIRouter,
+    HTTPException,
+    Response
+)
 
 from src.services.service import Service
 from src.api.dependencies.dependency import get_service
-from src.api.schemas.suggestion import (ResponseSuggestion,
-                                        ResponseSuggestionList,
-                                        Suggestion)
+from src.api.schemas.suggestion import (
+    ResponseSuggestion,
+    ResponseSuggestionList,
+    Suggestion
+)
 
 suggestion_router = APIRouter(
     tags=["Suggestion"],
@@ -42,15 +46,18 @@ async def get_all_suggestion(
     """
     try:
         suggestion_records = service.suggestion_repository.load_data()
+
         if not suggestion_records:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
                 detail="No suggestion not found"
             )
+
         return ResponseSuggestionList(
             suggestion=[ResponseSuggestion(**record)
                         for record in suggestion_records]
         )
+
     except Exception as e:
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -84,12 +91,15 @@ async def get_suggestion(
         suggestion_record = service.suggestion_repository.get_suggestion_by_question(
             suggestion_question=suggestion_question
         )
+
         if not suggestion_record:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
                 detail="Suggestion not found"
             )
+
         return Suggestion(**suggestion_record)
+
     except Exception as e:
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -134,10 +144,12 @@ async def upload_suggestion(
             question=question,
             answer=response
         )
+
         return Response(
             status_code=status.HTTP_201_CREATED,
             content="Adding suggestion successfully"
         )
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -170,14 +182,17 @@ async def delete_suggestion(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Field is required"
         )
+
     try:
         service.suggestion_repository.delete_suggestion(
             identifier=field
         )
+
         return Response(
             status_code=status.HTTP_201_CREATED,
             content="Delete suggestion successfully"
         )
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

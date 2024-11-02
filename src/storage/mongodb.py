@@ -116,11 +116,11 @@ class CRUDDocuments():
         limit=5
     ):
         """
-        Finds documents in the collection based on a specified filter, with optional sorting and limiting.
+        Finds documents in the collection based on a specified filter.
 
         Args:
             filter_obj (dict): A dictionary specifying the filter.
-            sort_by (tuple): Optional. A tuple specifying the field to sort by and the sort order (1 for ascending, -1 for descending).
+            sort_by (tuple): Optional. A tuple specifying the field.
             limit (int): Optional. The maximum number of documents to return.
 
         Returns:
@@ -139,10 +139,24 @@ class CRUDDocuments():
 
     async def find_many_doc(self, obj):
         """
+        Retrieve multiple documents from the collection.
+
+        Args:
+            obj (dict): A dictionary representing the filter criteria.
+
+        Returns:
+            AsyncIterator: An asynchronous iterator.
         """
         return self.collection.find(filter=obj)
 
     async def delete_many_doc(self, obj):
         """
+        Delete multiple documents from the collection.
+
+        Args:
+            obj (dict): A dictionary representing the filter criteria.
+
+        Returns:
+            DeleteResult: A result object containing information about the operation.
         """
         return self.collection.delete_many(filter=obj)

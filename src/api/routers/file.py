@@ -2,17 +2,21 @@
 This module defines FastAPI endpoints for file.
 """
 
-from fastapi import (status,
-                     Depends,
-                     APIRouter,
-                     HTTPException,
-                     Response)
+from fastapi import (
+    status,
+    Depends,
+    APIRouter,
+    HTTPException,
+    Response
+)
 
 from src.services.service import Service
 from src.api.dependencies.dependency import get_service
-from src.api.schemas.file import (FileUploadRequest,
-                                  AllFiles,
-                                  File)
+from src.api.schemas.file import (
+    FileUploadRequest,
+    AllFiles,
+    File
+)
 
 
 file_router = APIRouter(
@@ -40,9 +44,11 @@ async def get_all_files_upload(
     """
     try:
         file_records = service.file_repository.load_all_data()
+
         return AllFiles(
             data=[File(**record) for record in file_records]
         )
+
     except Exception as e:
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -76,12 +82,15 @@ async def get_file_upload(
         file_record = service.file_repository.get_specific_file(
             public_id=public_id
         )
+
         if not file_record:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
                 detail="File not found"
             )
+
         return File(**file_record)
+
     except Exception as e:
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -115,14 +124,17 @@ async def file_upload(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Data is required"
         )
+
     try:
         await service.file_management.add_file_router(
             data_list=request_file.data
         )
+
         return Response(
             status_code=status.HTTP_201_CREATED,
             content="Adding file successfully"
         )
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -155,18 +167,22 @@ async def file_delete(
         record = service.file_repository.get_specific_file(
             public_id=public_id
         )
+
         if not record:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="File not found"
             )
+
         service.file_management.delete_file(
             public_id=public_id
         )
+
         return Response(
             status_code=status.HTTP_201_CREATED,
             content="Deleted file successfully"
         )
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

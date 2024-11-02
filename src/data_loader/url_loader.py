@@ -4,9 +4,10 @@ This module provides a class for loading and processing data from URLs.
 
 import re
 from typing import List
+import markdownify
+from bs4 import BeautifulSoup
 from llama_index.core.schema import Document
 from llama_index.readers.web import SimpleWebPageReader
-import markdownify
 
 from src.data_loader.base_loader import BaseLoader
 from src.utils.utility import get_last_part_of_url
@@ -38,7 +39,9 @@ class URLLoader(BaseLoader):
         return re.sub(r"\n+", "\n", input_string)
 
     @staticmethod
-    def extract_articles(html_text: str, delimiter: str = "\n\n") -> str:
+    def extract_articles(
+        html_text: str
+    ) -> str:
         """
         Extract articles from HTML content using the <article> tag.
 
@@ -54,13 +57,16 @@ class URLLoader(BaseLoader):
         # matches = pattern.findall(html_text)
         # stripped_matches = [match.strip() for match in matches]
         # return delimiter.join(stripped_matches)
-        from bs4 import BeautifulSoup
 
         soup = BeautifulSoup(html_text, "html.parser")
         main_div = soup.find("div", {"id": "content"})
+
         return str(main_div).strip()
 
-    def load_data(self, sources: List[str]) -> List[Document]:
+    def load_data(
+        self,
+        sources: List[str]
+    ) -> List[Document]:
         """
         Load data from a list of URLs and convert the content to markdown format.
 
@@ -75,6 +81,7 @@ class URLLoader(BaseLoader):
         reader = SimpleWebPageReader()
         documents = reader.load_data(sources)
         processed_documents = []
+
         for doc in documents:
             # Get file_name
             file_name = get_last_part_of_url(doc.id_)
@@ -84,7 +91,6 @@ class URLLoader(BaseLoader):
             articles = self.remove_duplicate_new_line(articles)
             # Convert to markdown format
             markdown_text = markdownify.markdownify(articles)
-
             # Add metadata
             document = Document(
                 excluded_llm_metadata_keys=["url", "file_name", "file_type"],
@@ -97,9 +103,13 @@ class URLLoader(BaseLoader):
                 },
             )
             processed_documents.append(document)
+
         return processed_documents
 
-    async def aload_data(self, sources: List[str]) -> List[Document]:
+    async def aload_data(
+        self,
+        sources: List[str]
+    ) -> List[Document]:
         """
         Load data from a list of URLs and convert the content to markdown format.
 
@@ -114,6 +124,7 @@ class URLLoader(BaseLoader):
         reader = SimpleWebPageReader()
         documents = await reader.aload_data(sources)
         processed_documents = []
+
         for doc in documents:
             # Get file_name
             file_name = get_last_part_of_url(doc.id_)
@@ -123,7 +134,6 @@ class URLLoader(BaseLoader):
             articles = self.remove_duplicate_new_line(articles)
             # Convert to markdown format
             markdown_text = markdownify.markdownify(articles)
-
             # Add metadata
             document = Document(
                 excluded_llm_metadata_keys=["url", "file_name", "file_type"],
@@ -136,4 +146,5 @@ class URLLoader(BaseLoader):
                 },
             )
             processed_documents.append(document)
+
         return processed_documents

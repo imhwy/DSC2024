@@ -2,12 +2,17 @@
 This repository class for managing chat collec in the question answering system.
 """
 
-from typing import List
+from typing import (
+    List,
+    Any
+)
 
 from src.storage.chat_crud import CRUDChatCollection
 from src.models.chat import ChatDomain
-from src.utils.utility import (create_new_id,
-                               get_datetime)
+from src.utils.utility import (
+    create_new_id,
+    get_datetime
+)
 
 
 class ChatRepository:
@@ -34,11 +39,16 @@ class ChatRepository:
             list: A list of documents with '_id' field as a string.
         """
         self.data = list(self.collection.find_all_doc())
+
         for doc in self.data:
             doc["_id"] = str(doc["_id"])
+
         return self.data
 
-    async def add_one_record(self, chat: ChatDomain):
+    async def add_one_record(
+        self,
+        chat: ChatDomain
+    ):
         """
         Add a new chat domain document to the collection.
 
@@ -57,7 +67,7 @@ class ChatRepository:
         answer: str,
         retrieved_nodes: List[str],
         is_out_of_domain: bool = False
-    ):
+    ) -> None:
         """
         Add a new chat domain document to the collection.
 
@@ -74,6 +84,7 @@ class ChatRepository:
         """
         chat_domain_id = create_new_id(prefix="chatdomain")
         timestamp = get_datetime()
+
         chat_instance = ChatDomain(
             Id=chat_domain_id,
             room_id=room_id,
@@ -83,6 +94,7 @@ class ChatRepository:
             time=timestamp,
             is_outdomain=is_out_of_domain
         )
+
         await self.add_one_record(chat=chat_instance)
 
     async def get_last_chat(
@@ -90,6 +102,13 @@ class ChatRepository:
         room_id: str
     ) -> ChatDomain:
         """
+        Retrieve the last five chat messages from a specific room.
+
+        Args:
+            room_id (str): The ID of the chat room.
+
+        Returns:
+            ChatDomain: The last five chat messages from the room.
         """
         filter_obj = {"room_id": room_id}
         latest_chats = await self.collection.find_with_filter(
@@ -97,32 +116,50 @@ class ChatRepository:
             sort_by=("time", -1),
             limit=5
         )
+
         return latest_chats
 
     async def get_room_chat(
         self,
         room_id: str
-    ):
+    ) -> Any:
         """
+        Get all chat records for a specified room.
+
+        Args:
+            room_id (str): The ID of the chat room.
+
+        Returns:
+            Any: All chat records for the room.
         """
         filter_obj = {"room_id": room_id}
         records = self.collection.find_one_doc(
             obj=filter_obj
         )
+
         return records
 
     async def delete_room_chat(
         self,
         room_id: str
-    ):
+    ) -> bool:
         """
+        Delete all chat records for a given room.
+
+        Args:
+            room_id (str): The ID of the chat room.
+
+        Returns:
+            bool: True if records were deleted, otherwise False.
         """
         filter_obj = {"room_id": room_id}
         records = await self.collection.delete_many_doc(
             obj=filter_obj
         )
+
         if records.deleted_count > 0:
             return True
+
         return False
 
     async def get_lastest_chat(
@@ -130,6 +167,13 @@ class ChatRepository:
         room_id: str
     ) -> List[ChatDomain]:
         """
+        Retrieve the most recent chat message from a specific room.
+
+        Args:
+            room_id (str): The ID of the chat room.
+
+        Returns:
+            List[ChatDomain]: The most recent chat message from the room.
         """
         filter_obj = {"room_id": room_id}
         latest_chats = await self.collection.find_with_filter(
@@ -137,4 +181,5 @@ class ChatRepository:
             sort_by=("time", -1),
             limit=1
         )
+
         return list(latest_chats)

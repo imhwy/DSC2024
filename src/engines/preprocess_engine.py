@@ -4,23 +4,25 @@ This module is used for preprocessing queries
 
 import re
 from difflib import SequenceMatcher
+from typing import Any
 from underthesea import word_tokenize
 import torch
 import numpy as np
 
-from src.models.preprocess import (ProcessedData,
-                                   ShortChat,
-                                   UnsupportedLanguage,
-                                   PromptInjection)
-from src.prompt.postprocessing_prompt import (RESPONSE_UNSUPPORTED_LANGUAGE,
-                                              RESPONSE_PROMPT_INJECTION)
-from src.prompt.preprocessing_prompt import (FILLTER_WORDS,
-                                             TERMS_DICT,
-                                             SHORT_CHAT,
-                                             RESPONSE_DICT,
-                                             TOKENIZER_WORD_PREFIX,
-                                             PROMPT_INJECTION_PATTERNS,
-                                             POTENTIAL_PROMPT_INJECTION_PATTERNS)
+from src.models.preprocess import ProcessedData
+from src.prompt.postprocessing_prompt import (
+    RESPONSE_UNSUPPORTED_LANGUAGE,
+    RESPONSE_PROMPT_INJECTION
+)
+from src.prompt.preprocessing_prompt import (
+    FILLTER_WORDS,
+    TERMS_DICT,
+    SHORT_CHAT,
+    RESPONSE_DICT,
+    TOKENIZER_WORD_PREFIX,
+    PROMPT_INJECTION_PATTERNS,
+    POTENTIAL_PROMPT_INJECTION_PATTERNS
+)
 
 
 class PreprocessQuestion:
@@ -111,7 +113,7 @@ class PreprocessQuestion:
         return ' '.join(s_new)
 
     @staticmethod
-    def replace_symbols(text):
+    def replace_symbols(text) -> str:
         """
         Replaces specific symbols in the input text.
 
@@ -132,12 +134,17 @@ class PreprocessQuestion:
             "/": " ",
             "!": " "
         }
+
         for symbol, replacement in replacements.items():
             text = text.replace(symbol, replacement)
+
         return " ".join(text.split())
 
     @staticmethod
-    def replace_synonyms(text, synonym_dict):
+    def replace_synonyms(
+        text,
+        synonym_dict: Any
+    ) -> str:
         """
         Replaces synonyms in the input text
 
@@ -149,12 +156,14 @@ class PreprocessQuestion:
             str: The text with synonyms replaced by their corresponding keywords.
         """
         text = text.lower()
+
         for keyword, synonyms in synonym_dict.items():
             keyword = keyword.lower()
             for synonym in synonyms:
                 synonym = synonym.strip().lower()
                 text = re.sub(r'\b{}\b'.format(
                     re.escape(synonym)), keyword, text)
+
         return text
 
     @staticmethod
@@ -187,7 +196,10 @@ class PreprocessQuestion:
         return emoji_pattern.sub(r'', text)
 
     @staticmethod
-    def remove_filler_words(text, filler_words):
+    def remove_filler_words(
+        text: str,
+        filler_words: Any
+    ):
         """
         Removes specified filler words from the input text.
 
@@ -199,10 +211,14 @@ class PreprocessQuestion:
             str: The text with the specified filler words removed and extra spaces cleaned up.
         """
         text = text.lower()
+
         for word in filler_words:
-            pattern = r'\b{}\b'.format(re.escape(word.strip().lower()))
+            pattern = r'\b{}\b'.format(
+                re.escape(word.strip().lower())
+            )
             text = re.sub(pattern, '', text)
         text = re.sub(r'\s+', ' ', text).strip()
+
         return text
 
     @staticmethod
@@ -218,10 +234,14 @@ class PreprocessQuestion:
             str: The text with non-Vietnamese characters removed.
         """
         pattern = r"[0-9a-zA-ZaăâbcdđeêghiklmnoôơpqrstuưvxyàằầbcdđèềghìklmnòồờpqrstùừvxỳáắấbcdđéếghíklmnóốớpqrstúứvxýảẳẩbcdđẻểghỉklmnỏổởpqrstủửvxỷạặậbcdđẹệghịklmnọộợpqrstụựvxỵãẵẫbcdđẽễghĩklmnõỗỡpqrstũữvxỹAĂÂBCDĐEÊGHIKLMNOÔƠPQRSTUƯVXYÀẰẦBCDĐÈỀGHÌKLMNÒỒỜPQRSTÙỪVXỲÁẮẤBCDĐÉẾGHÍKLMNÓỐỚPQRSTÚỨVXÝẠẶẬBCDĐẸỆGHỊKLMNỌỘỢPQRSTỤỰVXỴẢẲẨBCDĐẺỂGHỈKLMNỎỔỞPQRSTỦỬVXỶÃẴẪBCDĐẼỄGHĨKLMNÕỖỠPQRSTŨỮVXỸ,._]"
+
         return re.sub(rf'[^{pattern}\s]', '', text).strip()
 
     @staticmethod
-    def merge_tokens_and_preds(tokens, predictions):
+    def merge_tokens_and_preds(
+        tokens,
+        predictions
+    ):
         """
         Merges tokens and their predictions, combining split tokens and their labels.
 
@@ -234,13 +254,16 @@ class PreprocessQuestion:
         """
         merged_tokens_preds = []
         i = 0
+
         while i < len(tokens):
             tok = tokens[i]
             label_indexes = set([predictions[i]])
+
             if tok.startswith(TOKENIZER_WORD_PREFIX):
                 tok_no_prefix = tok[len(TOKENIZER_WORD_PREFIX):]
                 cur_word_toks = [tok_no_prefix]
                 j = i + 1
+
                 while j < len(tokens):
                     if not tokens[j].startswith(TOKENIZER_WORD_PREFIX):
                         cur_word_toks.append(tokens[j])
@@ -248,16 +271,22 @@ class PreprocessQuestion:
                         j += 1
                     else:
                         break
+
                 cur_word = ''.join(cur_word_toks)
                 merged_tokens_preds.append((cur_word, label_indexes))
                 i = j
+
             else:
                 merged_tokens_preds.append((tok, label_indexes))
                 i += 1
+
         return merged_tokens_preds
 
     @staticmethod
-    def get_accented_words(merged_tokens_preds, label_list):
+    def get_accented_words(
+        merged_tokens_preds,
+        label_list
+    ):
         """
         Adds accents to words based on prediction labels.
 
@@ -269,6 +298,7 @@ class PreprocessQuestion:
             list of str: Words with applied accents.
         """
         accented_words = []
+
         for word_raw, label_indexes in merged_tokens_preds:
             for label_index in label_indexes:
                 tag_name = label_list[int(label_index)]
@@ -279,9 +309,13 @@ class PreprocessQuestion:
             else:
                 word_accented = word_raw
             accented_words.append(word_accented)
+
         return accented_words
 
-    def is_prompt_injection(self, text):
+    def is_prompt_injection(
+        self,
+        text
+    ):
         """
         Checks if the text contains patterns indicative of prompt injection.
 
@@ -294,15 +328,20 @@ class PreprocessQuestion:
         for pattern in PROMPT_INJECTION_PATTERNS:
             if re.search(pattern, text, re.IGNORECASE):
                 return True
+
         for pattern in POTENTIAL_PROMPT_INJECTION_PATTERNS:
             if re.search(pattern, text, re.IGNORECASE):
                 if self.prompt_injection_model.predict_proba(
                     [text]
                 )[0][0] >= 0.5:
                     return True
+
         return False
 
-    def detect_short_chat(self, text_input):
+    def detect_short_chat(
+        self,
+        text_input
+    ):
         """
         Detects if the input text is a short chat message based on patterns and emojis.
 
@@ -328,6 +367,7 @@ class PreprocessQuestion:
             "]+",
             flags=re.UNICODE
         )
+
         normalized_text = text_input.lower().strip()
         has_emoji = bool(emoji_pattern.search(normalized_text))
 
@@ -343,7 +383,12 @@ class PreprocessQuestion:
 
         return False
 
-    def insert_accents(self, text, model, tokenizer):
+    def insert_accents(
+        self,
+        text,
+        model,
+        tokenizer
+    ):
         """
         Inserts accents into the text using a model and tokenizer.
 
@@ -365,16 +410,25 @@ class PreprocessQuestion:
         input_ids = inputs['input_ids']
         tokens = tokenizer.convert_ids_to_tokens(input_ids[0])
         tokens = tokens[1:-1]
+
         with torch.no_grad():
             inputs.to(self.device_type)
             outputs = model(**inputs)
+
         predictions = outputs["logits"].cpu().numpy()
         predictions = np.argmax(predictions, axis=2)
         predictions = predictions[0][1:-1]
         assert len(tokens) == len(predictions)
+
         return tokens, predictions
 
-    def get_response(self, input_text, short_chats, response_dict, threshold=0.9):
+    def get_response(
+        self,
+        input_text,
+        short_chats,
+        response_dict,
+        threshold=0.9
+    ):
         """
         Finds the best matching short chat and returns the corresponding response.
 
@@ -390,16 +444,23 @@ class PreprocessQuestion:
         input_text = input_text.lower().strip()
         best_match = None
         best_ratio = 0.0
+
         for chat in short_chats:
             ratio = SequenceMatcher(None, input_text, chat).ratio()
             if ratio > best_ratio and ratio >= threshold:
                 best_ratio = ratio
                 best_match = chat
+
         if best_match and best_match in response_dict:
             return response_dict[best_match]
+
         return "Mình chưa hiểu rõ ý bạn lắm."
 
-    def clean_text(self, text, term_dict):
+    def clean_text(
+        self,
+        text,
+        term_dict
+    ):
         """
         Cleans and normalizes the input text using various text processing methods.
 
@@ -417,9 +478,13 @@ class PreprocessQuestion:
         text = self.replace_synonyms(text, term_dict)
         text = self.replace_symbols(text)
         text = self.normalize_elonge_word(text)
+
         return text
 
-    def lang_detect_2(self, text: str = None):
+    def lang_detect_2(
+        self,
+        text: str = None
+    ):
         """
         Detects the language of the input text and returns the most likely language and its score.
 
@@ -432,16 +497,22 @@ class PreprocessQuestion:
         """
         prediction = self.lang_detect_model.predict(text)
         lang_scores = {label.replace('__label__', ''): score for label, score in zip(
-            prediction[0], prediction[1])}
+            prediction[0], prediction[1]
+        )}
+
         if lang_scores:
             most_likely_lang = max(lang_scores, key=lang_scores.get)
             highest_score = lang_scores[most_likely_lang]
         else:
             most_likely_lang = None
             highest_score = 0
+
         return most_likely_lang, highest_score
 
-    def correct_vietnamese_text(self, text):
+    def correct_vietnamese_text(
+        self,
+        text
+    ):
         """
         Corrects the accents in Vietnamese text using a model and tokenizer.
 
@@ -452,13 +523,22 @@ class PreprocessQuestion:
             str: The Vietnamese text with corrected accents.
         """
         tokens, predictions = self.insert_accents(
-            text, self.tonemark_model, self.tonemark_tokenizer)
+            text,
+            self.tonemark_model,
+            self.tonemark_tokenizer
+        )
         merged_tokens_preds = self.merge_tokens_and_preds(tokens, predictions)
         accented_words = self.get_accented_words(
-            merged_tokens_preds, self.label_list)
+            merged_tokens_preds,
+            self.label_list
+        )
+
         return ' '.join(accented_words)
 
-    def tokenize_text(self, text):
+    def tokenize_text(
+        self,
+        text
+    ):
         """
         Tokenizes the input text into a list of words.
 
@@ -469,9 +549,13 @@ class PreprocessQuestion:
             list of str: A list of tokens (words) from the input text.
         """
         tokens = word_tokenize(text, format='text')
+
         return tokens
 
-    def classify_domain(self, text):
+    def classify_domain(
+        self,
+        text
+    ):
         """
         Classifies the domain of the input text using a pre-trained model.
 
@@ -484,13 +568,16 @@ class PreprocessQuestion:
         # Preprocess the text
         if len(text) <= 30:
             return 0
+
         processed_text = self.tokenize_text(text)
         score_prediction = self.domain_clf_model.predict_proba(
             [processed_text]
         )[0][1]
         print(f"score domain: {score_prediction}")
+
         if score_prediction >= 0.6:
             return 1
+
         return 0
 
     async def detect_icon(
@@ -498,6 +585,13 @@ class PreprocessQuestion:
         text: str
     ) -> bool:
         """
+        Detects if the given text contains an emoji or an emoticon.
+
+        Args:
+            text (str): The text to be checked for emojis or emoticons.
+
+        Returns:
+            bool: True if the text contains an emoji or emoticon; otherwise, False.
         """
         emoji_pattern = re.compile(
             "["
@@ -515,10 +609,16 @@ class PreprocessQuestion:
             "]+",
             flags=re.UNICODE
         )
-        emoticon_pattern = re.compile(r"(:|=|;)(\)+|\(+|D+|P+)")
-        return bool(emoji_pattern.fullmatch(text) or emoticon_pattern.fullmatch(text))
 
-    async def preprocess_text(self, text_input):
+        emoticon_pattern = re.compile(r"(:|=|;)(\)+|\(+|D+|P+)")
+
+        return bool(emoji_pattern.fullmatch(
+            text) or emoticon_pattern.fullmatch(text))
+
+    async def preprocess_text(
+        self,
+        text_input
+    ):
         """
         Preprocesses the input text to classify it and detect various conditions
         such as short chat, language, and prompt injection.
@@ -570,7 +670,7 @@ class PreprocessQuestion:
 
         if short_chat is False:
             lang, _ = self.lang_detect_2(clean_text_input)
-            corrected_text = clean_text_input 
+            corrected_text = clean_text_input
             if lang != "vie_Latn":
                 language = False
                 return ProcessedData(
@@ -581,6 +681,7 @@ class PreprocessQuestion:
                     is_short_chat=short_chat,
                     is_only_icon=False
                 )
+
             if language:
                 if self.is_prompt_injection(corrected_text):
                     prompt_injection = True
@@ -601,6 +702,7 @@ class PreprocessQuestion:
                     query = corrected_text
             else:
                 query = text_input
+
         return ProcessedData(
             query=query,
             language=language,

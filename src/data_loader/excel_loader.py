@@ -36,6 +36,7 @@ class ExcelLoader(BaseLoader):
         df.dropna(how='all', axis=1, inplace=True)
         df.set_index(df.columns[0], inplace=True)
         df.replace(to_replace=r'\n', value='<br>', regex=True, inplace=True)
+
         return df.to_markdown()
 
     def load_data(
@@ -53,6 +54,7 @@ class ExcelLoader(BaseLoader):
                             the loaded data in markdown format.
         """
         documents = []
+
         for file in sources:
             markdown_text = self.convert_to_markdown(file)
             documents.append(
@@ -61,4 +63,5 @@ class ExcelLoader(BaseLoader):
                     metadata={'file_path': file}
                 )
             )
+
         return documents

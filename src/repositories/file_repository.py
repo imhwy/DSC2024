@@ -8,10 +8,14 @@ import requests
 from dotenv import load_dotenv
 
 from src.storage.file_crud import CRUDFileCollection
-from src.models.file import (File,
-                             FileUpload)
-from src.utils.utility import (get_datetime,
-                               convert_value)
+from src.models.file import (
+    File,
+    FileUpload
+)
+from src.utils.utility import (
+    get_datetime,
+    convert_value
+)
 
 load_dotenv()
 
@@ -40,14 +44,18 @@ class FileRepository:
     def load_all_data(self):
         """
         Load all documents from the collection.
+
         Args:
             None
+
         Returns:
             list: A list of documents with '_id' field as a string.
         """
         self.data = list(self.collection.find_all_doc())
+
         for doc in self.data:
             doc["_id"] = str(doc["_id"])
+
         return self.data
 
     async def add_one_record(
@@ -79,6 +87,7 @@ class FileRepository:
             file_type (str, optional): The type or format of the file (e.g., "pdf", "txt").
         """
         timestamp = get_datetime()
+
         file_instance = File(
             public_id=public_id,
             url=url,
@@ -87,6 +96,7 @@ class FileRepository:
             file_path=file_path,
             time=timestamp
         )
+
         await self.add_one_record(
             file=file_instance
         )
@@ -104,6 +114,7 @@ class FileRepository:
                  itself if the file type is "link".
         """
         file_path = None
+
         if not data.file_type == "link":
             os.makedirs(
                 self.directory,
@@ -121,7 +132,9 @@ class FileRepository:
             with open(file_path, "wb") as file:
                 file.write(response.content)
             return file_path
+
         file_path = data.url
+
         return file_path
 
     def delete_specific_file(
@@ -140,10 +153,14 @@ class FileRepository:
             the result of the deletion operation.
         """
         try:
-            result = self.collection.delete_one_doc({"public_id": public_id})
+            result = self.collection.delete_one_doc(
+                {"public_id": public_id}
+            )
+
             if result.deleted_count > 0:
                 print(
-                    f"Document with public_id = {public_id} deleted successfully.")
+                    f"Document with public_id = {public_id} deleted successfully."
+                )
             else:
                 print(f"No document with public_id = {public_id} found.")
         except Exception as e:
@@ -168,4 +185,5 @@ class FileRepository:
         )
         if document:
             document["_id"] = str(document["_id"])
+
         return document
