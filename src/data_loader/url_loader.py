@@ -50,10 +50,15 @@ class URLLoader(BaseLoader):
         Returns:
             str: A string containing the extracted articles, separated by the delimiter.
         """
-        pattern = re.compile(r"<article.*?>(.*?)</article>", re.DOTALL)
-        matches = pattern.findall(html_text)
-        stripped_matches = [match.strip() for match in matches]
-        return delimiter.join(stripped_matches)
+        # pattern = re.compile(r"<article.*?>(.*?)</article>", re.DOTALL)
+        # matches = pattern.findall(html_text)
+        # stripped_matches = [match.strip() for match in matches]
+        # return delimiter.join(stripped_matches)
+        from bs4 import BeautifulSoup
+
+        soup = BeautifulSoup(html_text, "html.parser")
+        main_div = soup.find("div", {"id": "content"})
+        return str(main_div).strip()
 
     def load_data(self, sources: List[str]) -> List[Document]:
         """

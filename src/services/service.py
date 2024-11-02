@@ -97,9 +97,7 @@ class Service:
         self._raw_text = requests.get(URL, timeout=60).text
         self._label_list = self._raw_text.split("\n")
         self._llm = OpenAI(
-            api_key=OPENAI_API_KEY,
-            model=OPENAI_MODEL,
-            temperature=TEMPERATURE_MODEL
+            api_key=OPENAI_API_KEY, model=OPENAI_MODEL, temperature=TEMPERATURE_MODEL
         )
         self._complex_llm = OpenAI(
             api_key=OPENAI_API_KEY,
@@ -118,7 +116,7 @@ class Service:
         self._gemini = genai.GenerativeModel(
             model_name=GEMINI_LLM_MODEL,
             generation_config=self._generation_config,
-            safety_settings=SAFETY_SETTINGS
+            safety_settings=SAFETY_SETTINGS,
         )
         Settings.llms = self._llm
         Settings.embed_model = self._embed_model
@@ -174,7 +172,7 @@ class Service:
         self._file_management = FileManagement(
             file_repository=self._file_repository,
             general_loader=self._general_loader,
-            vector_database=self._vector_database
+            vector_database=self._vector_database,
         )
 
     @property
