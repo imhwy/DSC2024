@@ -23,6 +23,7 @@ from scrapegraphai.graphs import SmartScraperGraph
 from src.utils.utility import convert_value
 from src.prompt.loader_prompt import URL_SPLITER_PROMPT
 from src.utils.openai_call import get_major_name_from_link
+from langchain_openai import AzureChatOpenAI
 
 load_dotenv()
 
@@ -92,6 +93,15 @@ class WeaviateDB:
         self._suggestion_index = VectorStoreIndex.from_vector_store(
             vector_store=self._suggestion_vector_store
         )
+        self.azure_llm = AzureChatOpenAI(
+        azure_deployment="gptbot-o",
+        model="gpt-4o",  # or your deployment
+        api_version="2024-02-15-preview",  # or your api version
+        temperature=0,
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        azure_endpoint='https://bgsv-gpt.openai.azure.com/',
+        openai_api_type="azure",
+    )
 
     @property
     def index(self) -> VectorStoreIndex:
@@ -233,6 +243,36 @@ class WeaviateDB:
 
         return nodes
 
+    # def get_sessions_splitter(
+    #     self,
+    #     text
+    # ):
+    #     """Splitter to split text of a document into many nodes containing sessions.
+
+    #     Args:
+    #         text (str): input text
+
+    #     Returns:
+    #         SmartScraperGraph: A class including fetching, parsing and generating answer
+    #         based on prompt and source using LLMs and text embedding model.
+    #     """
+    #     graph_config = {
+    #         "llm": {
+    #             "model": OPENAI_MODEL_GRAPH,
+    #             "temperature": 0,
+    #         },
+    #         # "embeddings": {
+    #         #     "model": OPENAI_EMBED_MODEL,
+    #         #     "temperature": 0,
+    #         # },
+    #         # "verbose": True,
+    #     }
+
+    #     return SmartScraperGraph(
+    #         prompt=URL_SPLITER_PROMPT,
+    #         source=text,
+    #         config=graph_config,
+    #     )
     def get_sessions_splitter(
         self,
         text
@@ -246,16 +286,13 @@ class WeaviateDB:
             SmartScraperGraph: A class including fetching, parsing and generating answer
             based on prompt and source using LLMs and text embedding model.
         """
+      
         graph_config = {
             "llm": {
-                "model": OPENAI_MODEL_GRAPH,
+                "model_instance": self.azure_llm,
                 "temperature": 0,
-            },
-            # "embeddings": {
-            #     "model": OPENAI_EMBED_MODEL,
-            #     "temperature": 0,
-            # },
-            # "verbose": True,
+                "model_tokens": 8196,
+            }
         }
 
         return SmartScraperGraph(
